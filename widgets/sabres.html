@@ -6,75 +6,27 @@
 <meta name="viewport" content="width=480, initial-scale=1">
 <style>
   :root {
-    --bg:#0b0f14;
-    --panel:#0f1722;
-    --text:#e5e7eb;
-    --muted:#94a3b8;
-    --accent:#60a5fa;
-    --border:#1f2937;
+    --bg:#0b0f14; --panel:#0f1722; --text:#e5e7eb; --muted:#94a3b8;
+    --accent:#60a5fa; --border:#1f2937;
   }
   body {
-    margin:0;
-    background:var(--bg);
-    color:var(--text);
-    font-family:system-ui, sans-serif;
-    width:480px;
-    height:320px;
-    overflow:hidden;
-    display:flex;
-    align-items:center;
-    justify-content:center;
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:system-ui, sans-serif; width:480px; height:320px;
+    overflow:hidden; display:flex; align-items:center; justify-content:center;
   }
-
   .box {
-    width:460px;
-    height:300px;
-    background:var(--panel);
-    border:1px solid var(--border);
-    border-radius:14px;
-    padding:18px;
-    display:flex;
-    flex-direction:column;
-    justify-content:space-between;
+    width:460px; height:300px; background:var(--panel);
+    border:1px solid var(--border); border-radius:14px; padding:18px;
+    display:flex; flex-direction:column; justify-content:space-between;
   }
-
-  h2 {
-    margin:0;
-    font-size:1.45rem;
-    color:var(--accent);
-    text-align:center;
-  }
-
-  .row {
-    margin-top:6px;
-    font-size:1.2rem;
-    text-align:center;
-  }
-
-  .small {
-    font-size:0.9rem;
-    color:var(--muted);
-    text-align:center;
-  }
-
-  .title {
-    margin-top:16px;
-    font-size:1.05rem;
-    color:var(--accent);
-    text-align:center;
-    font-weight:600;
-  }
-
-  .updating {
-    font-size:0.75rem;
-    color:var(--muted);
-    text-align:center;
-    margin-top:6px;
-  }
+  h2{margin:0; font-size:1.45rem; color:var(--accent); text-align:center}
+  .row{margin-top:6px; font-size:1.2rem; text-align:center}
+  .small{font-size:.9rem; color:var(--muted); text-align:center}
+  .title{margin-top:16px; font-size:1.05rem; color:var(--accent); text-align:center; font-weight:600}
+  .updating{font-size:.75rem; color:var(--muted); text-align:center; margin-top:6px}
 </style>
 </head>
 <body>
-
 <div class="box">
   <h2>Buffalo Sabres</h2>
 
@@ -95,56 +47,56 @@ async function loadSabresWidget() {
   const nextExtra = document.getElementById("next_extra");
 
   try {
-    const url = "https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/scoreboard";
-    const data = await fetch(url, {cache:"no-store"}).then(r => r.json());
+    // ESPN team schedule (BUF). Uses team schedule, not daily scoreboard.
+    const url = "https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/teams/buf/schedule";
+    const data = await fetch(url, { cache: "no-store" }).then(r => r.json());
 
-    const events = data.events || [];
+    const events = Array.isArray(data.events) ? data.events : [];
 
-    const sabresGames = events.filter(ev =>
-      ev.competitions?.[0]?.competitors?.some(c => c.team?.shortDisplayName === "BUF")
-    );
+    // Helper to read competition safely
+    function compOf(e){ return e && e.competitions && e.competitions[0] ? e.competitions[0] : null; }
+    function teamsOf(c){ return c && Array.isArray(c.competitors) ? c.competitors : []; }
+    function bufTeam(ts){ return ts.find(t => t.team && t.team.shortDisplayName === "BUF"); }
+    function oppTeam(ts){ return ts.find(t => t.team && t.team.shortDisplayName !== "BUF"); }
 
-    // -------------------
-    // FIND LAST FINISHED GAME
-    // -------------------
-    const finals = sabresGames.filter(ev =>
-      ev.competitions[0].status.type.name === "STATUS_FINAL"
-    );
+    // Classify by status
+    const finals = [];
+    const upcoming = [];
 
-    if (finals.length > 0) {
-      // Most recent final = last final in list
+    for (const ev of events) {
+      const c = compOf(ev);
+      if (!c) continue;
+      const st = c.status && c.status.type ? c.status.type : {};
+      const completed = Boolean(st.completed);
+      const state = st.state || ""; // "pre", "in", "post"
+      (completed ? finals : (state === "pre" ? upcoming : null)) && (completed ? finals : upcoming).push(ev);
+    }
+
+    // Sort by date
+    function toTime(ev){ return Date.parse(ev.date || compOf(ev)?.date || 0) || 0; }
+    finals.sort((a,b)=>toTime(a)-toTime(b));
+    upcoming.sort((a,b)=>toTime(a)-toTime(b));
+
+    // Last final
+    if (finals.length) {
       const game = finals[finals.length - 1];
-      const comp = game.competitions[0];
-      const teams = comp.competitors;
-
-      const buf = teams.find(t => t.team.shortDisplayName === "BUF");
-      const opp = teams.find(t => t.team.shortDisplayName !== "BUF");
-
-      const score = `${buf.score}–${opp.score}`;
-      lastEl.textContent = `${score} vs ${opp.team.shortDisplayName}`;
+      const c = compOf(game); const ts = teamsOf(c);
+      const buf = bufTeam(ts); const opp = oppTeam(ts);
+      const score = `${(buf && buf.score) || "0"}–${(opp && opp.score) || "0"}`;
+      const vs = opp && opp.team ? opp.team.shortDisplayName : "—";
+      lastEl.textContent = `${score} vs ${vs}`;
     } else {
       lastEl.textContent = "No final game found";
     }
 
-    // -------------------
-    // FIND NEXT SCHEDULED GAME
-    // -------------------
-    const scheduled = sabresGames.filter(ev =>
-      ev.competitions[0].status.type.name === "STATUS_SCHEDULED"
-    );
-
-    if (scheduled.length > 0) {
-      // First upcoming game = first scheduled
-      const game = scheduled[0];
-      const comp = game.competitions[0];
-      const teams = comp.competitors;
-
-      const buf = teams.find(t => t.team.shortDisplayName === "BUF");
-      const opp = teams.find(t => t.team.shortDisplayName !== "BUF");
-
-      const when = comp.status.type.shortDetail || "Scheduled";
-
-      nextEl.textContent = `vs ${opp.team.shortDisplayName}`;
+    // Next scheduled
+    if (upcoming.length) {
+      const game = upcoming[0];
+      const c = compOf(game); const ts = teamsOf(c);
+      const opp = oppTeam(ts);
+      const when = (c && c.status && c.status.type && c.status.type.shortDetail) || (game && game.shortName) || "Scheduled";
+      const vs = opp && opp.team ? opp.team.shortDisplayName : "—";
+      nextEl.textContent = `vs ${vs}`;
       nextExtra.textContent = when;
     } else {
       nextEl.textContent = "No upcoming games";
@@ -155,12 +107,12 @@ async function loadSabresWidget() {
     console.error(err);
     lastEl.textContent = "Error loading data";
     nextEl.textContent = "";
+    nextExtra.textContent = "";
   }
 }
 
 loadSabresWidget();
 setInterval(loadSabresWidget, 60000);
 </script>
-
 </body>
 </html>
