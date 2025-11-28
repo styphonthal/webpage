@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Widgets – CommandBridge</title>
+
+<style>
+    :root {
+        --bg: #0a0a0c;
+        --sidebar-bg: #0d0f12;
+        --accent-blue: #3b82f6;
+        --accent-blue-light: #60a5fa;
+        --text-main: #e5e7eb;
+        --text-muted: #9ca3af;
+    }
+
+    body {
+        margin: 0;
+        display: flex;
+        height: 100vh;
+        background: var(--bg);
+        font-family: 'Inter', sans-serif;
+        color: var(--text-main);
+    }
+
+    .sidebar {
+        width: 240px;
+        background: var(--sidebar-bg);
+        border-right: 1px solid #1a1c20;
+        display: flex;
+        flex-direction: column;
+        padding: 24px 20px;
+    }
+
+    .logo {
+        font-size: 1.6rem;
+        font-weight: 700;
+        margin-bottom: 40px;
+        color: var(--accent-blue);
+        letter-spacing: 0.5px;
+    }
+
+    .nav-link {
+        font-size: 1.05rem;
+        padding: 12px 8px;
+        border-radius: 6px;
+        margin-bottom: 8px;
+        cursor: pointer;
+        text-decoration: none;
+        color: var(--text-muted);
+        transition: 0.2s ease;
+        display: block;
+    }
+
+    .nav-link:hover {
+        background: #1c1e22;
+        color: var(--accent-blue-light);
+    }
+
+    .active {
+        background: #1c1e22;
+        color: var(--accent-blue);
+    }
+
+    .content {
+        flex: 1;
+        padding: 40px 60px;
+        overflow-y: auto;
+    }
+
+    h1 {
+        font-size: 2.4rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    p {
+        font-size: 1.2rem;
+        color: var(--text-muted);
+        max-width: 700px;
+        line-height: 1.6;
+    }
+
+    .widget-box {
+        margin-top: 40px;
+        padding: 32px;
+        background: #111317;
+        border: 1px solid #1f2329;
+        border-radius: 12px;
+    }
+
+    .widget-title {
+        font-size: 1.5rem;
+        color: var(--accent-blue-light);
+        margin-bottom: 12px;
+    }
+
+    .widget-desc {
+        color: var(--text-muted);
+        font-size: 1.1rem;
+        line-height: 1.6;
+    }
+
+</style>
+</head>
+
+<body>
+
+    <div class="sidebar">
+        <div class="logo">CommandBridge</div>
+
+        <a class="nav-link" href="../index.html">Home</a>
+        <a class="nav-link" href="../projects/index.html">Projects</a>
+        <a class="nav-link active" href="./index.html">Widgets</a>
+    </div>
+
+    <div class="content">
+        <h1>Widgets</h1>
+        <p>Mini-tools and utilities you can embed or use standalone.</p>
+
+        <div class="widget-box">
+            <div class="widget-title">Example Widget</div>
+            <div class="widget-desc">
+                You can add Home Assistant widgets, n8n integrations, timers, counters, inventory displays, or Meta Smart Glasses overlays.
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

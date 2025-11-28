@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Projects</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --bg:#0b0f14;        /* near-black */
+      --panel:#0f1722;     /* dark panel */
+      --panel-2:#0d1320;
+      --text:#e5e7eb;      /* white-ish */
+      --muted:#94a3b8;     /* slate-400 */
+      --accent:#60a5fa;    /* blue-400 */
+      --accent-2:#38bdf8;  /* sky-400 */
+      --border:#1f2937;    /* gray-800 */
+      --chip:#111827;      /* gray-900 */
+      --radius:14px;
+      --shadow:0 10px 30px rgba(0,0,0,.35);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background:radial-gradient(1200px 700px at 15% -10%, rgba(56,189,248,.10), transparent 55%),
+                 radial-gradient(900px 600px at 85% 20%, rgba(96,165,250,.10), transparent 60%),
+                 var(--bg);
+      color:var(--text);
+      font:16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, "Helvetica Neue", Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+
+    /* Sidebar */
+    .sidebar{
+      position:fixed; inset:0 auto 0 0; width:240px;
+      background:linear-gradient(180deg, var(--panel), var(--panel-2));
+      border-right:1px solid var(--border);
+      padding:22px 18px;
+    }
+    .brand{display:flex; align-items:center; gap:10px; margin-bottom:24px}
+    .badge{
+      width:34px; height:34px; border-radius:10px;
+      background:linear-gradient(135deg, var(--accent), var(--accent-2));
+      box-shadow:0 6px 18px rgba(56,189,248,.35);
+    }
+    .brand h1{font-size:18px; margin:0; letter-spacing:.2px}
+    nav a{
+      display:flex; align-items:center; gap:10px;
+      padding:10px 12px; margin:6px 0; text-decoration:none;
+      color:var(--text); border-radius:10px; transition:.18s ease;
+      border:1px solid transparent; background:transparent;
+    }
+    nav a:hover{background:rgba(96,165,250,.10); border-color:rgba(96,165,250,.25)}
+    nav a.active{background:rgba(96,165,250,.14); border-color:rgba(96,165,250,.35)}
+    .nav-dot{width:8px;height:8px;border-radius:50%;background:var(--accent)}
+
+    /* Main */
+    .main{margin-left:240px; padding:28px 28px 60px}
+    .header{
+      display:flex; align-items:end; justify-content:space-between; gap:16px; flex-wrap:wrap;
+      margin-bottom:22px;
+    }
+    .header h2{font-size:28px; margin:0}
+    .muted{color:var(--muted)}
+    .controls{
+      display:flex; gap:12px; flex-wrap:wrap;
+    }
+    .input, .select{
+      background:rgba(17,24,39,.7);
+      color:var(--text);
+      border:1px solid var(--border);
+      border-radius:10px;
+      padding:10px 12px;
+      outline:none;
+      transition:.18s ease;
+    }
+    .input:focus, .select:focus{border-color:rgba(96,165,250,.45); box-shadow:0 0 0 3px rgba(96,165,250,.18)}
+    .input{min-width:260px}
+    .select{min-width:140px}
+
+    /* Tag chips */
+    .tags{display:flex; gap:8px; flex-wrap:wrap; margin:8px 0 18px}
+    .chip{
+      background:var(--chip);
+      border:1px solid var(--border);
+      color:var(--muted);
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:.85rem;
+      cursor:pointer;
+      transition:.18s ease;
+      user-select:none;
+    }
+    .chip:hover{border-color:rgba(96,165,250,.35); color:var(--text)}
+    .chip.active{background:rgba(96,165,250,.18); color:var(--text); border-color:rgba(96,165,250,.5)}
+
+    /* Grid */
+    .card-grid{
+      display:grid; gap:16px;
+      grid-template-columns:repeat(auto-fill, minmax(260px,1fr));
+    }
+    .card{
+      background:linear-gradient(180deg, rgba(17,24,39,.85), rgba(15,23,34,.85));
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      padding:16px 16px 14px;
+      box-shadow:var(--shadow);
+      min-height:150px;
+      display:flex; flex-direction:column; gap:8px;
+    }
+    .card-title{font-size:1.05rem; font-weight:600}
+    .card-desc{color:var(--muted)}
+    .card-meta{
+      display:flex; align-items:center; justify-content:space-between; margin-top:auto; color:var(--muted); font-size:.85rem;
+    }
+    .pill{
+      padding:4px 8px; border:1px solid var(--border); border-radius:999px; font-size:.78rem; color:var(--accent)
+    }
+
+    /* Empty state */
+    .empty{
+      border:1px dashed var(--border);
+      background:rgba(17,24,39,.6);
+      border-radius:var(--radius);
+      padding:22px;
+      color:var(--muted);
+      text-align:center;
+    }
+
+    /* Responsive */
+    @media (max-width:860px){
+      .sidebar{position:static;width:auto}
+      .main{margin-left:0}
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="badge" aria-hidden="true"></div>
+      <h1>CommandBridge</h1>
+    </div>
+    <nav>
+      <a href="../index.html"><span class="nav-dot" aria-hidden="true"></span> Home</a>
+      <a href="./index.html" class="active"><span class="nav-dot" aria-hidden="true"></span> Projects</a>
+      <a href="../widgets/index.html"><span class="nav-dot" aria-hidden="true"></span> Widgets</a>
+    </nav>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <div class="header">
+      <div>
+        <h2>Projects</h2>
+        <div class="muted">Dynamic list backed by <code>/data/projects.json</code></div>
+      </div>
+      <div class="controls">
+        <input id="q" class="input" type="search" placeholder="Search title, description, tags…" />
+        <select id="sort" class="select" aria-label="Sort">
+          <option value="updated-desc">Updated ↓</option>
+          <option value="updated-asc">Updated ↑</option>
+          <option value="title-asc">Title A–Z</option>
+          <option value="title-desc">Title Z–A</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="tagRow" class="tags" aria-label="Tags"></div>
+
+    <section id="results">
+      <div id="grid" class="card-grid" aria-live="polite"></div>
+      <div id="empty" class="empty" style="display:none">No matching projects.</div>
+    </section>
+  </main>
+
+  <script>
+  (function(){
+    const state = {
+      all: [],
+      filtered: [],
+      tags: new Set(),
+      activeTags: new Set(),
+      q: '',
+      sort: 'updated-desc'
+    };
+
+    const el = {
+      q: document.getElementById('q'),
+      sort: document.getElementById('sort'),
+      tagRow: document.getElementById('tagRow'),
+      grid: document.getElementById('grid'),
+      empty: document.getElementById('empty')
+    };
+
+    function normalize(p){
+      // Ensure required fields exist; tolerate missing fields
+      const id = String(p.id || cryptoRandom());
+      const title = String(p.title || 'Untitled');
+      const description = String(p.description || '');
+      const tags = Array.isArray(p.tags) ? p.tags.map(String) : [];
+      const updated = parseDate(p.updated);
+      const status = p.status ? String(p.status) : '';
+      return { id, title, description, tags, updated, status, _search: (title+' '+description+' '+tags.join(' ')).toLowerCase() };
+    }
+
+    function parseDate(d){
+      // Accept "YYYY-MM-DD" or ISO; fallback to epoch 0
+      const t = (typeof d === 'string' || d instanceof String) ? Date.parse(d) : (typeof d === 'number' ? d : NaN);
+      return Number.isFinite(t) ? t : 0;
+    }
+
+    function cryptoRandom(){
+      // short random id if none provided
+      return Math.random().toString(36).slice(2,10);
+    }
+
+    async function fetchJSON(url){
+      const res = await fetch(url, {cache:'no-store'});
+      if(!res.ok) throw new Error('Failed to load '+url+': '+res.status);
+      return res.json();
+    }
+
+    function renderTags(){
+      el.tagRow.innerHTML = '';
+      const allTags = Array.from(state.tags).sort((a,b)=>a.localeCompare(b));
+      if(!allTags.length) return;
+      // “All” chip
+      const allChip = chip('All', !state.activeTags.size);
+      allChip.addEventListener('click', ()=>{
+        state.activeTags.clear();
+        renderTags(); applyFilters();
+      });
+      el.tagRow.appendChild(allChip);
+
+      for(const t of allTags){
+        const c = chip(t, state.activeTags.has(t));
+        c.addEventListener('click', ()=>{
+          if(state.activeTags.has(t)) state.activeTags.delete(t);
+          else state.activeTags.add(t);
+          renderTags(); applyFilters();
+        });
+        el.tagRow.appendChild(c);
+      }
+    }
+
+    function chip(label, active){
+      const d = document.createElement('div');
+      d.className = 'chip'+(active?' active':'');
+      d.textContent = label;
+      return d;
+    }
+
+    function applyFilters(){
+      const q = state.q.trim().toLowerCase();
+      const tagFilter = state.activeTags;
+      let arr = state.all.filter(p=>{
+        const okQ = q ? p._search.includes(q) : true;
+        const okT = tagFilter.size ? p.tags.some(t=>tagFilter.has(t)) : true;
+        return okQ && okT;
+      });
+
+      // sort
+      const s = state.sort;
+      if(s === 'updated-desc') arr.sort((a,b)=>b.updated - a.updated);
+      else if(s === 'updated-asc') arr.sort((a,b)=>a.updated - b.updated);
+      else if(s === 'title-asc') arr.sort((a,b)=>a.title.localeCompare(b.title));
+      else if(s === 'title-desc') arr.sort((a,b)=>b.title.localeCompare(a.title));
+
+      state.filtered = arr;
+      renderGrid();
+    }
+
+    function fmtDate(ts){
+      if(!ts) return '';
+      const d = new Date(ts);
+      // YYYY-MM-DD
+      const m = String(d.getMonth()+1).padStart(2,'0');
+      const day = String(d.getDate()).padStart(2,'0');
+      return `${d.getFullYear()}-${m}-${day}`;
+    }
+
+    function renderGrid(){
+      const a = state.filtered;
+      el.grid.innerHTML = '';
+      if(!a.length){ el.empty.style.display='block'; return; }
+      el.empty.style.display='none';
+
+      for(const p of a){
+        const card = document.createElement('article');
+        card.className = 'card';
+        const tags = p.tags.length ? `<div class="card-meta"><span class="pill">${p.tags.join(' • ')}</span><span class="muted">${fmtDate(p.updated)}</span></div>` : `<div class="card-meta"><span></span><span class="muted">${fmtDate(p.updated)}</span></div>`;
+        card.innerHTML = `
+          <div class="card-title">${escapeHTML(p.title)}</div>
+          <div class="card-desc">${escapeHTML(p.description)}</div>
+          ${tags}
+        `;
+        el.grid.appendChild(card);
+      }
+    }
+
+    function escapeHTML(s){
+      return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+
+    async function init(){
+      // Load data from /data/projects.json (relative to /projects/)
+      let data = [];
+      try{
+        data = await fetchJSON('../data/projects.json');
+      }catch(e){
+        // graceful empty state
+        data = [];
+        console.error(e);
+      }
+      state.all = (Array.isArray(data)?data:[]).map(normalize);
+
+      // Collect tags
+      state.tags.clear();
+      for(const p of state.all){ for(const t of p.tags) state.tags.add(String(t)); }
+      renderTags();
+
+      // Default sort and render
+      applyFilters();
+    }
+
+    // UI events
+    el.q.addEventListener('input', e=>{ state.q = e.target.value; applyFilters(); });
+    el.sort.addEventListener('change', e=>{ state.sort = e.target.value; applyFilters(); });
+
+    init();
+  })();
+  </script>
+</body>
+</html>
