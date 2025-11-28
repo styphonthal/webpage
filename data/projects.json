@@ -26,7 +26,7 @@
     "description": "Linux clock widget based on windows ME widget",
     "tags": ["linux", "clock", "widget"],
     "updated": "2025-01-06"
-  }
+  },
   {
     "id": "proj-005",
     "title": "Linux Penny Arcade Comic Displayer",
@@ -42,4 +42,5 @@
     "updated": "2025-01-06"
   }
 ]
+
 
