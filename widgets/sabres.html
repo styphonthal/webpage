@@ -46,8 +46,8 @@
   }
 
   .row {
-    margin-top:10px;
-    font-size:1.25rem;
+    margin-top:6px;
+    font-size:1.2rem;
     text-align:center;
   }
 
@@ -57,11 +57,19 @@
     text-align:center;
   }
 
+  .title {
+    margin-top:16px;
+    font-size:1.05rem;
+    color:var(--accent);
+    text-align:center;
+    font-weight:600;
+  }
+
   .updating {
     font-size:0.75rem;
     color:var(--muted);
     text-align:center;
-    margin-top:4px;
+    margin-top:6px;
   }
 </style>
 </head>
@@ -70,76 +78,88 @@
 <div class="box">
   <h2>Buffalo Sabres</h2>
 
-  <div id="status" class="row">Loading…</div>
-  <div id="extra" class="small"></div>
+  <div class="title">Last Game</div>
+  <div id="last" class="row">Loading…</div>
+
+  <div class="title">Next Game</div>
+  <div id="next" class="row"></div>
+  <div id="next_extra" class="small"></div>
 
   <div class="updating">Auto-refreshing every 60s</div>
 </div>
 
 <script>
-async function loadScore() {
-  const statusEl = document.getElementById('status');
-  const extraEl = document.getElementById('extra');
+async function loadSabresWidget() {
+  const lastEl = document.getElementById("last");
+  const nextEl = document.getElementById("next");
+  const nextExtra = document.getElementById("next_extra");
 
   try {
-    // ESPN NHL Scoreboard
     const url = "https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/scoreboard";
     const data = await fetch(url, {cache:"no-store"}).then(r => r.json());
 
     const events = data.events || [];
 
-    // Find any Sabres game (live, final, or scheduled)
-    const game = events.find(ev =>
+    const sabresGames = events.filter(ev =>
       ev.competitions?.[0]?.competitors?.some(c => c.team?.shortDisplayName === "BUF")
     );
 
-    if (!game) {
-      statusEl.textContent = "No game today";
-      extraEl.textContent = "";
-      return;
+    // -------------------
+    // FIND LAST FINISHED GAME
+    // -------------------
+    const finals = sabresGames.filter(ev =>
+      ev.competitions[0].status.type.name === "STATUS_FINAL"
+    );
+
+    if (finals.length > 0) {
+      // Most recent final = last final in list
+      const game = finals[finals.length - 1];
+      const comp = game.competitions[0];
+      const teams = comp.competitors;
+
+      const buf = teams.find(t => t.team.shortDisplayName === "BUF");
+      const opp = teams.find(t => t.team.shortDisplayName !== "BUF");
+
+      const score = `${buf.score}–${opp.score}`;
+      lastEl.textContent = `${score} vs ${opp.team.shortDisplayName}`;
+    } else {
+      lastEl.textContent = "No final game found";
     }
 
-    const comp = game.competitions[0];
-    const teams = comp.competitors;
+    // -------------------
+    // FIND NEXT SCHEDULED GAME
+    // -------------------
+    const scheduled = sabresGames.filter(ev =>
+      ev.competitions[0].status.type.name === "STATUS_SCHEDULED"
+    );
 
-    const buffalo = teams.find(t => t.team.shortDisplayName === "BUF");
-    const other = teams.find(t => t.team.shortDisplayName !== "BUF");
+    if (scheduled.length > 0) {
+      // First upcoming game = first scheduled
+      const game = scheduled[0];
+      const comp = game.competitions[0];
+      const teams = comp.competitors;
 
-    const buffaloScore = buffalo.score || "0";
-    const otherScore = other.score || "0";
+      const buf = teams.find(t => t.team.shortDisplayName === "BUF");
+      const opp = teams.find(t => t.team.shortDisplayName !== "BUF");
 
-    const homeAway = buffalo.homeAway === "home" ? "(Home)" : "(Away)";
-    const oppName = other.team.shortDisplayName;
+      const when = comp.status.type.shortDetail || "Scheduled";
 
-    const statusType = comp.status.type.name;
-    const detail = comp.status.type.detail || "";
-    const shortDetail = comp.status.type.shortDetail || "";
-
-    if (statusType === "STATUS_IN_PROGRESS") {
-      statusEl.innerHTML = `${buffaloScore}–${otherScore} vs ${oppName}<br><span style="font-size:1rem">${shortDetail}</span>`;
-      extraEl.textContent = detail;
-    } else if (statusType === "STATUS_FINAL") {
-      statusEl.innerHTML = `Final: ${buffaloScore}–${otherScore} vs ${oppName}`;
-      extraEl.textContent = detail;
-    } else if (statusType === "STATUS_SCHEDULED") {
-      statusEl.innerHTML = `Next: vs ${oppName}`;
-      extraEl.textContent = shortDetail;
+      nextEl.textContent = `vs ${opp.team.shortDisplayName}`;
+      nextExtra.textContent = when;
     } else {
-      statusEl.textContent = shortDetail || "Game status unknown";
-      extraEl.textContent = detail;
+      nextEl.textContent = "No upcoming games";
+      nextExtra.textContent = "";
     }
 
   } catch (err) {
-    statusEl.textContent = "Error loading data";
-    extraEl.textContent = "";
     console.error(err);
+    lastEl.textContent = "Error loading data";
+    nextEl.textContent = "";
   }
 }
 
-// First load
-loadScore();
-// Refresh every 60s
-setInterval(loadScore, 60000);
+loadSabresWidget();
+setInterval(loadSabresWidget, 60000);
 </script>
 
 </body>
