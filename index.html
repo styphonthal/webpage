@@ -80,60 +80,45 @@
     .section{margin-top:18px}
     .section h4{margin:0 0 10px 0; font-size:1rem; color:var(--muted); font-weight:600}
 
-    /* --- Hero (inside .main) --- */
-.hero {
-  position: relative;
-  /* removed margin-left:240px; */
-  margin: 0 0 22px 0;
-  padding: 40px 28px 54px;
-  height: 42vh;
-  min-height: 280px;
-  overflow: hidden;
-  background:
-    radial-gradient(1200px 700px at 10% -20%, rgba(56,189,248,.12), transparent 55%),
-    radial-gradient(900px 600px at 90% 0%, rgba(96,165,250,.10), transparent 60%),
-    linear-gradient(180deg, #0e1522 0%, #0b111c 100%);
-  border-bottom: 1px solid var(--border);
-  box-shadow: var(--shadow);
-  border-radius: var(--radius);
-}
-
-.hero .hero-bg {
-  position: absolute; inset: 0;
+/* Make the SVG darker overall */
+.hero .hero-bg { 
+  position: absolute; inset: 0; 
   width: 100%; height: 100%;
-  opacity: .95;
-  -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,.9), rgba(0,0,0,.7) 70%, rgba(0,0,0,0));
-  mask-image: linear-gradient(to bottom, rgba(0,0,0,.9), rgba(0,0,0,.7) 70%, rgba(0,0,0,0));
+  opacity: .68;                       /* was .95 */
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,.95), rgba(0,0,0,.8) 70%, rgba(0,0,0,0));
+  mask-image: linear-gradient(to bottom, rgba(0,0,0,.95), rgba(0,0,0,.8) 70%, rgba(0,0,0,0));
 }
 
-.hero-content {
-  position: relative; z-index: 1;
-  display: grid; grid-template-columns: auto 1fr;
-  gap: 18px; align-items: center;
-  max-width: 1100px;
-  margin: 0 auto;                 /* centers the text block */
+/* Extra dark vignette so text area is safe */
+.hero::before{
+  content:"";
+  position:absolute; inset:0;
+  background:
+    radial-gradient(800px 480px at 34% 38%, rgba(6,10,18,.70), transparent 65%),
+    linear-gradient(180deg, rgba(4,8,14,.55), rgba(4,8,14,.25));
+  pointer-events:none;
+  z-index:0;
 }
 
-.hero .mark {
-  width: 56px; height: 56px; border-radius: 14px;
-  background: url("/command.png") center/cover no-repeat;
-  box-shadow: 0 10px 26px rgba(56,189,248,.35);
-  border: 1px solid rgba(96,165,250,.35);
+/* Copy panel for contrast */
+.hero-content{ 
+  position: relative; z-index: 2; 
+  display: grid; grid-template-columns: auto 1fr; gap: 18px; 
+  align-items: center; max-width: 1100px; margin: 0 auto;
 }
 
-.hero h1 { margin:0; font-size: 28px; letter-spacing:.2px }
-.hero p.sub { margin:6px 0 0 0; color: var(--muted) }
-.hero .cta-row { margin-top:16px; display:flex; gap:10px; flex-wrap:wrap }
-.hero .btn {
-  display:inline-block; padding:9px 12px; border-radius:10px;
-  text-decoration:none; border:1px solid var(--border);
-  background: rgba(96,165,250,.10); color: var(--text);
+.hero-copy{
+  background: rgba(8,12,20,.55);      /* translucent dark */
+  border: 1px solid rgba(96,165,250,.20);
+  border-radius: 12px;
+  padding: 14px 16px;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  box-shadow: 0 10px 30px rgba(0,0,0,.35);
 }
-.hero .btn:hover { border-color: rgba(96,165,250,.45) }
 
-@media (max-width:860px){
-  .hero{ margin: 0 0 18px 0; height: 36vh }
-}
+.hero h1{ margin:0 0 6px 0; font-size:28px; letter-spacing:.2px; }
+.hero p.sub{ margin:6px 0 0 0; color:#c4cfde; }  /* brighter text */
 
 
     /* Responsive */
@@ -216,24 +201,19 @@
     </g>
   </svg>
 
-  <!-- Foreground content -->
   <div class="hero-content">
-    <div class="mark" aria-hidden="true"></div>
-    <div>
-      <h1>CommandBridge.uk</h1>
-      <p class="sub">Experiments in code, automation, interface design, and sci-fi engineering.</p>
-      <p class="sub">
-        Personal builds spanning Qt→Android ports, Meta glasses integrations, Home Assistant + n8n workflows,
-        and occasional sci-fi micro-fiction. Notes on what I design, break, and push further.
-      </p>
-      <div class="cta-row">
-        <a class="btn" href="./projects/index.html">Open Projects →</a>
-        <a class="btn" href="./widgets/index.html">Open Widgets →</a>
-        <!-- Optional future section -->
-        <!-- <a class="btn" href="./fiction/index.html">Fiction →</a> -->
-      </div>
-    </div>
+  <div class="mark" aria-hidden="true"></div>
+  <div class="hero-copy">
+    <h1>CommandBridge.uk</h1>
+    <p class="sub">Experiments in code, automation, interface design, and sci-fi engineering.</p>
+    <p class="sub">
+      Personal builds spanning Qt→Android ports, Meta glasses integrations, Home Assistant + n8n workflows,
+      and occasional sci-fi micro-fiction. Notes on what I design, break, and push further.
+    </p>
   </div>
+</div>
+
+  
 </header>
 
 
@@ -241,6 +221,7 @@
   </main>
 </body>
 </html>
+
 
 
 
