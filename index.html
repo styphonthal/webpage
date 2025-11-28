@@ -79,6 +79,57 @@
     /* Section */
     .section{margin-top:18px}
     .section h4{margin:0 0 10px 0; font-size:1rem; color:var(--muted); font-weight:600}
+/* --- Hero --- */
+.hero {
+  position: relative;
+  margin-left: 240px;              /* align with .main */
+  padding: 40px 28px 54px;
+  height: 42vh;                    /* ~40% viewport; tweak as needed */
+  min-height: 280px;
+  overflow: hidden;
+  background:
+    radial-gradient(1200px 700px at 10% -20%, rgba(56,189,248,.12), transparent 55%),
+    radial-gradient(900px 600px at 90% 0%, rgba(96,165,250,.10), transparent 60%),
+    linear-gradient(180deg, #0e1522 0%, #0b111c 100%);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
+.hero .hero-bg {
+  position:absolute; inset:0;
+  opacity:.95;
+  /* fade bottom so text remains readable */
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,.9), rgba(0,0,0,.7) 70%, rgba(0,0,0,0));
+  mask-image: linear-gradient(to bottom, rgba(0,0,0,.9), rgba(0,0,0,.7) 70%, rgba(0,0,0,0));
+}
+
+.hero-content {
+  position: relative; z-index: 1;
+  display: grid; grid-template-columns: auto 1fr;
+  gap: 18px; align-items: center; max-width: 1100px;
+}
+
+.hero .mark {
+  width: 56px; height: 56px; border-radius: 14px;
+  background: url("/command.png") center/cover no-repeat;
+  box-shadow: 0 10px 26px rgba(56,189,248,.35);
+  border: 1px solid rgba(96,165,250,.35);
+}
+
+.hero h1 { margin:0; font-size: 28px; letter-spacing:.2px }
+.hero p.sub { margin:6px 0 0 0; color: var(--muted) }
+
+.hero .cta-row { margin-top:16px; display:flex; gap:10px; flex-wrap:wrap }
+.hero .btn {
+  display:inline-block; padding:9px 12px; border-radius:10px;
+  text-decoration:none; border:1px solid var(--border);
+  background: rgba(96,165,250,.10); color: var(--text);
+}
+.hero .btn:hover { border-color: rgba(96,165,250,.45) }
+
+@media (max-width:860px){
+  .hero{ margin-left:0; height: 36vh }
+}
 
     /* Responsive */
     @media (max-width:860px){
@@ -103,43 +154,88 @@
 
   <!-- Main -->
   <main class="main">
-    <div class="header">
-      <div>
-        <h2>Home</h2>        
+
+<header class="hero">
+  <!-- Starship bridge background (inline SVG, no external files) -->
+  <svg class="hero-bg" viewBox="0 0 1600 700" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%"  stop-color="#0a1630"/>
+        <stop offset="100%" stop-color="#071120"/>
+      </linearGradient>
+      <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#12233c"/>
+        <stop offset="100%" stop-color="#0b1a2e"/>
+      </linearGradient>
+      <linearGradient id="glow" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#8bd2ff"/>
+        <stop offset="100%" stop-color="#4fb8ff"/>
+      </linearGradient>
+    </defs>
+
+    <!-- Space backdrop -->
+    <rect x="0" y="0" width="1600" height="700" fill="url(#g1)"/>
+    <!-- Stars -->
+    <g fill="#9fd7ff" opacity=".8">
+      <circle cx="220" cy="120" r="2"/><circle cx="380" cy="80" r="1.5"/>
+      <circle cx="520" cy="160" r="1.8"/><circle cx="760" cy="90" r="2.2"/>
+      <circle cx="1040" cy="140" r="1.6"/><circle cx="1280" cy="100" r="2"/>
+      <circle cx="1440" cy="170" r="1.4"/><circle cx="980" cy="210" r="1.4"/>
+    </g>
+
+    <!-- Panoramic canopy -->
+    <path d="M0,40 Q800,-60 1600,40 L1600,150 Q800,60 0,150 Z" fill="#0b1d33"/>
+    <path d="M0,150 Q800,60 1600,150" stroke="#2a5ea1" stroke-width="6" opacity=".5" fill="none"/>
+
+    <!-- Forward console arc -->
+    <path d="M-50,520 Q800,360 1650,520 L1650,700 L-50,700 Z" fill="url(#panel)"/>
+    <path d="M50,560 Q800,400 1550,560" stroke="#2a5ea1" stroke-width="6" opacity=".55" fill="none"/>
+
+    <!-- Captain’s dais / main display -->
+    <ellipse cx="1120" cy="360" rx="220" ry="46" fill="#0c2037" opacity=".9"/>
+    <rect x="980" y="300" width="280" height="70" rx="10" fill="#0e2746"/>
+    <rect x="1040" y="315" width="160" height="40" rx="8" fill="url(#glow)" opacity=".85"/>
+
+    <!-- Aux panels (lights) -->
+    <g opacity=".85">
+      <rect x="860" y="332" width="40" height="18" rx="3" fill="#5ab8ff"/>
+      <rect x="910" y="332" width="40" height="18" rx="3" fill="#3aa7ff"/>
+      <rect x="1240" y="332" width="40" height="18" rx="3" fill="#3aa7ff"/>
+      <rect x="1290" y="332" width="40" height="18" rx="3" fill="#5ab8ff"/>
+    </g>
+
+    <!-- Command prompt glyph (ties to brand) -->
+    <g transform="translate(140,270) scale(1.35)" fill="#e6f2ff">
+      <path d="M0,0 L70,50 L0,100 L18,125 L110,62 L18,0 Z"/>
+      <rect x="130" y="40" width="70" height="22" rx="6"/>
+    </g>
+  </svg>
+
+  <!-- Foreground content -->
+  <div class="hero-content">
+    <div class="mark" aria-hidden="true"></div>
+    <div>
+      <h1>CommandBridge.uk</h1>
+      <p class="sub">Experiments in code, automation, interface design, and sci-fi engineering.</p>
+      <p class="sub">
+        Personal builds spanning Qt→Android ports, Meta glasses integrations, Home Assistant + n8n workflows,
+        and occasional sci-fi micro-fiction. Notes on what I design, break, and push further.
+      </p>
+      <div class="cta-row">
+        <a class="btn" href="./projects/index.html">Open Projects →</a>
+        <a class="btn" href="./widgets/index.html">Open Widgets →</a>
+        <!-- Optional future section -->
+        <!-- <a class="btn" href="./fiction/index.html">Fiction →</a> -->
       </div>
     </div>
+  </div>
+</header>
 
-    <section class="grid">
-      <article class="card">
-        <h3>Projects</h3>
-        <p>Browse active builds, notes, and links. </p>
-        <a class="cta" href="./projects/index.html">Open Projects →</a>
-      </article>
 
-      <article class="card">
-        <h3>Widgets</h3>
-        <p>Quick utilitie</p>
-        <a class="cta" href="./widgets/index.html">Open Widgets →</a>
-      </article>
-    </section>
 
-    <section class="section">
-      <h4>Shortcuts</h4>
-      <div class="grid">
-        <article class="card">
-          <h3>Meta Glasses Bot</h3>
-          <p>n8n + WhatsApp relay; HA service calls; Keep/Todo integration.</p>
-          <a class="cta" href="./projects/index.html#">Details →</a>
-        </article>
-        <article class="card">
-          <h3>Movie/Series Tracker</h3>
-          <p>Room + Retrofit + Glide; settings via ViewPager; Qt parity.</p>
-          <a class="cta" href="./projects/index.html#">Details →</a>
-        </article>
-      </div>
-    </section>
   </main>
 </body>
 </html>
+
 
 
