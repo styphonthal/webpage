@@ -40,69 +40,75 @@
   <div class="updating">Auto-refreshing every 60s</div>
 </div>
 
-<script>
+  <script>
 async function loadSabresWidget() {
   const lastEl = document.getElementById("last");
   const nextEl = document.getElementById("next");
   const nextExtra = document.getElementById("next_extra");
 
-  try {
-    // ESPN team schedule (BUF). Uses team schedule, not daily scoreboard.
-    const url = "https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/teams/buf/schedule";
-    const data = await fetch(url, { cache: "no-store" }).then(r => r.json());
+  // helpers
+  const toTime = (ev) => Date.parse(ev?.date || ev?.competitions?.[0]?.date || 0) || 0;
+  const compOf  = (e) => e?.competitions?.[0] || null;
+  const teamsOf = (c) => Array.isArray(c?.competitors) ? c.competitors : [];
+  const isBUF   = (t) => t?.team?.abbreviation === "BUF";
+  const bufTeam = (ts) => ts.find(isBUF);
+  const oppTeam = (ts) => ts.find((t) => !isBUF(t));
+  const scoreOf = (t) => {
+    // ESPN can return "3" or { value: 3 }
+    const s = t?.score;
+    if (s == null) return null;
+    if (typeof s === "string" || typeof s === "number") return String(s);
+    if (typeof s === "object" && s.value != null) return String(s.value);
+    return null;
+  };
+  const vsAt = (buf) => (buf?.homeAway === "home" ? "vs" : "at");
 
+  try {
+    const url = "https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/teams/buf/schedule";
+    const data = await fetch(url, { cache: "no-store" }).then((r) => r.json());
     const events = Array.isArray(data.events) ? data.events : [];
 
-    // Helper to read competition safely
-    function compOf(e){ return e && e.competitions && e.competitions[0] ? e.competitions[0] : null; }
-    function teamsOf(c){ return c && Array.isArray(c.competitors) ? c.competitors : []; }
-    function bufTeam(ts){ return ts.find(t => t.team && t.team.shortDisplayName === "BUF"); }
-    function oppTeam(ts){ return ts.find(t => t.team && t.team.shortDisplayName !== "BUF"); }
-
-    // Classify by status
+    // partition
     const finals = [];
     const upcoming = [];
-
     for (const ev of events) {
       const c = compOf(ev);
       if (!c) continue;
-      const st = c.status && c.status.type ? c.status.type : {};
-      const completed = Boolean(st.completed);
-      const state = st.state || ""; // "pre", "in", "post"
-      (completed ? finals : (state === "pre" ? upcoming : null)) && (completed ? finals : upcoming).push(ev);
+      const st = c.status?.type || {};
+      if (st.completed) finals.push(ev);
+      else if ((st.state || "").toLowerCase() === "pre") upcoming.push(ev);
     }
+    finals.sort((a, b) => toTime(a) - toTime(b));
+    upcoming.sort((a, b) => toTime(a) - toTime(b));
 
-    // Sort by date
-    function toTime(ev){ return Date.parse(ev.date || compOf(ev)?.date || 0) || 0; }
-    finals.sort((a,b)=>toTime(a)-toTime(b));
-    upcoming.sort((a,b)=>toTime(a)-toTime(b));
-
-    // Last final
+    // last final
     if (finals.length) {
       const game = finals[finals.length - 1];
-      const c = compOf(game); const ts = teamsOf(c);
-      const buf = bufTeam(ts); const opp = oppTeam(ts);
-      const score = `${(buf && buf.score) || "0"}–${(opp && opp.score) || "0"}`;
-      const vs = opp && opp.team ? opp.team.shortDisplayName : "—";
-      lastEl.textContent = `${score} vs ${vs}`;
+      const c = compOf(game), ts = teamsOf(c);
+      const buf = bufTeam(ts), opp = oppTeam(ts);
+      const bufScore = scoreOf(buf) ?? "0";
+      const oppScore = scoreOf(opp) ?? "0";
+      const oppName  = opp?.team?.shortDisplayName || opp?.team?.name || "—";
+      lastEl.textContent = `${bufScore}–${oppScore} ${vsAt(buf)} ${oppName}`;
     } else {
       lastEl.textContent = "No final game found";
     }
 
-    // Next scheduled
+    // next scheduled
     if (upcoming.length) {
       const game = upcoming[0];
-      const c = compOf(game); const ts = teamsOf(c);
-      const opp = oppTeam(ts);
-      const when = (c && c.status && c.status.type && c.status.type.shortDetail) || (game && game.shortName) || "Scheduled";
-      const vs = opp && opp.team ? opp.team.shortDisplayName : "—";
-      nextEl.textContent = `vs ${vs}`;
+      const c = compOf(game), ts = teamsOf(c);
+      const buf = bufTeam(ts), opp = oppTeam(ts);
+      const oppName = opp?.team?.shortDisplayName || opp?.team?.name || "—";
+      const when = c?.status?.type?.shortDetail
+                || game?.shortName
+                || new Date(toTime(game)).toLocaleString(undefined, { month: "2-digit", day: "2-digit", hour: "numeric", minute: "2-digit" });
+      nextEl.textContent = `${vsAt(buf)} ${oppName}`;
       nextExtra.textContent = when;
     } else {
       nextEl.textContent = "No upcoming games";
       nextExtra.textContent = "";
     }
-
   } catch (err) {
     console.error(err);
     lastEl.textContent = "Error loading data";
@@ -114,5 +120,7 @@ async function loadSabresWidget() {
 loadSabresWidget();
 setInterval(loadSabresWidget, 60000);
 </script>
+
+
 </body>
 </html>
