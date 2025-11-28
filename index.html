@@ -1,128 +1,148 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>CommandBridge</title>
-
-<style>
-    /* --- Page colors --- */
-    :root {
-        --bg: #0a0a0c;
-        --sidebar-bg: #0d0f12;
-        --accent-blue: #3b82f6;
-        --accent-blue-light: #60a5fa;
-        --text-main: #e5e7eb;
-        --text-muted: #9ca3af;
+  <meta charset="utf-8" />
+  <title>CommandBridge</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --bg:#0b0f14;        /* near-black */
+      --panel:#0f1722;     /* dark panel */
+      --panel-2:#0d1320;
+      --text:#e5e7eb;      /* white-ish */
+      --muted:#94a3b8;     /* slate-400 */
+      --accent:#60a5fa;    /* blue-400 */
+      --accent-2:#38bdf8;  /* sky-400 */
+      --border:#1f2937;    /* gray-800 */
+      --chip:#111827;      /* gray-900 */
+      --radius:14px;
+      --shadow:0 10px 30px rgba(0,0,0,.35);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background:radial-gradient(1200px 700px at 15% -10%, rgba(56,189,248,.10), transparent 55%),
+                 radial-gradient(900px 600px at 85% 20%, rgba(96,165,250,.10), transparent 60%),
+                 var(--bg);
+      color:var(--text);
+      font:16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, "Helvetica Neue", Arial, "Apple Color Emoji","Segoe UI Emoji";
     }
 
-    body {
-        margin: 0;
-        display: flex;
-        height: 100vh;
-        background: var(--bg);
-        font-family: 'Inter', sans-serif;
-        color: var(--text-main);
+    /* Sidebar */
+    .sidebar{
+      position:fixed; inset:0 auto 0 0; width:240px;
+      background:linear-gradient(180deg, var(--panel), var(--panel-2));
+      border-right:1px solid var(--border);
+      padding:22px 18px;
     }
-
-    /* --- Sidebar --- */
-    .sidebar {
-        width: 240px;
-        background: var(--sidebar-bg);
-        border-right: 1px solid #1a1c20;
-        display: flex;
-        flex-direction: column;
-        padding: 24px 20px;
+    .brand{display:flex; align-items:center; gap:10px; margin-bottom:24px}
+    .badge{
+      width:34px; height:34px; border-radius:10px;
+      background:linear-gradient(135deg, var(--accent), var(--accent-2));
+      box-shadow:0 6px 18px rgba(56,189,248,.35);
     }
-
-    .logo {
-        font-size: 1.6rem;
-        font-weight: 700;
-        margin-bottom: 40px;
-        color: var(--accent-blue);
-        letter-spacing: 0.5px;
+    .brand h1{font-size:18px; margin:0; letter-spacing:.2px}
+    nav a{
+      display:flex; align-items:center; gap:10px;
+      padding:10px 12px; margin:6px 0; text-decoration:none;
+      color:var(--text); border-radius:10px; transition:.18s ease;
+      border:1px solid transparent; background:transparent;
     }
+    nav a:hover{background:rgba(96,165,250,.10); border-color:rgba(96,165,250,.25)}
+    nav a.active{background:rgba(96,165,250,.14); border-color:rgba(96,165,250,.35)}
+    .nav-dot{width:8px;height:8px;border-radius:50%;background:var(--accent)}
 
-    .nav-link {
-        font-size: 1.05rem;
-        padding: 12px 8px;
-        border-radius: 6px;
-        margin-bottom: 8px;
-        cursor: pointer;
-        text-decoration: none;
-        color: var(--text-muted);
-        transition: 0.2s ease;
-        display: block;
+    /* Main */
+    .main{margin-left:240px; padding:28px 28px 60px}
+    .header{display:flex; align-items:end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:22px}
+    .header h2{font-size:28px; margin:0}
+    .muted{color:var(--muted)}
+
+    /* Cards */
+    .grid{display:grid; gap:16px; grid-template-columns:repeat(auto-fill, minmax(280px,1fr))}
+    .card{
+      background:linear-gradient(180deg, rgba(17,24,39,.85), rgba(15,23,34,.85));
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      padding:18px;
+      box-shadow:var(--shadow);
+      display:flex; flex-direction:column; gap:8px; min-height:140px;
     }
+    .card h3{margin:0; font-size:1.15rem}
+    .card p{margin:0; color:var(--muted)}
+    .card .cta{margin-top:auto; display:inline-block; padding:8px 10px; border:1px solid var(--border); border-radius:10px; color:var(--accent); text-decoration:none}
+    .card .cta:hover{border-color:rgba(96,165,250,.45)}
 
-    .nav-link:hover {
-        background: #1c1e22;
-        color: var(--accent-blue-light);
+    /* Section */
+    .section{margin-top:18px}
+    .section h4{margin:0 0 10px 0; font-size:1rem; color:var(--muted); font-weight:600}
+
+    /* Responsive */
+    @media (max-width:860px){
+      .sidebar{position:static;width:auto}
+      .main{margin-left:0}
     }
-
-    .active {
-        background: #1c1e22;
-        color: var(--accent-blue);
-    }
-
-    /* --- Main content --- */
-    .content {
-        flex: 1;
-        padding: 40px 60px;
-        overflow-y: auto;
-    }
-
-    h1 {
-        font-size: 2.4rem;
-        font-weight: 700;
-        margin-bottom: 10px;
-    }
-
-    p {
-        font-size: 1.2rem;
-        color: var(--text-muted);
-        max-width: 700px;
-        line-height: 1.6;
-    }
-
-    .hero-box {
-        margin-top: 40px;
-        padding: 32px;
-        background: #111317;
-        border: 1px solid #1f2329;
-        border-radius: 12px;
-    }
-
-    .hero-box h2 {
-        font-size: 1.6rem;
-        color: var(--accent-blue);
-        margin-bottom: 12px;
-    }
-
-</style>
+  </style>
 </head>
-
 <body>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="badge" aria-hidden="true"></div>
+      <h1>CommandBridge</h1>
+    </div>
+    <nav>
+      <a href="./index.html" class="active"><span class="nav-dot" aria-hidden="true"></span> Home</a>
+      <a href="./projects/index.html"><span class="nav-dot" aria-hidden="true"></span> Projects</a>
+      <a href="./widgets/index.html"><span class="nav-dot" aria-hidden="true"></span> Widgets</a>
+    </nav>
+  </aside>
 
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <div class="logo">CommandBridge</div>
-
-        <a class="nav-link active" href="./index.html">Home</a>
-        <a class="nav-link" href="./projects/index.html">Projects</a>
-        <a class="nav-link" href="./widgets/index.html">Widgets</a>
+  <!-- Main -->
+  <main class="main">
+    <div class="header">
+      <div>
+        <h2>Home</h2>
+        <div class="muted">Unified theme and navigation shared with Projects/Widgets.</div>
+      </div>
     </div>
 
-    <!-- Main Content -->
-    <div class="content">
-        <h1>Welcome</h1>
-        <p>This is your CommandBridge hub. Use the navigation on the left to access your projects, tools, and widgets. </p>
+    <section class="grid">
+      <article class="card">
+        <h3>Projects</h3>
+        <p>Browse active builds, notes, and links. Data-backed by <code>/data/projects.json</code>.</p>
+        <a class="cta" href="./projects/index.html">Open Projects →</a>
+      </article>
 
-        <div class="hero-box">
-            <h2>Getting Started</h2>
-           
-        </div>
-    </div>
+      <article class="card">
+        <h3>Widgets</h3>
+        <p>Quick utilities and dashboards designed for the CommandBridge layout.</p>
+        <a class="cta" href="./widgets/index.html">Open Widgets →</a>
+      </article>
 
+      <article class="card">
+        <h3>Status</h3>
+        <p>Host on Cloudflare Pages; static assets from GitHub. DNS: <code>commandbridge.uk</code>.</p>
+        <a class="cta" href="https://github.com/styphonthal/webpage" target="_blank" rel="noopener">View Repo →</a>
+      </article>
+    </section>
+
+    <section class="section">
+      <h4>Shortcuts</h4>
+      <div class="grid">
+        <article class="card">
+          <h3>Meta Glasses Bot</h3>
+          <p>n8n + WhatsApp relay; HA service calls; Keep/Todo integration.</p>
+          <a class="cta" href="./projects/index.html#">Details →</a>
+        </article>
+        <article class="card">
+          <h3>Movie/Series Tracker</h3>
+          <p>Room + Retrofit + Glide; settings via ViewPager; Qt parity.</p>
+          <a class="cta" href="./projects/index.html#">Details →</a>
+        </article>
+      </div>
+    </section>
+  </main>
 </body>
 </html>
