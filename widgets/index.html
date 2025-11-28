@@ -4,8 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Widgets – CommandBridge</title>
-
-<style>
+  <style>
     :root{
       --bg:#0b0f14;        /* near-black */
       --panel:#0f1722;     /* dark panel */
@@ -19,94 +18,120 @@
       --radius:14px;
       --shadow:0 10px 30px rgba(0,0,0,.35);
     }
-    body {
-        margin: 0;
-        display: flex;
-        height: 100vh;
-        background: var(--bg);
-        font-family: 'Inter', sans-serif;
-        color: var(--text-main);
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background:radial-gradient(1200px 700px at 15% -10%, rgba(56,189,248,.10), transparent 55%),
+                 radial-gradient(900px 600px at 85% 20%, rgba(96,165,250,.10), transparent 60%),
+                 var(--bg);
+      color:var(--text);
+      font:16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, "Helvetica Neue", Arial, "Apple Color Emoji","Segoe UI Emoji";
     }
 
-    .sidebar {
-        width: 240px;
-        background: var(--sidebar-bg);
-        border-right: 1px solid #1a1c20;
-        display: flex;
-        flex-direction: column;
-        padding: 24px 20px;
+    /* Sidebar */
+    .sidebar{
+      position:fixed; inset:0 auto 0 0; width:240px;
+      background:linear-gradient(180deg, var(--panel), var(--panel-2));
+      border-right:1px solid var(--border);
+      padding:22px 18px;
+    }
+    .brand{display:flex; align-items:center; gap:10px; margin-bottom:24px}
+    .badge{
+      width:34px; height:34px; border-radius:10px;
+      background:linear-gradient(135deg, var(--accent), var(--accent-2));
+      box-shadow:0 6px 18px rgba(56,189,248,.35);
+    }
+    .brand h1{font-size:18px; margin:0; letter-spacing:.2px}
+    nav a{
+      display:flex; align-items:center; gap:10px;
+      padding:10px 12px; margin:6px 0; text-decoration:none;
+      color:var(--text); border-radius:10px; transition:.18s ease;
+      border:1px solid transparent; background:transparent;
+    }
+    nav a:hover{background:rgba(96,165,250,.10); border-color:rgba(96,165,250,.25)}
+    nav a.active{background:rgba(96,165,250,.14); border-color:rgba(96,165,250,.35)}
+    .nav-dot{width:8px;height:8px;border-radius:50%;background:var(--accent)}
+
+    /* Main */
+    .main{margin-left:240px; padding:28px 28px 60px}
+    .header{
+      display:flex; align-items:end; justify-content:space-between; gap:16px; flex-wrap:wrap;
+      margin-bottom:22px;
+    }
+    .header h2{font-size:28px; margin:0}
+    .muted{color:var(--muted)}
+    .controls{
+      display:flex; gap:12px; flex-wrap:wrap;
+    }
+    .input, .select{
+      background:rgba(17,24,39,.7);
+      color:var(--text);
+      border:1px solid var(--border);
+      border-radius:10px;
+      padding:10px 12px;
+      outline:none;
+      transition:.18s ease;
+    }
+    .input:focus, .select:focus{border-color:rgba(96,165,250,.45); box-shadow:0 0 0 3px rgba(96,165,250,.18)}
+    .input{min-width:260px}
+    .select{min-width:140px}
+
+    /* Tag chips */
+    .tags{display:flex; gap:8px; flex-wrap:wrap; margin:8px 0 18px}
+    .chip{
+      background:var(--chip);
+      border:1px solid var(--border);
+      color:var(--muted);
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:.85rem;
+      cursor:pointer;
+      transition:.18s ease;
+      user-select:none;
+    }
+    .chip:hover{border-color:rgba(96,165,250,.35); color:var(--text)}
+    .chip.active{background:rgba(96,165,250,.18); color:var(--text); border-color:rgba(96,165,250,.5)}
+
+    /* Grid */
+    .card-grid{
+      display:grid; gap:16px;
+      grid-template-columns:repeat(auto-fill, minmax(260px,1fr));
+    }
+    .card{
+      background:linear-gradient(180deg, rgba(17,24,39,.85), rgba(15,23,34,.85));
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      padding:16px 16px 14px;
+      box-shadow:var(--shadow);
+      min-height:150px;
+      display:flex; flex-direction:column; gap:8px;
+    }
+    .card-title{font-size:1.05rem; font-weight:600}
+    .card-desc{color:var(--muted)}
+    .card-meta{
+      display:flex; align-items:center; justify-content:space-between; margin-top:auto; color:var(--muted); font-size:.85rem;
+    }
+    .pill{
+      padding:4px 8px; border:1px solid var(--border); border-radius:999px; font-size:.78rem; color:var(--accent)
     }
 
-    .logo {
-        font-size: 1.6rem;
-        font-weight: 700;
-        margin-bottom: 40px;
-        color: var(--accent-blue);
-        letter-spacing: 0.5px;
+    /* Empty state */
+    .empty{
+      border:1px dashed var(--border);
+      background:rgba(17,24,39,.6);
+      border-radius:var(--radius);
+      padding:22px;
+      color:var(--muted);
+      text-align:center;
     }
 
-    .nav-link {
-        font-size: 1.05rem;
-        padding: 12px 8px;
-        border-radius: 6px;
-        margin-bottom: 8px;
-        cursor: pointer;
-        text-decoration: none;
-        color: var(--text-muted);
-        transition: 0.2s ease;
-        display: block;
+    /* Responsive */
+    @media (max-width:860px){
+      .sidebar{position:static;width:auto}
+      .main{margin-left:0}
     }
-
-    .nav-link:hover {
-        background: #1c1e22;
-        color: var(--accent-blue-light);
-    }
-
-    .active {
-        background: #1c1e22;
-        color: var(--accent-blue);
-    }
-
-    .content {
-        flex: 1;
-        padding: 40px 60px;
-        overflow-y: auto;
-    }
-
-    h1 {
-        font-size: 2.4rem;
-        font-weight: 700;
-        margin-bottom: 10px;
-    }
-
-    p {
-        font-size: 1.2rem;
-        color: var(--text-muted);
-        max-width: 700px;
-        line-height: 1.6;
-    }
-
-    .widget-box {
-        margin-top: 40px;
-        padding: 32px;
-        background: #111317;
-        border: 1px solid #1f2329;
-        border-radius: 12px;
-    }
-
-    .widget-title {
-        font-size: 1.5rem;
-        color: var(--accent-blue-light);
-        margin-bottom: 12px;
-    }
-
-    .widget-desc {
-        color: var(--text-muted);
-        font-size: 1.1rem;
-        line-height: 1.6;
-    }
-
-</style>
+  </style>
 </head>
 
 <body>
@@ -133,4 +158,5 @@
 
 </body>
 </html>
+
 
