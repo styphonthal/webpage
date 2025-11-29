@@ -4,12 +4,15 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta http-equiv="Content-Security-Policy"
-      content="default-src 'self';
-               connect-src 'self' https://statsapi.web.nhl.com;
-               img-src 'self' data: https:;
-               style-src 'self' 'unsafe-inline';
-               script-src 'self' 'unsafe-inline';
-               frame-ancestors 'self';">
+      content="
+        default-src 'self';
+        connect-src 'self' https://statsapi.web.nhl.com;
+        script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com;
+        img-src 'self' data: https:;
+        style-src 'self' 'unsafe-inline';
+        frame-ancestors 'self';
+      ">
+
 
 <title>Buffalo Sabres — Scores & Goals</title>
 <style>
