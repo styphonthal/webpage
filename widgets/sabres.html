@@ -3,6 +3,13 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta http-equiv="Content-Security-Policy"
+      content="default-src 'self';
+               connect-src 'self' https://statsapi.web.nhl.com https://api-web.nhle.com;
+               img-src 'self' data: https:;
+               style-src 'self' 'unsafe-inline';
+               script-src 'self' 'unsafe-inline';
+               frame-ancestors 'self';">
 <title>Buffalo Sabres — Scores & Goals</title>
 <style>
   :root{
@@ -140,79 +147,48 @@
   const SABRES_ID = 7;
   const TZ = 'America/New_York';
 
-  // ---------- helpers ----------
-  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  // ---- UI helpers ----
+  const setText = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
+  const showErr = (where, err) => setText(where, (err && err.message) ? err.message : String(err || 'Error'));
 
+  // ---- timing + retries ----
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  async function fetchJSON(url, {retries=1, timeoutMs=8000} = {}) {
+    for (let i=0; i<=retries; i++){
+      const ctrl = new AbortController();
+      const t = setTimeout(()=>ctrl.abort(), timeoutMs);
+      try{
+        const r = await fetch(url, {cache:'no-store', mode:'cors', signal: ctrl.signal});
+        clearTimeout(t);
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return await r.json();
+      } catch (e) {
+        clearTimeout(t);
+        if (i === retries) throw e;
+        await sleep(400*(i+1));
+      }
+    }
+  }
+
+  // ---- local date (avoid UTC drift) ----
   function nyDate(d = new Date()){
     const y = d.toLocaleString('en-CA', {timeZone: TZ, year:'numeric'});
     const m = d.toLocaleString('en-CA', {timeZone: TZ, month:'2-digit'});
     const day = d.toLocaleString('en-CA', {timeZone: TZ, day:'2-digit'});
     return `${y}-${m}-${day}`;
   }
+  const toDate = s => { try { return new Date(s); } catch { return null; } };
 
-  function toLocalDate(dstr){
-    try { return new Date(dstr); } catch { return null; }
-  }
-
-  async function safeFetch(url, opt={}, retries=2, backoff=400){
-    for (let i=0;i<=retries;i++){
-      try{
-        const r = await fetch(url, {cache:'no-store', ...opt});
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return await r.json();
-      }catch(e){
-        if (i===retries) throw e;
-        await sleep(backoff*(i+1));
-      }
-    }
-  }
-
-  // ---------- primary: statsapi ----------
-  async function getScheduleStatsApi(){
+  // ---- schedule providers ----
+  async function getScheduleStatsApi() {
     const now = new Date();
     const start = new Date(now); start.setDate(start.getDate()-30);
     const end   = new Date(now); end.setDate(end.getDate()+30);
-
-    const url = `https://statsapi.web.nhl.com/api/v1/schedule` +
-      `?teamId=${SABRES_ID}` +
-      `&expand=schedule.teams,schedule.linescore` +
-      `&startDate=${nyDate(start)}&endDate=${nyDate(end)}`;
-
-    const data = await safeFetch(url);
-    const games = (data.dates||[]).flatMap(d => d.games || []);
-    return games;
-  }
-
-  // ---------- fallback: api-web ----------
-  async function getScheduleApiWeb(){
-    const now = new Date();
-    const days = [];
-    for (let i=-14;i<=14;i++){
-      const d = new Date(now); d.setDate(d.getDate()+i);
-      days.push(nyDate(d));
-    }
-    const results = [];
-    for (const day of days){
-      try{
-        const data = await safeFetch(`https://api-web.nhle.com/v1/score/${day}`);
-        for (const g of (data.games||[])){
-          if (g.awayTeam?.id===SABRES_ID || g.homeTeam?.id===SABRES_ID){
-            results.push({
-              gamePk: g.id,
-              gameDate: g.startTimeUTC,
-              status: { detailedState: g.gameState, abstractGameState: stateToAbstract(g.gameState) },
-              teams: {
-                away: { team: { name: (g.awayTeam?.placeName?.default||'') + ' ' + (g.awayTeam?.commonName?.default||'') }, score: g.awayTeam?.score ?? 0, id: g.awayTeam?.id },
-                home: { team: { name: (g.homeTeam?.placeName?.default||'') + ' ' + (g.homeTeam?.commonName?.default||'') }, score: g.homeTeam?.score ?? 0, id: g.homeTeam?.id },
-              },
-              __apiweb: true
-            });
-          }
-        }
-      }catch(_){ /* ignore day failure */ }
-    }
-    results.sort((a,b)=> new Date(a.gameDate) - new Date(b.gameDate));
-    return results;
+    const url = `https://statsapi.web.nhl.com/api/v1/schedule?teamId=${SABRES_ID}` +
+                `&expand=schedule.teams,schedule.linescore` +
+                `&startDate=${nyDate(start)}&endDate=${nyDate(end)}`;
+    const data = await fetchJSON(url, {retries: 1, timeoutMs: 8000});
+    return (data.dates||[]).flatMap(d => d.games || []);
   }
 
   function stateToAbstract(s=''){
@@ -222,87 +198,98 @@
     return 'Preview';
   }
 
-  async function getLiveFeed(game){
-    if (!game.__apiweb){
-      try{
-        return await safeFetch(`https://statsapi.web.nhl.com/api/v1/game/${game.gamePk}/feed/live`);
-      }catch(_){ /* fall through */ }
+  async function getScheduleApiWeb() {
+    const now = new Date();
+    const days = [];
+    for (let i=-14;i<=14;i++){
+      const d = new Date(now); d.setDate(d.getDate()+i);
+      days.push(nyDate(d));
     }
-    try{
-      return await safeFetch(`https://api-web.nhle.com/v1/gamecenter/${game.gamePk}/play-by-play`);
-    }catch(_){
-      return null;
+    const out = [];
+    for (const day of days){
+      try {
+        const data = await fetchJSON(`https://api-web.nhle.com/v1/score/${day}`, {retries: 0, timeoutMs: 6000});
+        for (const g of (data.games||[])) {
+          if (g.awayTeam?.id===SABRES_ID || g.homeTeam?.id===SABRES_ID){
+            out.push({
+              gamePk: g.id,
+              gameDate: g.startTimeUTC,
+              status: { detailedState: g.gameState, abstractGameState: stateToAbstract(g.gameState) },
+              teams: {
+                away: { team: { name: (g.awayTeam?.placeName?.default||'') + ' ' + (g.awayTeam?.commonName?.default||'') }, score: g.awayTeam?.score ?? 0 },
+                home: { team: { name: (g.homeTeam?.placeName?.default||'') + ' ' + (g.homeTeam?.commonName?.default||'') }, score: g.homeTeam?.score ?? 0 }
+              },
+              __apiweb: true
+            });
+          }
+        }
+      } catch { /* ignore per-day failure */ }
     }
+    out.sort((a,b)=> new Date(a.gameDate) - new Date(b.gameDate));
+    return out;
   }
 
-  // ---------- pickers ----------
+  async function getLiveFeed(game){
+    // try statsapi first unless source was api-web
+    if (!game.__apiweb){
+      try { return await fetchJSON(`https://statsapi.web.nhl.com/api/v1/game/${game.gamePk}/feed/live`, {retries:1, timeoutMs: 8000}); }
+      catch { /* fallthrough */ }
+    }
+    try { return await fetchJSON(`https://api-web.nhle.com/v1/gamecenter/${game.gamePk}/play-by-play`, {retries:1, timeoutMs: 8000}); }
+    catch { return null; }
+  }
+
   function pickGames(games){
     const now = new Date();
     const live = games.find(g => (g.status?.abstractGameState||'').toLowerCase()==='live');
-
     const past = games.filter(g => new Date(g.gameDate) <= now);
     const future = games.filter(g => new Date(g.gameDate) > now);
-
     const finished = past.filter(g => (g.status?.detailedState||'').toLowerCase().includes('final'));
     const lastFinished = finished.length ? finished[finished.length-1] : (past.length ? past[past.length-1] : null);
-
     const nextScheduled = future.length ? future[0] : null;
-
     const todayStr = nyDate(now);
     const today = games.find(g => (g.gameDate||'').slice(0,10) === todayStr) || null;
-
     return { live, lastFinished, nextScheduled, today };
   }
 
-  // ---------- render ----------
-  function fmtTeamName(t){
-    return t?.team?.name || '—';
-  }
+  // ---- renderers ----
+  const nameOf = t => (t?.team?.name) || '—';
 
   function renderScorebar(game, live){
-    const awayName = fmtTeamName(game.teams.away);
-    const homeName = fmtTeamName(game.teams.home);
-
-    let awayScore = game.teams.away.score ?? 0;
-    let homeScore = game.teams.home.score ?? 0;
+    if (!game){ setText('state','No game found'); return; }
+    const awayName = nameOf(game.teams.away);
+    const homeName = nameOf(game.teams.home);
+    let away = game.teams.away.score ?? 0;
+    let home = game.teams.home.score ?? 0;
 
     const ls = live?.liveData?.linescore;
-    if (ls?.teams?.away?.goals != null) awayScore = ls.teams.away.goals;
-    if (ls?.teams?.home?.goals != null) homeScore = ls.teams.home.goals;
+    if (ls?.teams?.away?.goals != null) away = ls.teams.away.goals;
+    if (ls?.teams?.home?.goals != null) home = ls.teams.home.goals;
+    if (live?.homeTeam?.score != null){ home = live.homeTeam.score; away = live.awayTeam.score; }
 
-    if (live?.homeTeam?.score != null) {
-      homeScore = live.homeTeam.score; awayScore = live.awayTeam.score;
-    }
+    document.querySelector('#awayTeam .name').textContent = awayName;
+    document.querySelector('#homeTeam .name').textContent = homeName;
+    setText('score', `${away} — ${home}`);
 
-    document.getElementById('awayTeam').querySelector('.name').textContent = awayName;
-    document.getElementById('homeTeam').querySelector('.name').textContent = homeName;
-    document.getElementById('score').textContent = `${awayScore} — ${homeScore}`;
-
-    const status = (live?.gameData?.status?.detailedState) ||
-                   (game.status?.detailedState) ||
-                   (live?.gameState) || '—';
-    document.getElementById('state').textContent = status;
+    const status = (live?.gameData?.status?.detailedState) || (game.status?.detailedState) || (live?.gameState) || '—';
+    setText('state', status);
 
     let when = '';
-    if (ls?.currentPeriodTimeRemaining) {
-      when = `${ls.currentPeriodOrdinal || ''} ${ls.currentPeriodTimeRemaining}`;
-    } else if (live?.periodDescriptor?.number && live?.clock?.timeRemaining) {
-      when = `P${live.periodDescriptor.number} ${live.clock.timeRemaining}`;
-    } else if (game.gameDate) {
-      const dt = toLocalDate(game.gameDate);
-      when = dt ? dt.toLocaleString([], {weekday:'short', hour:'numeric', minute:'2-digit'}) : '';
-    }
-    document.getElementById('when').textContent = when || '—';
+    if (ls?.currentPeriodTimeRemaining) when = `${ls.currentPeriodOrdinal || ''} ${ls.currentPeriodTimeRemaining}`;
+    else if (live?.periodDescriptor?.number && live?.clock?.timeRemaining) when = `P${live.periodDescriptor.number} ${live.clock.timeRemaining}`;
+    else if (game.gameDate){ const dt = toDate(game.gameDate); when = dt ? dt.toLocaleString([], {weekday:'short', hour:'numeric', minute:'2-digit'}) : ''; }
+    setText('when', when || '—');
   }
 
-  function renderGoals(live, targetId='goals'){
-    const box = document.getElementById(targetId);
-    if (!box) return;
+  function renderGoals(live){
+    const box = document.getElementById('goals');
+    if (!live){ box.textContent = 'No play-by-play available.'; return; }
 
+    // statsapi format
     const plays = live?.liveData?.plays;
     if (plays?.scoringPlays){
       const idxs = plays.scoringPlays;
-      if (!idxs.length){ box.textContent='No goals yet.'; return; }
+      if (!idxs.length){ box.textContent = 'No goals yet.'; return; }
       box.innerHTML='';
       for (const i of idxs){
         const p = plays.allPlays[i];
@@ -327,7 +314,8 @@
       }
       return;
     }
-    if (live?.plays) {
+    // api-web format
+    if (live?.plays){
       const scoring = live.plays.filter(p=>p.typeDescKey==='goal');
       if (!scoring.length){ box.textContent='No goals yet.'; return; }
       box.innerHTML='';
@@ -356,85 +344,79 @@
     box.textContent = 'No play-by-play available.';
   }
 
-  function renderLastGameSummary(game){
-    const box = document.getElementById('lastGameBox');
-    if (!game){ box.textContent = '—'; return; }
-    const dt = toLocalDate(game.gameDate);
+  function renderLast(game){
+    const el = document.getElementById('lastGameBox');
+    if (!game){ el.textContent = '—'; return; }
+    const dt = toDate(game.gameDate);
     const when = dt ? dt.toLocaleString([], {weekday:'short', month:'short', day:'numeric', hour:'numeric', minute:'2-digit'}) : '';
-    const away = fmtTeamName(game.teams.away);
-    const home = fmtTeamName(game.teams.home);
-    const a = game.teams.away.score ?? '—';
-    const h = game.teams.home.score ?? '—';
-    box.innerHTML = `
-      <div><strong>${away}</strong> at <strong>${home}</strong></div>
-      <div>Final: ${a} — ${h}</div>
-      <div>${when}</div>
-    `;
+    el.innerHTML = `
+      <div><strong>${nameOf(game.teams.away)}</strong> at <strong>${nameOf(game.teams.home)}</strong></div>
+      <div>Final: ${game.teams.away.score ?? '—'} — ${game.teams.home.score ?? '—'}</div>
+      <div>${when}</div>`;
+  }
+  function renderNext(game){
+    const el = document.getElementById('nextGameBox');
+    if (!game){ el.textContent = '—'; return; }
+    const dt = toDate(game.gameDate);
+    const when = dt ? dt.toLocaleString([], {weekday:'short', month:'short', day:'numeric', hour:'numeric', minute:'2-digit'}) : '';
+    el.innerHTML = `
+      <div><strong>${nameOf(game.teams.away)}</strong> at <strong>${nameOf(game.teams.home)}</strong></div>
+      <div>${when}</div>`;
   }
 
-  function renderNextGameSummary(game){
-    const box = document.getElementById('nextGameBox');
-    if (!game){ box.textContent = '—'; return; }
-    const dt = toLocalDate(game.gameDate);
-    const when = dt ? dt.toLocaleString([], {weekday:'short', month:'short', day:'numeric', hour:'numeric', minute:'2-digit'}) : '';
-    const away = fmtTeamName(game.teams.away);
-    const home = fmtTeamName(game.teams.home);
-    box.innerHTML = `
-      <div><strong>${away}</strong> at <strong>${home}</strong></div>
-      <div>${when}</div>
-    `;
-  }
-
-  // ---------- main ----------
+  // ---- main flow ----
   try{
     let games = [];
     try {
       games = await getScheduleStatsApi();
-    } catch(_){
+    } catch (e) {
+      console.warn('statsapi schedule failed', e);
       games = await getScheduleApiWeb();
     }
-    if (!games.length) throw new Error('No games found');
+    if (!games.length) throw new Error('No games found or blocked by CSP/ad-block');
 
     games.sort((a,b)=> new Date(a.gameDate) - new Date(b.gameDate));
-
     const { live, lastFinished, nextScheduled, today } = pickGames(games);
 
-    const primary = live || today || lastFinished || nextScheduled;
-
+    const primary = live || today || lastFinished || nextScheduled || games[games.length-1];
     let feed = null;
-    if (primary){
-      try { feed = await getLiveFeed(primary); } catch(_){ /* non-fatal */ }
-    }
+    try { feed = await getLiveFeed(primary); }
+    catch (e) { console.warn('live feed failed', e); }
 
-    renderScorebar(primary || games[games.length-1], feed);
-    renderGoals(feed, 'goals');
-    renderLastGameSummary(lastFinished);
-    renderNextGameSummary(nextScheduled);
+    renderScorebar(primary, feed);
+    renderGoals(feed);
+    renderLast(lastFinished);
+    renderNext(nextScheduled);
 
     const isLive =
       (feed?.gameData?.status?.abstractGameState || feed?.gameState || '')
       .toString().toLowerCase() === 'live';
 
-    if (isLive && primary){
-      const liveUrlStats = `https://statsapi.web.nhl.com/api/v1/game/${primary.gamePk}/feed/live`;
-      const liveUrlWeb   = `https://api-web.nhle.com/v1/gamecenter/${primary.gamePk}/play-by-play`;
+    if (isLive){
+      const statsURL = `https://statsapi.web.nhl.com/api/v1/game/${primary.gamePk}/feed/live`;
+      const webURL   = `https://api-web.nhle.com/v1/gamecenter/${primary.gamePk}/play-by-play`;
       setInterval(async ()=>{
         try {
           feed = primary.__apiweb
-            ? await safeFetch(liveUrlWeb, {}, 1)
-            : await safeFetch(liveUrlStats, {}, 1);
+            ? await fetchJSON(webURL, {retries: 0, timeoutMs: 6000})
+            : await fetchJSON(statsURL, {retries: 0, timeoutMs: 6000});
           renderScorebar(primary, feed);
-          renderGoals(feed, 'goals');
-        }catch(_){ /* keep previous */ }
+          renderGoals(feed);
+        } catch (e) {
+          console.warn('refresh failed', e);
+        }
       }, 15000);
     }
-  }catch(err){
-    document.getElementById('state').textContent = 'Error loading data';
-    document.getElementById('goals').textContent = String(err);
+  } catch (err){
+    setText('state', 'Error loading data');
+    showErr('goals', err);
     const lg = document.getElementById('lastGameBox'); if (lg) lg.textContent = '—';
     const ng = document.getElementById('nextGameBox'); if (ng) ng.textContent = '—';
   }
 })();
 </script>
+
+
+
 </body>
 </html>
