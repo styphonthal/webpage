@@ -3,16 +3,17 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<!-- CSP: allow only same-origin + StatsAPI and inline styles/scripts -->
 <meta http-equiv="Content-Security-Policy"
       content="
         default-src 'self';
         connect-src 'self' https://statsapi.web.nhl.com;
-        script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com;
+        script-src 'self' 'unsafe-inline';
         img-src 'self' data: https:;
         style-src 'self' 'unsafe-inline';
         frame-ancestors 'self';
       ">
-
 
 <title>Buffalo Sabres — Scores & Goals</title>
 <style>
@@ -109,7 +110,7 @@
 </head>
 <body>
   <div class="wrap">
-    <!-- Primary bar (today/live/last finished/next) -->
+    <!-- Primary bar (live/today/last/next) -->
     <div class="scorebar" id="scorebar">
       <div class="teams">
         <div class="team" id="awayTeam">
@@ -151,7 +152,7 @@
   const SABRES_ID = 7;
   const TZ = 'America/New_York';
 
-  // ---- utils ----
+  // ---------- utils ----------
   const sleep = ms => new Promise(r => setTimeout(r, ms));
   const setTxt = (id,t) => { const el = document.getElementById(id); if (el) el.textContent = t; };
 
@@ -180,46 +181,42 @@
     }
   }
 
-  // ---- SCHEDULE (statsapi only) ----
-  async function getSchedule(){
-    const now = new Date();
-    const start = new Date(now); start.setDate(start.getDate()-30);
-    const end   = new Date(now); end.setDate(end.getDate()+30);
-    const url = `https://statsapi.web.nhl.com/api/v1/schedule` +
-                `?teamId=${SABRES_ID}` +
-                `&expand=schedule.teams,schedule.linescore` +
-                `&startDate=${nyDate(start)}&endDate=${nyDate(end)}`;
-    const data = await fetchJSON(url, {retries: 1, timeoutMs: 8000});
-    return (data.dates||[]).flatMap(d => d.games || []);
+  // ---------- data fetchers (StatsAPI only) ----------
+  // 1) last + next
+  async function getPrevNext(){
+    const url = `https://statsapi.web.nhl.com/api/v1/teams/${SABRES_ID}?expand=team.schedule.previous,team.schedule.next`;
+    const data = await fetchJSON(url, {retries:1, timeoutMs:8000});
+    const t = data.teams?.[0] || {};
+    const prev = t.previousGameSchedule?.dates?.[0]?.games?.[0] || null;
+    const next = t.nextGameSchedule?.dates?.[0]?.games?.[0] || null;
+    return {prev, next};
   }
-
-  async function getLiveFeed(gamePk){
+  // 2) today (detect live/today)
+  async function getToday(){
+    const url = `https://statsapi.web.nhl.com/api/v1/schedule?teamId=${SABRES_ID}&date=${nyDate()}&expand=schedule.linescore`;
+    const data = await fetchJSON(url, {retries:1, timeoutMs:8000});
+    const g = (data.dates?.[0]?.games?.[0]) || null;
+    return g;
+  }
+  // 3) feed/live for scorers and clock
+  async function getFeed(gamePk){
     const url = `https://statsapi.web.nhl.com/api/v1/game/${gamePk}/feed/live`;
-    return await fetchJSON(url, {retries: 1, timeoutMs: 8000});
+    return await fetchJSON(url, {retries:1, timeoutMs:8000});
   }
 
-  function pickGames(games){
-    const now = new Date();
-    // sort just in case
-    games.sort((a,b)=> new Date(a.gameDate) - new Date(b.gameDate));
-
-    const live = games.find(g => (g.status?.abstractGameState||'').toLowerCase()==='live');
-
-    const past = games.filter(g => new Date(g.gameDate) <= now);
-    const future = games.filter(g => new Date(g.gameDate) > now);
-
-    const finished = past.filter(g => (g.status?.detailedState||'').toLowerCase().includes('final'));
-    const lastFinished = finished.length ? finished[finished.length-1] : (past.length ? past[past.length-1] : null);
-
-    const nextScheduled = future.length ? future[0] : null;
-
-    const todayStr = nyDate(now);
-    const today = games.find(g => (g.gameDate||'').slice(0,10) === todayStr) || null;
-
-    return { live, lastFinished, nextScheduled, today };
+  // ---------- pick primary ----------
+  function pickPrimary({today, prev, next}){
+    // If there is a game today and it's not Final yet, prefer it (handles LIVE and PREVIEW).
+    const state = (today?.status?.detailedState || '').toLowerCase();
+    if (today && state && state !== 'final') return today;
+    // Else show most recent finished if available.
+    if (prev) return prev;
+    // Else show next scheduled.
+    if (next) return next;
+    return null;
   }
 
-  // ---- renderers ----
+  // ---------- renderers ----------
   const nameOf = t => (t?.team?.name) || '—';
 
   function renderScorebar(game, feed){
@@ -306,32 +303,35 @@
       <div>${when}</div>`;
   }
 
-  // ---- main ----
+  // ---------- main ----------
   try{
-    const games = await getSchedule();                    // single CORS-safe call
-    if (!games.length) throw new Error('No games in range');
+    // parallel: prev/next and today
+    const [pn, today] = await Promise.all([getPrevNext(), getToday()]);
+    const { prev, next } = pn;
 
-    const { live, lastFinished, nextScheduled, today } = pickGames(games);
-    const primary = live || today || lastFinished || nextScheduled || games[games.length-1];
+    // choose what to show on the big bar
+    const primary = pickPrimary({today, prev, next});
 
+    // get feed for scorers/clock (non-fatal)
     let feed = null;
-    if (primary){
-      try { feed = await getLiveFeed(primary.gamePk); } catch { /* non-fatal */ }
+    if (primary?.gamePk) {
+      try { feed = await getFeed(primary.gamePk); } catch {}
     }
 
     renderScorebar(primary, feed);
     renderGoals(feed);
-    renderLast(lastFinished);
-    renderNext(nextScheduled);
+    renderLast(prev);
+    renderNext(next);
 
+    // live refresh if needed
     const isLive = (feed?.gameData?.status?.abstractGameState||'').toLowerCase()==='live';
-    if (isLive){
+    if (isLive && primary?.gamePk){
       const liveUrl = `https://statsapi.web.nhl.com/api/v1/game/${primary.gamePk}/feed/live`;
       setInterval(async ()=>{
         try{
-          feed = await fetchJSON(liveUrl, {retries: 0, timeoutMs: 6000});
-          renderScorebar(primary, feed);
-          renderGoals(feed);
+          const f = await fetchJSON(liveUrl, {retries:0, timeoutMs:6000});
+          renderScorebar(primary, f);
+          renderGoals(f);
         }catch{}
       }, 15000);
     }
@@ -343,8 +343,6 @@
   }
 })();
 </script>
-
-
 
 </body>
 </html>
