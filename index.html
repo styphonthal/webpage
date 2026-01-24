@@ -64,23 +64,11 @@
       width:48px;
       height:48px;
       border-radius:12px;
-      background:linear-gradient(135deg, var(--accent), var(--accent-glow));
+      background:url("command.png") center/cover no-repeat,
+                 linear-gradient(135deg, var(--accent), var(--accent-glow));
       box-shadow:0 8px 24px rgba(59,130,246,.4), 0 0 60px rgba(59,130,246,.2);
       position:relative;
       animation:pulse-glow 4s ease-in-out infinite;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      overflow:hidden;
-    }
-    
-    .badge::before{
-      content:'>';
-      font-size:28px;
-      font-weight:900;
-      color:#fff;
-      font-family:monospace;
-      text-shadow:0 2px 8px rgba(0,0,0,.3);
     }
     
     @keyframes pulse-glow{
