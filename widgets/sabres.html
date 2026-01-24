@@ -20,6 +20,7 @@
       radial-gradient(900px 500px at 20% 80%, rgba(0,38,84,.35), transparent 70%),
       var(--bg-deep);
     font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   }
   
   .wrap{
@@ -416,6 +417,14 @@
     return `https://assets.nhle.com/logos/nhl/svg/${abbr}_light.svg`;
   }
 
+  function teamLabel(t) {
+    return t?.placeName?.default
+        || t?.commonName?.default
+        || t?.name?.default
+        || t?.abbrev
+        || '';
+  }
+
   async function fetchJSON(url) {
     try {
       const proxiedUrl = CORS_PROXY + encodeURIComponent(url);
@@ -540,9 +549,9 @@
     const away = game.awayTeam;
     const home = game.homeTeam;
     
-    // Update team names
-    document.querySelector('#awayTeam .name').textContent = away.placeName?.default || away.commonName?.default || away.abbrev;
-    document.querySelector('#homeTeam .name').textContent = home.placeName?.default || home.commonName?.default || home.abbrev;
+    // Update team names using centralized function
+    document.querySelector('#awayTeam .name').textContent = teamLabel(away);
+    document.querySelector('#homeTeam .name').textContent = teamLabel(home);
     
     // Update logos
     document.getElementById('awayBadge').style.backgroundImage = 
@@ -562,10 +571,12 @@
     setTxt('score', `${awayScore} — ${homeScore}`);
 
     // Update status
-    let status = 'Final';
     const gameState = details?.gameState || game.gameState;
+    const isActuallyLive = ['LIVE', 'CRIT', 'CRITICAL'].includes(gameState);
     
-    if (gameState === 'LIVE' || gameState === 'CRIT' || gameState === 'CRITICAL') {
+    let status = 'Final';
+    
+    if (isActuallyLive) {
       status = 'LIVE';
       
       // Show period and time if available
@@ -580,24 +591,24 @@
           status = `${period}${period === 1 ? 'st' : period === 2 ? 'nd' : period === 3 ? 'rd' : 'th'} Period`;
         }
       }
-    } else if (gameState === 'FUT' || gameState === 'PRE') {
+      
+      // Check for intermission
+      if (details?.clock?.inIntermission) {
+        status = 'Intermission';
+      }
+    } else if (['FUT', 'PRE'].includes(gameState)) {
       status = 'Scheduled';
-    } else if (gameState === 'OFF' || gameState === 'FINAL') {
+    } else if (['FINAL', 'OFF'].includes(gameState)) {
       status = 'Final';
-    }
-    
-    // Check for intermission
-    if (details?.gameState === 'LIVE' && details?.clock?.inIntermission) {
-      status = 'Intermission';
     }
     
     setTxt('state', status);
 
     // Update time/date
     let when = '';
-    if (details?.clock && !details.clock.inIntermission) {
+    if (isActuallyLive && details?.clock && !details.clock.inIntermission) {
       when = details.clock.timeRemaining || '';
-    } else if (details?.clock?.inIntermission) {
+    } else if (isActuallyLive && details?.clock?.inIntermission) {
       when = 'Break';
     } else {
       when = formatDate(game.startTimeUTC);
@@ -609,13 +620,22 @@
   function renderGoals(details) {
     const goalsEl = document.getElementById('goals');
     
-    if (!details || !details.plays) {
+    if (!details) {
       goalsEl.innerHTML = '<div class="loading">No play data available</div>';
       return;
     }
 
-    const goals = details.plays.filter(play => 
-      play.typeDescKey === 'goal'
+    // Support alternate keys for plays
+    const plays = details.plays || details.gameEvents || [];
+    
+    if (!plays || plays.length === 0) {
+      console.log('Available detail keys:', Object.keys(details));
+      goalsEl.innerHTML = '<div class="loading">No play data available</div>';
+      return;
+    }
+
+    const goals = plays.filter(play => 
+      play.typeDescKey === 'goal' || play.typeCode === 'GOAL'
     );
 
     if (goals.length === 0) {
@@ -629,9 +649,9 @@
       const time = goal.timeInPeriod || '';
       const team = goal.details?.eventOwnerTeamId;
       
-      // Find team name
+      // Find team name using centralized function
       const teamInfo = details.homeTeam?.id === team ? details.homeTeam : details.awayTeam;
-      const teamName = teamInfo?.name?.default || teamInfo?.commonName?.default || teamInfo?.abbrev || '';
+      const teamName = teamLabel(teamInfo);
       
       // Get scorer info - need to look at the full player list
       let scorerName = 'Unknown';
@@ -729,7 +749,7 @@
 
     el.innerHTML = `
       <div class="game-summary">
-        <div><strong>${away.placeName?.default || away.commonName?.default || away.abbrev}</strong> at <strong>${home.placeName?.default || home.commonName?.default || home.abbrev}</strong></div>
+        <div><strong>${teamLabel(away)}</strong> at <strong>${teamLabel(home)}</strong></div>
         <div>Final: ${away.score || 0} — ${home.score || 0}</div>
         <div>${when}</div>
       </div>
@@ -750,7 +770,7 @@
 
     el.innerHTML = `
       <div class="game-summary">
-        <div><strong>${away.placeName?.default || away.commonName?.default || away.abbrev}</strong> at <strong>${home.placeName?.default || home.commonName?.default || home.abbrev}</strong></div>
+        <div><strong>${teamLabel(away)}</strong> at <strong>${teamLabel(home)}</strong></div>
         <div>${when}</div>
       </div>
     `;
@@ -789,7 +809,7 @@
     if (topScorer) {
       setHTML('topScorer', `Current leading scorer: <strong>${topScorer.name}</strong>, ${topScorer.goals} goals`);
     } else {
-      setHTML('topScorer', '<span style="font-size:.9rem">Loading top scorer...</span>');
+      setHTML('topScorer', 'Top scorer unavailable');
     }
     
     // Prioritize: live game > last game
@@ -801,38 +821,36 @@
       renderScorebar(primaryGame, details, isLive);
       renderGoals(details);
       
-      // Auto-refresh if live
+      // Auto-refresh if live - optimized to reduce API calls
       if (isLive) {
         console.log('Starting live game auto-refresh (every 15 seconds)');
+        const gameId = primaryGame.id;
         
         const refreshInterval = setInterval(async () => {
           try {
             console.log('Fetching live update...', new Date().toLocaleTimeString());
             
-            // Re-fetch schedule to check if game is still live
-            const freshSchedule = await getSchedule();
-            const stillLive = !!freshSchedule.liveGame;
-            
-            if (!stillLive) {
-              clearInterval(refreshInterval);
-              console.log('Game ended, stopping auto-refresh');
-              // Reload the page to show final state
-              setTimeout(() => location.reload(), 2000);
-              return;
-            }
-            
-            // Fetch fresh game details
-            const updatedDetails = await getGameDetails(freshSchedule.liveGame.id);
+            // Only fetch game details, not the full schedule
+            const updatedDetails = await getGameDetails(gameId);
+            const gameState = updatedDetails?.gameState;
             
             // Update display
-            renderScorebar(freshSchedule.liveGame, updatedDetails, true);
+            renderScorebar(primaryGame, updatedDetails, true);
             renderGoals(updatedDetails);
             
             console.log('Live update complete:', {
               score: `${updatedDetails.awayTeam?.score || 0} - ${updatedDetails.homeTeam?.score || 0}`,
               period: updatedDetails.periodDescriptor?.number,
-              gameState: updatedDetails.gameState
+              gameState: gameState,
+              clock: updatedDetails.clock?.timeRemaining
             });
+            
+            // Stop refreshing if game is over
+            if (['FINAL', 'OFF'].includes(gameState)) {
+              clearInterval(refreshInterval);
+              console.log('Game ended, stopping auto-refresh');
+              setTimeout(() => location.reload(), 2000);
+            }
           } catch (e) {
             console.error('Refresh error:', e);
           }
