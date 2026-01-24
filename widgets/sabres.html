@@ -22,7 +22,7 @@
     font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial;
     padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   }
-  
+
   .wrap{
     max-width:1200px;
     width:100%;
@@ -40,7 +40,7 @@
     border-radius:18px;
     box-shadow: 0 8px 24px rgba(0,0,0,.3);
   }
-  
+
   .team-header h1{
     margin:0 0 12px 0;
     font-size:2rem;
@@ -48,7 +48,7 @@
     font-weight:800;
     letter-spacing:.5px;
   }
-  
+
   .team-stats{
     display:flex;
     justify-content:center;
@@ -56,14 +56,14 @@
     flex-wrap:wrap;
     margin-top:10px;
   }
-  
+
   .stat-item{
     display:flex;
     flex-direction:column;
     align-items:center;
     gap:4px;
   }
-  
+
   .stat-label{
     font-size:.9rem;
     color:#a8c5f5;
@@ -71,13 +71,13 @@
     text-transform:uppercase;
     letter-spacing:.5px;
   }
-  
+
   .stat-value{
     font-size:1.3rem;
     color:var(--sabres-gold);
     font-weight:700;
   }
-  
+
   .top-scorer{
     margin-top:12px;
     padding-top:12px;
@@ -85,7 +85,7 @@
     color:#cfe1ff;
     font-size:1.05rem;
   }
-  
+
   .top-scorer strong{
     color:var(--sabres-gold);
     font-weight:700;
@@ -104,7 +104,7 @@
     padding:18px 20px;
     box-shadow: 0 12px 30px rgba(0,0,0,.35);
   }
-  
+
   .teams{
     display:grid;
     grid-template-columns: 1fr auto 1fr;
@@ -113,17 +113,17 @@
     flex:1 1 auto;
     min-width:0;
   }
-  
+
   .team{
     display:flex;
     align-items:center;
     gap:12px;
     min-width:0;
   }
-  
+
   .team.away{justify-content:flex-end}
   .team.home{justify-content:flex-start}
-  
+
   .badge{
     width:50px;
     height:50px;
@@ -134,7 +134,7 @@
     border:2px solid rgba(252,181,20,.3);
     flex-shrink:0;
   }
-  
+
   .name{
     font-weight:700;
     letter-spacing:.3px;
@@ -143,7 +143,7 @@
     text-overflow:ellipsis;
     font-size:1.1rem;
   }
-  
+
   .score{
     font-weight:800;
     font-size:2.4rem;
@@ -151,7 +151,7 @@
     color:var(--sabres-gold);
     white-space:nowrap;
   }
-  
+
   .meta{
     display:flex;
     flex-direction:column;
@@ -160,12 +160,12 @@
     min-width:160px;
     color:#cfe1ff;
   }
-  
+
   .state{
     font-weight:700;
     font-size:1.05rem;
   }
-  
+
   .pill{
     display:inline-block;
     font-size:.9rem;
@@ -185,7 +185,7 @@
     border-radius:16px;
     padding:18px 20px;
   }
-  
+
   .panel h3{
     margin:0 0 14px 0;
     font-size:1.15rem;
@@ -193,14 +193,14 @@
     border-bottom:1px solid rgba(252,181,20,.2);
     padding-bottom:8px;
   }
-  
+
   .game-summary{
     display:flex;
     flex-direction:column;
     gap:8px;
     font-size:1rem;
   }
-  
+
   .game-summary strong{
     color:var(--sabres-gold);
   }
@@ -210,7 +210,7 @@
     display:grid;
     gap:12px;
   }
-  
+
   .goal{
     display:grid;
     grid-template-columns: 90px 1fr;
@@ -222,50 +222,50 @@
     border:1px solid rgba(252,181,20,.15);
     transition:all .2s;
   }
-  
+
   .goal:hover{
     background: rgba(252,181,20,.08);
     border-color:rgba(252,181,20,.3);
   }
-  
+
   .time{
     font-weight:700;
     color:#ffe3a3;
     font-size:.95rem;
   }
-  
+
   .goal-details{
     display:flex;
     flex-direction:column;
     gap:4px;
   }
-  
+
   .who{
     font-weight:700;
     color:var(--sabres-white);
   }
-  
+
   .team-name{
     color:var(--sabres-gold);
     font-weight:600;
   }
-  
+
   .assist{
     color:#c6d6f6;
     font-size:.9rem;
     margin-top:2px;
   }
-  
+
   .assist-player{
     display:inline-block;
     margin-right:8px;
   }
-  
+
   .sep{
     opacity:.4;
     padding:0 6px;
   }
-  
+
   .strength{
     color:#a8c5f5;
     font-size:.85rem;
@@ -276,11 +276,9 @@
     padding:20px;
     color:#c6d6f6;
   }
-  
-  .error{
-    color:#ff9999;
-  }
-  
+
+  .error{ color:#ff9999; }
+
   .info{
     color:#a8c5f5;
     font-size:.95rem;
@@ -288,27 +286,13 @@
   }
 
   @media (max-width:768px){
-    .teams{
-      grid-template-columns: 1fr;
-      gap:12px;
-    }
-    .team{
-      justify-content:center !important;
-    }
-    .score{
-      text-align:center;
-      font-size:2rem;
-    }
-    .meta{
-      align-items:center;
-      min-width:auto;
-    }
-    .goal{
-      grid-template-columns:80px 1fr;
-      gap:10px;
-    }
+    .teams{ grid-template-columns: 1fr; gap:12px; }
+    .team{ justify-content:center !important; }
+    .score{ text-align:center; font-size:2rem; }
+    .meta{ align-items:center; min-width:auto; }
+    .goal{ grid-template-columns:80px 1fr; gap:10px; }
   }
-  
+
   @media (max-width:480px){
     .score{font-size:1.8rem}
     .name{font-size:1rem}
@@ -379,7 +363,20 @@
 (async function(){
   const SABRES_ABBR = 'BUF';
   const CORS_PROXY = 'https://corsproxy.io/?';
-  
+
+  // Refresh/backoff config
+  const BASE_REFRESH_MS = 15000;
+  const MAX_REFRESH_MS  = 120000;   // cap backoff at 2 minutes
+  const MAX_CONSEC_FAIL = 8;        // stop after N consecutive failures
+  const SCHEDULE_RECHECK_EVERY = 8; // every 8 ticks (~2 minutes at 15s) re-check schedule
+
+  let refreshTimer = null;
+  let currentGameId = null;
+  let currentPrimaryGame = null;
+  let tickCount = 0;
+  let consecutiveFailures = 0;
+  let currentDelay = BASE_REFRESH_MS;
+
   // Helper functions
   const setTxt = (id, t) => {
     const el = document.getElementById(id);
@@ -426,21 +423,36 @@
         || '';
   }
 
-  function setUpdatedNow() {
+  function setUpdatedNow(extraNote = '') {
     const el = document.getElementById('updated');
     if (!el) return;
-    el.textContent = `Updated ${new Date().toLocaleTimeString('en-US', { 
+    const ts = new Date().toLocaleTimeString('en-US', {
       timeZone: 'America/New_York',
       hour: 'numeric',
       minute: '2-digit',
       second: '2-digit'
-    })}`;
+    });
+    el.textContent = `Updated ${ts}${extraNote ? ` • ${extraNote}` : ''}`;
+  }
+
+  // ---- (1) Cache buster on ALL NHL endpoints (not only play-by-play) ----
+  function withCacheBuster(url) {
+    try {
+      const u = new URL(url);
+      u.searchParams.set('cb', String(Date.now()));
+      return u.toString();
+    } catch {
+      // If URL parsing fails for any reason, fallback by appending cb safely
+      const sep = url.includes('?') ? '&' : '?';
+      return `${url}${sep}cb=${Date.now()}`;
+    }
   }
 
   async function fetchJSON(url) {
     try {
-      const proxiedUrl = CORS_PROXY + encodeURIComponent(url);
-      const response = await fetch(proxiedUrl);
+      const busted = withCacheBuster(url);
+      const proxiedUrl = CORS_PROXY + encodeURIComponent(busted);
+      const response = await fetch(proxiedUrl, { cache: 'no-store' });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       return await response.json();
     } catch (error) {
@@ -454,7 +466,7 @@
     try {
       const url = `https://api-web.nhle.com/v1/standings/now`;
       const data = await fetchJSON(url);
-      
+
       // Find Sabres in standings
       let sabres = null;
       for (const standing of data.standings || []) {
@@ -463,12 +475,12 @@
           break;
         }
       }
-      
+
       if (!sabres) {
         console.log('Sabres not found in standings, trying team common name...');
         return { wins: 0, losses: 0, otLosses: 0, points: 0 };
       }
-      
+
       return {
         wins: sabres.wins || 0,
         losses: sabres.losses || 0,
@@ -486,19 +498,19 @@
     try {
       const url = `https://api-web.nhle.com/v1/club-stats/${SABRES_ABBR}/now`;
       const data = await fetchJSON(url);
-      
+
       // Find player with most goals
       const skaters = data.skaters || [];
       if (skaters.length === 0) {
         console.log('No skaters found');
         return null;
       }
-      
+
       const topScorer = skaters.reduce((top, player) => {
         const goals = player.goals || 0;
         return goals > (top.goals || 0) ? player : top;
       }, skaters[0]);
-      
+
       return {
         name: `${topScorer.firstName?.default || ''} ${topScorer.lastName?.default || ''}`.trim(),
         goals: topScorer.goals || 0
@@ -508,46 +520,112 @@
       return null;
     }
   }
+
+  // ---- (2) Schedule week selection should be NY-time based (not UTC) ----
   async function getSchedule() {
     const now = new Date();
-    const formatAPIDate = (d) => d.toISOString().split('T')[0];
-    
-    // Get current week
-    const url = `https://api-web.nhle.com/v1/club-schedule/${SABRES_ABBR}/week/${formatAPIDate(now)}`;
+    const nowNY = nyYYYYMMDD(now);
+
+    // Get current week (NY date)
+    const url = `https://api-web.nhle.com/v1/club-schedule/${SABRES_ABBR}/week/${nowNY}`;
     const data = await fetchJSON(url);
-    
+
     // Also get previous week to ensure we catch recent games
     const prevWeek = new Date(now);
     prevWeek.setDate(prevWeek.getDate() - 7);
-    const prevUrl = `https://api-web.nhle.com/v1/club-schedule/${SABRES_ABBR}/week/${formatAPIDate(prevWeek)}`;
+    const prevNY = nyYYYYMMDD(prevWeek);
+
+    const prevUrl = `https://api-web.nhle.com/v1/club-schedule/${SABRES_ABBR}/week/${prevNY}`;
     const prevData = await fetchJSON(prevUrl);
-    
+
     const allGames = [...(prevData.games || []), ...(data.games || [])];
-    
+
     // Find live game
-    const liveGame = allGames.find(g => 
-      g.gameState === 'LIVE' || 
+    const liveGame = allGames.find(g =>
+      g.gameState === 'LIVE' ||
       g.gameState === 'CRIT' ||
       g.gameState === 'CRITICAL'
     );
-    
+
     // Find last completed game (excluding current live game)
     const lastGame = allGames
       .filter(g => (g.gameState === 'OFF' || g.gameState === 'FINAL') && g.id !== liveGame?.id)
       .sort((a, b) => new Date(b.startTimeUTC) - new Date(a.startTimeUTC))[0];
-    
+
     // Find next upcoming game
     const nextGame = allGames
       .filter(g => g.gameState === 'FUT' || g.gameState === 'PRE')
-      .sort((a, b) => new Date(a.startTimeUTC) - new Date(b.startTimeUTC))[0];
-    
+      .sort((a, b) => new Date(a.startTimeUTC) - new Date(a.startTimeUTC))[0];
+
     return { liveGame, lastGame, nextGame, games: allGames };
   }
 
-  // Get game details with cache buster
+  // ---- Game details ----
   async function getGameDetails(gameId) {
-    const url = `https://api-web.nhle.com/v1/gamecenter/${gameId}/play-by-play?cb=${Date.now()}`;
+    const url = `https://api-web.nhle.com/v1/gamecenter/${gameId}/play-by-play`;
     return await fetchJSON(url);
+  }
+
+  // ---- (3) Better intermission time extraction (many possible keys) ----
+  function parseClockMMSS(s) {
+    if (!s || typeof s !== 'string') return null;
+    const m = s.match(/^(\d{1,2}):(\d{2})$/);
+    if (!m) return null;
+    const mm = parseInt(m[1], 10);
+    const ss = parseInt(m[2], 10);
+    if (!Number.isFinite(mm) || !Number.isFinite(ss)) return null;
+    return { mm, ss, total: mm * 60 + ss };
+  }
+
+  function formatSecondsToMMSS(sec) {
+    if (!Number.isFinite(sec)) return '';
+    const s = Math.max(0, Math.floor(sec));
+    const mm = Math.floor(s / 60);
+    const ss = String(s % 60).padStart(2, '0');
+    return `${mm}:${ss}`;
+  }
+
+  function getIntermissionDisplay(clock) {
+    if (!clock) return '';
+
+    // If NHL feed provides a clock string even during intermission, use it.
+    // Some feeds keep timeRemaining as the period-end time; others show actual intermission countdown.
+    const tr = typeof clock.timeRemaining === 'string' ? clock.timeRemaining.trim() : '';
+
+    // Common candidates seen in feeds
+    const candidates = [
+      clock.intermissionTimeRemaining,
+      clock.intermissionRemaining,
+      clock.intermissionTimeRemainingSeconds,
+      clock.intermissionRemainingSeconds,
+      clock.intermissionTimeRemainingSec,
+      clock.intermissionRemainingSec,
+      clock.intermissionTimeLeft,
+      clock.intermissionTimeLeftSeconds,
+      clock.intermissionClock
+    ];
+
+    // 1) Prefer a real MM:SS string if present
+    for (const c of candidates) {
+      if (typeof c === 'string' && parseClockMMSS(c)) {
+        return `INT ${c}`;
+      }
+    }
+
+    // 2) Prefer numeric seconds if present
+    for (const c of candidates) {
+      if (typeof c === 'number' && Number.isFinite(c)) {
+        return `INT ${formatSecondsToMMSS(c)}`;
+      }
+    }
+
+    // 3) If timeRemaining looks like MM:SS, many feeds show intermission countdown there
+    if (parseClockMMSS(tr)) {
+      return `INT ${tr}`;
+    }
+
+    // 4) Fallback
+    return 'Intermission';
   }
 
   // Render the main scorebar
@@ -561,36 +639,33 @@
     // Use details as source of truth when available
     const away = details?.awayTeam || game.awayTeam;
     const home = details?.homeTeam || game.homeTeam;
-    
-    // Update team names using centralized function
+
+    // Update team names
     document.querySelector('#awayTeam .name').textContent = teamLabel(away);
     document.querySelector('#homeTeam .name').textContent = teamLabel(home);
-    
+
     // Update logos
     const awayAbbrev = away.abbrev || game.awayTeam?.abbrev;
     const homeAbbrev = home.abbrev || game.homeTeam?.abbrev;
-    
-    document.getElementById('awayBadge').style.backgroundImage = 
+
+    document.getElementById('awayBadge').style.backgroundImage =
       `url('${getTeamLogo(awayAbbrev)}')`;
-    document.getElementById('homeBadge').style.backgroundImage = 
+    document.getElementById('homeBadge').style.backgroundImage =
       `url('${getTeamLogo(homeAbbrev)}')`;
 
-    // Update scores - prefer details over game object
-    let awayScore = details?.awayTeam?.score ?? game.awayTeam?.score ?? 0;
-    let homeScore = details?.homeTeam?.score ?? game.homeTeam?.score ?? 0;
-    
+    // Update scores
+    const awayScore = details?.awayTeam?.score ?? game.awayTeam?.score ?? 0;
+    const homeScore = details?.homeTeam?.score ?? game.homeTeam?.score ?? 0;
     setTxt('score', `${awayScore} — ${homeScore}`);
 
     // Update status
     const gameState = details?.gameState || game.gameState;
     const isActuallyLive = ['LIVE', 'CRIT', 'CRITICAL'].includes(gameState);
-    
+
     let status = 'Final';
-    
     if (isActuallyLive) {
       status = 'LIVE';
-      
-      // Show period and time if available
+
       if (details?.periodDescriptor) {
         const period = details.periodDescriptor.number;
         const periodType = details.periodDescriptor.periodType;
@@ -602,8 +677,7 @@
           status = `${period}${period === 1 ? 'st' : period === 2 ? 'nd' : period === 3 ? 'rd' : 'th'} Period`;
         }
       }
-      
-      // Check for intermission
+
       if (details?.clock?.inIntermission) {
         status = 'Intermission';
       }
@@ -612,148 +686,185 @@
     } else if (['FINAL', 'OFF'].includes(gameState)) {
       status = 'Final';
     }
-    
+
     setTxt('state', status);
 
     // Update time/date
     let when = '';
-    
     if (isActuallyLive) {
       if (details?.clock?.inIntermission) {
-        // Prefer intermission remaining if API provides it
-        const ir = details.clock.intermissionTimeRemaining 
-                || details.clock.intermissionRemaining 
-                || details.clock.intermissionTimeRemainingSeconds;
-        
-        if (typeof ir === 'string' && ir.trim()) {
-          when = `INT ${ir}`;
-        } else if (typeof ir === 'number' && Number.isFinite(ir)) {
-          const mm = Math.floor(ir / 60);
-          const ss = String(ir % 60).padStart(2, '0');
-          when = `INT ${mm}:${ss}`;
-        } else {
-          when = 'Intermission';
-        }
+        when = getIntermissionDisplay(details.clock);
       } else {
-        // Not intermission: show live clock
         when = details?.clock?.timeRemaining || '';
       }
     } else {
       when = formatDate(game.startTimeUTC);
     }
-    
+
     setTxt('when', when || '—');
   }
 
-  // Render goals
+  // ---- (4) Roster mapping: merge multiple possible arrays, not just the first ----
+  function gatherRosterCandidates(details) {
+    const out = [];
+
+    const maybePush = (arr) => {
+      if (Array.isArray(arr)) out.push(...arr);
+    };
+
+    // Known/common
+    maybePush(details?.rosterSpots);
+
+    // Variants / defensive
+    maybePush(details?.players);
+    maybePush(details?.playerSpots);
+    maybePush(details?.skaters);
+    maybePush(details?.goalies);
+
+    // Team nested variants
+    maybePush(details?.homeTeam?.rosterSpots);
+    maybePush(details?.awayTeam?.rosterSpots);
+    maybePush(details?.homeTeam?.players);
+    maybePush(details?.awayTeam?.players);
+
+    return out;
+  }
+
+  function buildPlayerMap(details) {
+    const playerMap = new Map();
+    const roster = gatherRosterCandidates(details);
+
+    for (const p of roster) {
+      const pid = p?.playerId ?? p?.id;
+      if (!pid) continue;
+
+      // Most NHL feeds use firstName/lastName objects with .default; some use plain strings
+      const fn = (typeof p?.firstName === 'string') ? p.firstName : (p?.firstName?.default || '');
+      const ln = (typeof p?.lastName === 'string')  ? p.lastName  : (p?.lastName?.default  || '');
+      const name = `${fn} ${ln}`.trim();
+
+      if (name) playerMap.set(pid, name);
+    }
+
+    return playerMap;
+  }
+
+  // ---- (5) Goals sorting hardened, and shootout exclusion hardened ----
+  function timeToSeconds(t) {
+    const parsed = parseClockMMSS(t);
+    if (!parsed) return null;
+    return parsed.total;
+  }
+
+  function isShootoutGoal(play) {
+    const pt = play?.periodDescriptor?.periodType;
+    if (pt === 'SO') return true;
+
+    // Defensive variants seen in some feeds
+    if (play?.details?.isShootout === true) return true;
+    if (play?.details?.shootout === true) return true;
+    if (play?.details?.situationCode === 'SO') return true;
+
+    return false;
+  }
+
   function renderGoals(details) {
     const goalsEl = document.getElementById('goals');
-    
+
     if (!details) {
       goalsEl.innerHTML = '<div class="loading">No play data available</div>';
       return;
     }
 
-    // Support alternate keys for plays
     const plays = details.plays || details.gameEvents || [];
-    
     if (!plays || plays.length === 0) {
       console.log('Available detail keys:', Object.keys(details));
       goalsEl.innerHTML = '<div class="loading">No play data available</div>';
       return;
     }
 
-    // Build player name map from roster
-    const playerMap = new Map();
-    const rosters = details.rosterSpots || details.homeTeam?.players || details.awayTeam?.players || [];
-    
-    for (const player of rosters) {
-      if (player.playerId) {
-        const name = `${player.firstName?.default || ''} ${player.lastName?.default || ''}`.trim();
-        playerMap.set(player.playerId, name);
-      }
-    }
+    const playerMap = buildPlayerMap(details);
 
-    const goals = plays
+    let goals = plays
       .filter(play => play.typeDescKey === 'goal' || play.typeCode === 'GOAL')
-      .filter(play => play.periodDescriptor?.periodType !== 'SO') // Exclude shootout
-      .sort((a, b) => {
-        // Sort by period, then by time
-        const periodDiff = (a.periodDescriptor?.number || 0) - (b.periodDescriptor?.number || 0);
-        if (periodDiff !== 0) return periodDiff;
-        
-        // Convert time to seconds for comparison
-        const timeToSec = (t) => {
-          if (!t) return 0;
-          const parts = t.split(':');
-          return parseInt(parts[0]) * 60 + parseInt(parts[1] || 0);
-        };
-        return timeToSec(a.timeInPeriod) - timeToSec(b.timeInPeriod);
-      });
+      .filter(play => !isShootoutGoal(play));
 
     if (goals.length === 0) {
       goalsEl.innerHTML = '<div class="loading">No goals scored yet</div>';
       return;
     }
 
+    // Sort chronologically: period asc, time asc, then stable by original order
+    goals = goals
+      .map((g, idx) => ({ g, idx }))
+      .sort((A, B) => {
+        const a = A.g, b = B.g;
+
+        const ap = a?.periodDescriptor?.number ?? 0;
+        const bp = b?.periodDescriptor?.number ?? 0;
+        if (ap !== bp) return ap - bp;
+
+        const ats = timeToSeconds(a?.timeInPeriod);
+        const bts = timeToSeconds(b?.timeInPeriod);
+
+        // If either time is missing/unparseable, keep stable ordering
+        if (ats == null || bts == null) return A.idx - B.idx;
+        if (ats !== bts) return ats - bts;
+
+        return A.idx - B.idx;
+      })
+      .map(x => x.g);
+
     let html = '';
     for (const goal of goals) {
       const period = goal.periodDescriptor?.number || '';
       const time = goal.timeInPeriod || '';
-      const team = goal.details?.eventOwnerTeamId;
-      
-      // Find team name using centralized function
-      const teamInfo = details.homeTeam?.id === team ? details.homeTeam : details.awayTeam;
+      const teamId = goal.details?.eventOwnerTeamId;
+
+      const teamInfo = (details.homeTeam?.id === teamId) ? details.homeTeam : details.awayTeam;
       const teamName = teamLabel(teamInfo);
-      
-      // Get scorer info using player map
+
       let scorerName = 'Unknown';
       let goalNumber = '';
-      
+
       if (goal.details) {
         const scorerId = goal.details.scoringPlayerId || goal.details.playerId;
-        
+
         if (scorerId && playerMap.has(scorerId)) {
           scorerName = playerMap.get(scorerId);
         } else if (goal.details.scoringPlayer) {
           scorerName = goal.details.scoringPlayer;
         }
-        
+
         if (goal.details.scoringPlayerTotal) {
           goalNumber = ` (${goal.details.scoringPlayerTotal})`;
         }
       }
-      
-      // Get assists with numbers using player map
+
       const assists = [];
-      
       if (goal.details) {
-        // Assist 1
         const assist1Id = goal.details.assist1PlayerId;
         if (assist1Id && playerMap.has(assist1Id)) {
-          const name = playerMap.get(assist1Id);
           const total = goal.details.assist1PlayerTotal ? ` (${goal.details.assist1PlayerTotal})` : '';
-          assists.push(`${name}${total}`);
+          assists.push(`${playerMap.get(assist1Id)}${total}`);
         } else if (goal.details.assist1Player) {
           const total = goal.details.assist1PlayerTotal ? ` (${goal.details.assist1PlayerTotal})` : '';
           assists.push(`${goal.details.assist1Player}${total}`);
         }
-        
-        // Assist 2
+
         const assist2Id = goal.details.assist2PlayerId;
         if (assist2Id && playerMap.has(assist2Id)) {
-          const name = playerMap.get(assist2Id);
           const total = goal.details.assist2PlayerTotal ? ` (${goal.details.assist2PlayerTotal})` : '';
-          assists.push(`${name}${total}`);
+          assists.push(`${playerMap.get(assist2Id)}${total}`);
         } else if (goal.details.assist2Player) {
           const total = goal.details.assist2PlayerTotal ? ` (${goal.details.assist2PlayerTotal})` : '';
           assists.push(`${goal.details.assist2Player}${total}`);
         }
       }
-      
+
       const strength = goal.details?.strength || 'ev';
       const situation = goal.details?.situationCode || '';
-      
+
       html += `
         <div class="goal">
           <div class="time">Period ${period}<br>${time}</div>
@@ -763,7 +874,7 @@
               <span class="sep">—</span>
               <span class="who">${scorerName}${goalNumber}</span>
             </div>
-            <div class="strength">${strength.toUpperCase()}${situation ? ` (${situation})` : ''}</div>
+            <div class="strength">${String(strength).toUpperCase()}${situation ? ` (${situation})` : ''}</div>
             ${assists.length ? `
               <div class="assist">Assists: ${assists.map(a => `<span class="assist-player">${a}</span>`).join('')}</div>
             ` : ''}
@@ -816,94 +927,163 @@
     `;
   }
 
-  // Main execution
+  // ---- (6)(7)(8) Refresh loop: backoff, visibility pause/resume, schedule re-check ----
+  function clearRefreshTimer() {
+    if (refreshTimer) {
+      clearTimeout(refreshTimer);
+      refreshTimer = null;
+    }
+  }
+
+  function scheduleNextTick(delayMs) {
+    clearRefreshTimer();
+    refreshTimer = setTimeout(refreshTick, delayMs);
+  }
+
+  async function refreshTick() {
+    // (7) Pause while hidden; resume immediately on visibilitychange
+    if (document.hidden) {
+      scheduleNextTick(Math.min(currentDelay, 30000));
+      return;
+    }
+
+    if (!currentGameId || !currentPrimaryGame) return;
+
+    try {
+      tickCount++;
+
+      // (8) Periodically re-check schedule to confirm still-live + gameId
+      if (tickCount % SCHEDULE_RECHECK_EVERY === 0) {
+        const sch = await getSchedule();
+
+        // Update panels occasionally too (avoids stale last/next)
+        renderLastGame(sch.lastGame);
+        renderNextGame(sch.nextGame);
+
+        if (!sch.liveGame) {
+          // Live game ended (or not detected). Force a reload to settle into final.
+          setUpdatedNow('Schedule: no live game');
+          location.reload();
+          return;
+        }
+
+        if (sch.liveGame.id && sch.liveGame.id !== currentGameId) {
+          currentGameId = sch.liveGame.id;
+          currentPrimaryGame = sch.liveGame;
+          setUpdatedNow('Switched live game');
+        }
+      }
+
+      const updatedDetails = await getGameDetails(currentGameId);
+      const gameState = updatedDetails?.gameState;
+
+      renderScorebar(currentPrimaryGame, updatedDetails, true);
+      renderGoals(updatedDetails);
+      setUpdatedNow();
+
+      // success: reset backoff
+      consecutiveFailures = 0;
+      currentDelay = BASE_REFRESH_MS;
+
+      // stop refreshing if game is over
+      if (['FINAL', 'OFF'].includes(gameState)) {
+        setUpdatedNow('Final');
+        clearRefreshTimer();
+        setTimeout(() => location.reload(), 2000);
+        return;
+      }
+
+      scheduleNextTick(currentDelay);
+    } catch (e) {
+      consecutiveFailures++;
+      console.error('Refresh error:', e);
+
+      // (6) Exponential backoff + stop after too many consecutive failures
+      currentDelay = Math.min(MAX_REFRESH_MS, Math.floor(currentDelay * 2));
+      setUpdatedNow(`Delayed (x${consecutiveFailures})`);
+
+      if (consecutiveFailures >= MAX_CONSEC_FAIL) {
+        clearRefreshTimer();
+        setTxt('state', 'Data delayed');
+        setTxt('when', '—');
+        setHTML('goals',
+          `<div class="error">Live updates paused after repeated failures (likely proxy throttling). Reload to resume.</div>`
+        );
+        return;
+      }
+
+      scheduleNextTick(currentDelay);
+    }
+  }
+
+  // Resume immediately when tab becomes visible
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+      // if we were paused, refresh quickly
+      if (currentGameId && currentPrimaryGame) {
+        scheduleNextTick(250);
+      }
+    }
+  });
+
+  // ---- Main execution ----
   try {
-    // Fetch schedule first
     const schedule = await getSchedule();
-    
-    // Fetch team stats and top scorer (don't let these block the main display)
+
+    // Fetch team stats and top scorer (don't let these block main display)
     let teamStats = null;
     let topScorer = null;
-    
-    try {
-      teamStats = await getTeamStats();
-    } catch (e) {
-      console.error('Failed to load team stats:', e);
-    }
-    
-    try {
-      topScorer = await getTopScorer();
-    } catch (e) {
-      console.error('Failed to load top scorer:', e);
-    }
-    
+
+    try { teamStats = await getTeamStats(); }
+    catch (e) { console.error('Failed to load team stats:', e); }
+
+    try { topScorer = await getTopScorer(); }
+    catch (e) { console.error('Failed to load top scorer:', e); }
+
     // Render team header
     if (teamStats) {
       setTxt('record', `${teamStats.wins}-${teamStats.losses}-${teamStats.otLosses}`);
-      setTxt('points', teamStats.points.toString());
+      setTxt('points', String(teamStats.points));
     } else {
       setHTML('record', '<span style="font-size:.9rem">Loading...</span>');
       setHTML('points', '<span style="font-size:.9rem">...</span>');
     }
-    
+
     if (topScorer) {
       setHTML('topScorer', `Current leading scorer: <strong>${topScorer.name}</strong>, ${topScorer.goals} goals`);
     } else {
       setHTML('topScorer', 'Top scorer unavailable');
     }
-    
+
     // Prioritize: live game > last game
     const primaryGame = schedule.liveGame || schedule.lastGame;
     const isLive = !!schedule.liveGame;
-    
+
     if (primaryGame) {
+      currentPrimaryGame = primaryGame;
+      currentGameId = primaryGame.id;
+
       const details = await getGameDetails(primaryGame.id);
       renderScorebar(primaryGame, details, isLive);
       renderGoals(details);
-      
-      // Auto-refresh if live - optimized to reduce API calls
+      setUpdatedNow();
+
+      // start refresh loop if live
       if (isLive) {
-        console.log('Starting live game auto-refresh (every 15 seconds)');
-        const gameId = primaryGame.id;
-        
-        const refreshInterval = setInterval(async () => {
-          try {
-            console.log('Fetching live update...', new Date().toLocaleTimeString());
-            
-            // Only fetch game details, not the full schedule
-            const updatedDetails = await getGameDetails(gameId);
-            const gameState = updatedDetails?.gameState;
-            
-            // Update display
-            renderScorebar(primaryGame, updatedDetails, true);
-            renderGoals(updatedDetails);
-            
-            console.log('Live update complete:', {
-              score: `${updatedDetails.awayTeam?.score || 0} - ${updatedDetails.homeTeam?.score || 0}`,
-              period: updatedDetails.periodDescriptor?.number,
-              gameState: gameState,
-              clock: updatedDetails.clock?.timeRemaining
-            });
-            
-            // Stop refreshing if game is over
-            if (['FINAL', 'OFF'].includes(gameState)) {
-              clearInterval(refreshInterval);
-              console.log('Game ended, stopping auto-refresh');
-              setTimeout(() => location.reload(), 2000);
-            }
-          } catch (e) {
-            console.error('Refresh error:', e);
-          }
-        }, 15000); // Refresh every 15 seconds
+        tickCount = 0;
+        consecutiveFailures = 0;
+        currentDelay = BASE_REFRESH_MS;
+        scheduleNextTick(BASE_REFRESH_MS);
       }
     } else {
       setTxt('state', 'No recent game');
       setTxt('score', '— — —');
       setTxt('when', '—');
       setHTML('goals', '<div class="info">No recent games found. Check back during the hockey season!</div>');
+      setUpdatedNow();
     }
 
-    // Render summaries - always show last game even if currently live
+    // Render summaries
     renderLastGame(schedule.lastGame);
     renderNextGame(schedule.nextGame);
 
@@ -913,6 +1093,7 @@
     setHTML('goals', `<div class="error">Unable to load NHL data. This widget uses a CORS proxy which may be rate-limited. Please try again in a few moments.</div>`);
     setHTML('lastGameBox', '<div class="error">—</div>');
     setHTML('nextGameBox', '<div class="error">—</div>');
+    setUpdatedNow('Error');
   }
 })();
 </script>
