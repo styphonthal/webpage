@@ -345,6 +345,13 @@
     
     const games = data.games || [];
     
+    // Find live game
+    const liveGame = games.find(g => 
+      g.gameState === 'LIVE' || 
+      g.gameState === 'CRIT' ||
+      g.gameState === 'CRITICAL'
+    );
+    
     // Find last completed game
     const lastGame = games
       .filter(g => g.gameState === 'OFF' || g.gameState === 'FINAL')
@@ -355,7 +362,7 @@
       .filter(g => g.gameState === 'FUT' || g.gameState === 'PRE')
       .sort((a, b) => new Date(a.startTimeUTC) - new Date(b.startTimeUTC))[0];
     
-    return { lastGame, nextGame, games };
+    return { liveGame, lastGame, nextGame, games };
   }
 
   // Get game details
@@ -365,7 +372,7 @@
   }
 
   // Render the main scorebar
-  function renderScorebar(game, details) {
+  function renderScorebar(game, details, isLive = false) {
     if (!game) {
       setTxt('state', 'No game data');
       setTxt('when', '—');
@@ -385,23 +392,46 @@
     document.getElementById('homeBadge').style.backgroundImage = 
       `url('${getTeamLogo(home.abbrev)}')`;
 
-    // Update scores
-    const awayScore = game.awayTeam.score || 0;
-    const homeScore = game.homeTeam.score || 0;
+    // Update scores - use live data if available
+    let awayScore = game.awayTeam.score || 0;
+    let homeScore = game.homeTeam.score || 0;
+    
+    if (details?.homeTeam && details?.awayTeam) {
+      awayScore = details.awayTeam.score || awayScore;
+      homeScore = details.homeTeam.score || homeScore;
+    }
     
     setTxt('score', `${awayScore} — ${homeScore}`);
 
     // Update status
     let status = 'Final';
-    if (game.gameState === 'LIVE' || game.gameState === 'CRIT') {
-      status = 'Live';
+    if (isLive || game.gameState === 'LIVE' || game.gameState === 'CRIT' || game.gameState === 'CRITICAL') {
+      status = 'LIVE';
+      
+      // Show period and time if available
+      if (details?.periodDescriptor) {
+        const period = details.periodDescriptor.number;
+        const periodType = details.periodDescriptor.periodType;
+        if (periodType === 'OT') {
+          status = 'OVERTIME';
+        } else if (periodType === 'SO') {
+          status = 'SHOOTOUT';
+        } else {
+          status = `${period}${period === 1 ? 'st' : period === 2 ? 'nd' : period === 3 ? 'rd' : 'th'} Period`;
+        }
+      }
     } else if (game.gameState === 'FUT') {
       status = 'Scheduled';
     }
     setTxt('state', status);
 
     // Update time/date
-    const when = formatDate(game.startTimeUTC);
+    let when = '';
+    if (isLive && details?.clock) {
+      when = details.clock.timeRemaining || '';
+    } else {
+      when = formatDate(game.startTimeUTC);
+    }
     setTxt('when', when || '—');
   }
 
@@ -509,13 +539,27 @@
   try {
     const schedule = await getSchedule();
     
-    // Use last game as primary display
-    const primaryGame = schedule.lastGame;
+    // Prioritize: live game > last game
+    const primaryGame = schedule.liveGame || schedule.lastGame;
+    const isLive = !!schedule.liveGame;
     
     if (primaryGame) {
       const details = await getGameDetails(primaryGame.id);
-      renderScorebar(primaryGame, details);
+      renderScorebar(primaryGame, details, isLive);
       renderGoals(details);
+      
+      // Auto-refresh if live
+      if (isLive) {
+        setInterval(async () => {
+          try {
+            const updatedDetails = await getGameDetails(primaryGame.id);
+            renderScorebar(primaryGame, updatedDetails, true);
+            renderGoals(updatedDetails);
+          } catch (e) {
+            console.error('Refresh error:', e);
+          }
+        }, 20000); // Refresh every 20 seconds
+      }
     } else {
       setTxt('state', 'No recent game');
       setTxt('score', '— — —');
@@ -523,8 +567,8 @@
       setHTML('goals', '<div class="info">No recent games found. Check back during the hockey season!</div>');
     }
 
-    // Render summaries
-    renderLastGame(schedule.lastGame);
+    // Render summaries - show last game only if not currently live
+    renderLastGame(isLive ? null : schedule.lastGame);
     renderNextGame(schedule.nextGame);
 
   } catch (error) {
