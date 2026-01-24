@@ -29,6 +29,67 @@
     padding:28px clamp(16px, 3vw, 36px);
   }
 
+  /* Team Header */
+  .team-header{
+    text-align:center;
+    margin-bottom:24px;
+    padding:20px;
+    background: linear-gradient(180deg, rgba(0,38,84,.65), rgba(0,28,62,.65));
+    border: 2px solid rgba(252,181,20,.25);
+    border-radius:18px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.3);
+  }
+  
+  .team-header h1{
+    margin:0 0 12px 0;
+    font-size:2rem;
+    color:var(--sabres-gold);
+    font-weight:800;
+    letter-spacing:.5px;
+  }
+  
+  .team-stats{
+    display:flex;
+    justify-content:center;
+    gap:32px;
+    flex-wrap:wrap;
+    margin-top:10px;
+  }
+  
+  .stat-item{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:4px;
+  }
+  
+  .stat-label{
+    font-size:.9rem;
+    color:#a8c5f5;
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:.5px;
+  }
+  
+  .stat-value{
+    font-size:1.3rem;
+    color:var(--sabres-gold);
+    font-weight:700;
+  }
+  
+  .top-scorer{
+    margin-top:12px;
+    padding-top:12px;
+    border-top:1px solid rgba(252,181,20,.2);
+    color:#cfe1ff;
+    font-size:1.05rem;
+  }
+  
+  .top-scorer strong{
+    color:var(--sabres-gold);
+    font-weight:700;
+  }
+
   /* Score header */
   .scorebar{
     display:flex;
@@ -191,6 +252,12 @@
   .assist{
     color:#c6d6f6;
     font-size:.9rem;
+    margin-top:2px;
+  }
+  
+  .assist-player{
+    display:inline-block;
+    margin-right:8px;
   }
   
   .sep{
@@ -250,6 +317,24 @@
 </head>
 <body>
   <div class="wrap">
+    <!-- Team Header -->
+    <div class="team-header">
+      <h1>Buffalo Sabres</h1>
+      <div class="team-stats">
+        <div class="stat-item">
+          <span class="stat-label">Record</span>
+          <span class="stat-value" id="record">0-0-0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Points</span>
+          <span class="stat-value" id="points">0</span>
+        </div>
+      </div>
+      <div class="top-scorer" id="topScorer">
+        Loading top scorer...
+      </div>
+    </div>
+
     <!-- Primary score bar -->
     <div class="scorebar" id="scorebar">
       <div class="teams">
@@ -335,7 +420,51 @@
     }
   }
 
-  // Get team schedule
+  // Get team standings and stats
+  async function getTeamStats() {
+    try {
+      const url = `https://api-web.nhle.com/v1/standings/now`;
+      const data = await fetchJSON(url);
+      
+      // Find Sabres in standings
+      const sabres = data.standings?.find(team => team.teamAbbrev?.default === SABRES_ABBR);
+      
+      return {
+        wins: sabres?.wins || 0,
+        losses: sabres?.losses || 0,
+        otLosses: sabres?.otLosses || 0,
+        points: sabres?.points || 0
+      };
+    } catch (error) {
+      console.error('Error fetching team stats:', error);
+      return { wins: 0, losses: 0, otLosses: 0, points: 0 };
+    }
+  }
+
+  // Get roster and find top scorer
+  async function getTopScorer() {
+    try {
+      const url = `https://api-web.nhle.com/v1/club-stats/${SABRES_ABBR}/now`;
+      const data = await fetchJSON(url);
+      
+      // Find player with most goals
+      const skaters = data.skaters || [];
+      if (skaters.length === 0) return null;
+      
+      const topScorer = skaters.reduce((top, player) => {
+        const goals = player.goals || 0;
+        return goals > (top.goals || 0) ? player : top;
+      }, skaters[0]);
+      
+      return {
+        name: `${topScorer.firstName?.default || ''} ${topScorer.lastName?.default || ''}`.trim(),
+        goals: topScorer.goals || 0
+      };
+    } catch (error) {
+      console.error('Error fetching top scorer:', error);
+      return null;
+    }
+  }
   async function getSchedule() {
     const now = new Date();
     const formatAPIDate = (d) => d.toISOString().split('T')[0];
@@ -470,32 +599,62 @@
       const teamInfo = details.homeTeam?.id === team ? details.homeTeam : details.awayTeam;
       const teamName = teamInfo?.name?.default || teamInfo?.commonName?.default || teamInfo?.abbrev || '';
       
-      // Get scorer info - check multiple possible fields
+      // Get scorer info - need to look at the full player list
       let scorerName = 'Unknown';
       let goalNumber = '';
       
-      if (goal.details?.scoringPlayer) {
-        scorerName = goal.details.scoringPlayer;
-      } else if (goal.details?.firstName && goal.details?.lastName) {
-        scorerName = `${goal.details.firstName.default} ${goal.details.lastName.default}`;
+      // Try to find scorer in the goal details
+      if (goal.details) {
+        // Look through players involved in the play
+        const scorerId = goal.details.scoringPlayerId || goal.details.playerId;
+        
+        // Check if we have player details in the response
+        if (details.rosterSpots) {
+          const scorerRoster = details.rosterSpots.find(p => p.playerId === scorerId);
+          if (scorerRoster) {
+            scorerName = `${scorerRoster.firstName?.default || ''} ${scorerRoster.lastName?.default || ''}`.trim();
+          }
+        }
+        
+        // Fallback to direct fields
+        if (scorerName === 'Unknown' && goal.details.scoringPlayer) {
+          scorerName = goal.details.scoringPlayer;
+        }
+        
+        if (goal.details.scoringPlayerTotal) {
+          goalNumber = ` (${goal.details.scoringPlayerTotal})`;
+        }
       }
       
-      if (goal.details?.scoringPlayerTotal) {
-        goalNumber = ` (${goal.details.scoringPlayerTotal})`;
-      }
-      
-      // Get assists
+      // Get assists with numbers
       const assists = [];
-      if (goal.details?.assist1Player) {
-        assists.push(goal.details.assist1Player);
-      } else if (goal.details?.assist1firstName && goal.details?.assist1lastName) {
-        assists.push(`${goal.details.assist1firstName.default} ${goal.details.assist1lastName.default}`);
-      }
       
-      if (goal.details?.assist2Player) {
-        assists.push(goal.details.assist2Player);
-      } else if (goal.details?.assist2firstName && goal.details?.assist2lastName) {
-        assists.push(`${goal.details.assist2firstName.default} ${goal.details.assist2lastName.default}`);
+      if (goal.details) {
+        // Assist 1
+        if (goal.details.assist1PlayerId && details.rosterSpots) {
+          const assist1 = details.rosterSpots.find(p => p.playerId === goal.details.assist1PlayerId);
+          if (assist1) {
+            const name = `${assist1.firstName?.default || ''} ${assist1.lastName?.default || ''}`.trim();
+            const total = goal.details.assist1PlayerTotal ? ` (${goal.details.assist1PlayerTotal})` : '';
+            assists.push(`${name}${total}`);
+          }
+        } else if (goal.details.assist1Player) {
+          const total = goal.details.assist1PlayerTotal ? ` (${goal.details.assist1PlayerTotal})` : '';
+          assists.push(`${goal.details.assist1Player}${total}`);
+        }
+        
+        // Assist 2
+        if (goal.details.assist2PlayerId && details.rosterSpots) {
+          const assist2 = details.rosterSpots.find(p => p.playerId === goal.details.assist2PlayerId);
+          if (assist2) {
+            const name = `${assist2.firstName?.default || ''} ${assist2.lastName?.default || ''}`.trim();
+            const total = goal.details.assist2PlayerTotal ? ` (${goal.details.assist2PlayerTotal})` : '';
+            assists.push(`${name}${total}`);
+          }
+        } else if (goal.details.assist2Player) {
+          const total = goal.details.assist2PlayerTotal ? ` (${goal.details.assist2PlayerTotal})` : '';
+          assists.push(`${goal.details.assist2Player}${total}`);
+        }
       }
       
       const strength = goal.details?.strength || 'ev';
@@ -512,7 +671,7 @@
             </div>
             <div class="strength">${strength.toUpperCase()}${situation ? ` (${situation})` : ''}</div>
             ${assists.length ? `
-              <div class="assist">Assists: ${assists.join(', ')}</div>
+              <div class="assist">Assists: ${assists.map(a => `<span class="assist-player">${a}</span>`).join('')}</div>
             ` : ''}
           </div>
         </div>
