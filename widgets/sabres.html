@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Buffalo Sabres — Scores & Goals v2 </title>
+<title>Buffalo Sabres — Scores & Goals</title>
 <style>
   :root{
     --sabres-navy: #002654;
@@ -66,8 +66,9 @@
     width:50px;
     height:50px;
     border-radius:10px;
-    background-size:cover;
+    background-size:contain;
     background-position:center;
+    background-repeat:no-repeat;
     border:2px solid rgba(252,181,20,.3);
     flex-shrink:0;
   }
@@ -283,8 +284,8 @@
 
 <script>
 (async function(){
-  const SABRES_ID = 7;
-
+  const SABRES_ABBR = 'BUF';
+  
   // Helper functions
   const setTxt = (id, t) => {
     const el = document.getElementById(id);
@@ -311,138 +312,148 @@
     }
   }
 
-  function getTeamLogo(teamId) {
-    return `https://assets.nhle.com/logos/nhl/svg/${teamId}_dark.svg`;
+  function getTeamLogo(abbr) {
+    return `https://assets.nhle.com/logos/nhl/svg/${abbr}_light.svg`;
   }
 
   async function fetchJSON(url) {
     try {
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json'
-        }
-      });
+      const response = await fetch(url);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       return await response.json();
     } catch (error) {
-      console.error('Fetch error:', error);
+      console.error('Fetch error:', url, error);
       throw error;
     }
   }
 
-  // Get schedule (previous and next games)
+  // Get team schedule
   async function getSchedule() {
-    const url = `https://statsapi.web.nhl.com/api/v1/teams/${SABRES_ID}?expand=team.schedule.previous,team.schedule.next`;
-    const data = await fetchJSON(url);
-    const team = data.teams?.[0];
+    const now = new Date();
+    const startDate = new Date(now);
+    startDate.setDate(startDate.getDate() - 7);
+    const endDate = new Date(now);
+    endDate.setDate(endDate.getDate() + 14);
     
-    return {
-      previous: team?.previousGameSchedule?.dates?.[0]?.games?.[0] || null,
-      next: team?.nextGameSchedule?.dates?.[0]?.games?.[0] || null
-    };
+    const formatAPIDate = (d) => d.toISOString().split('T')[0];
+    
+    const url = `https://api-web.nhle.com/v1/club-schedule/${SABRES_ABBR}/week/${formatAPIDate(now)}`;
+    const data = await fetchJSON(url);
+    
+    const games = data.games || [];
+    const currentDate = new Date();
+    
+    // Find last completed game
+    const lastGame = games
+      .filter(g => g.gameState === 'OFF' || g.gameState === 'FINAL')
+      .sort((a, b) => new Date(b.startTimeUTC) - new Date(a.startTimeUTC))[0];
+    
+    // Find next upcoming game
+    const nextGame = games
+      .filter(g => g.gameState === 'FUT' || g.gameState === 'PRE')
+      .sort((a, b) => new Date(a.startTimeUTC) - new Date(b.startTimeUTC))[0];
+    
+    return { lastGame, nextGame, games };
   }
 
-  // Get live game data
-  async function getGameFeed(gamePk) {
-    const url = `https://statsapi.web.nhl.com/api/v1/game/${gamePk}/feed/live`;
+  // Get game details
+  async function getGameDetails(gameId) {
+    const url = `https://api-web.nhle.com/v1/gamecenter/${gameId}/play-by-play`;
     return await fetchJSON(url);
   }
 
   // Render the main scorebar
-  function renderScorebar(game, feed) {
+  function renderScorebar(game, details) {
     if (!game) {
       setTxt('state', 'No game data');
       setTxt('when', '—');
       return;
     }
 
-    const away = game.teams.away;
-    const home = game.teams.home;
+    const isHomeGame = game.homeTeam.abbrev === SABRES_ABBR;
+    const away = game.awayTeam;
+    const home = game.homeTeam;
     
     // Update team names
-    document.querySelector('#awayTeam .name').textContent = away.team.name;
-    document.querySelector('#homeTeam .name').textContent = home.team.name;
+    document.querySelector('#awayTeam .name').textContent = away.placeName?.default || away.abbrev;
+    document.querySelector('#homeTeam .name').textContent = home.placeName?.default || home.abbrev;
     
     // Update logos
     document.getElementById('awayBadge').style.backgroundImage = 
-      `url('${getTeamLogo(away.team.id)}')`;
+      `url('${getTeamLogo(away.abbrev)}')`;
     document.getElementById('homeBadge').style.backgroundImage = 
-      `url('${getTeamLogo(home.team.id)}')`;
+      `url('${getTeamLogo(home.abbrev)}')`;
 
     // Update scores
-    let awayScore = away.score || 0;
-    let homeScore = home.score || 0;
-    
-    if (feed?.liveData?.linescore) {
-      const ls = feed.liveData.linescore;
-      if (ls.teams?.away?.goals != null) awayScore = ls.teams.away.goals;
-      if (ls.teams?.home?.goals != null) homeScore = ls.teams.home.goals;
-    }
+    const awayScore = game.awayTeam.score || 0;
+    const homeScore = game.homeTeam.score || 0;
     
     setTxt('score', `${awayScore} — ${homeScore}`);
 
     // Update status
-    const status = feed?.gameData?.status?.detailedState || 
-                   game.status?.detailedState || 
-                   'Scheduled';
+    let status = 'Final';
+    if (game.gameState === 'LIVE' || game.gameState === 'CRIT') {
+      status = 'Live';
+    } else if (game.gameState === 'FUT') {
+      status = 'Scheduled';
+    }
     setTxt('state', status);
 
     // Update time/date
-    let when = '';
-    if (feed?.liveData?.linescore?.currentPeriodTimeRemaining) {
-      const ls = feed.liveData.linescore;
-      when = `${ls.currentPeriodOrdinal || ''} ${ls.currentPeriodTimeRemaining}`;
-    } else if (game.gameDate) {
-      when = formatDate(game.gameDate);
-    }
+    const when = formatDate(game.startTimeUTC);
     setTxt('when', when || '—');
   }
 
   // Render goals
-  function renderGoals(feed) {
+  function renderGoals(details) {
     const goalsEl = document.getElementById('goals');
     
-    if (!feed?.liveData?.plays) {
+    if (!details || !details.plays) {
       goalsEl.innerHTML = '<div class="loading">No play data available</div>';
       return;
     }
 
-    const plays = feed.liveData.plays;
-    const scoringPlays = plays.scoringPlays || [];
+    const goals = details.plays.filter(play => 
+      play.typeDescKey === 'goal'
+    );
 
-    if (scoringPlays.length === 0) {
+    if (goals.length === 0) {
       goalsEl.innerHTML = '<div class="loading">No goals scored yet</div>';
       return;
     }
 
     let html = '';
-    for (const idx of scoringPlays) {
-      const play = plays.allPlays[idx];
-      if (!play) continue;
-
-      const period = play.about?.ordinalNum || '';
-      const time = play.about?.periodTime || '';
-      const team = play.team?.name || '';
+    for (const goal of goals) {
+      const period = goal.periodDescriptor?.number || '';
+      const time = goal.timeInPeriod || '';
+      const team = goal.details?.eventOwnerTeamId;
       
-      const scorer = play.players?.find(p => p.playerType === 'Scorer');
-      const assists = play.players?.filter(p => p.playerType === 'Assist') || [];
+      // Find team name
+      const teamInfo = details.homeTeam?.id === team ? details.homeTeam : details.awayTeam;
+      const teamName = teamInfo?.name?.default || teamInfo?.abbrev || '';
       
-      const strength = play.result?.strength?.code || 'EV';
-      const emptyNet = play.result?.emptyNet ? ', EN' : '';
-
+      const scorer = goal.details?.scoringPlayerTotal 
+        ? `${goal.details.scoringPlayer || 'Unknown'} (${goal.details.scoringPlayerTotal})`
+        : goal.details?.scoringPlayer || 'Unknown';
+      
+      const assists = [];
+      if (goal.details?.assist1Player) assists.push(goal.details.assist1Player);
+      if (goal.details?.assist2Player) assists.push(goal.details.assist2Player);
+      
+      const strength = goal.details?.strength || 'ev';
+      
       html += `
         <div class="goal">
-          <div class="time">${period}<br>${time}</div>
+          <div class="time">Period ${period}<br>${time}</div>
           <div class="goal-details">
             <div>
-              <span class="team-name">${team}</span>
+              <span class="team-name">${teamName}</span>
               <span class="sep">—</span>
-              <span class="who">${scorer?.player?.fullName || 'Unknown'}</span>
+              <span class="who">${scorer}</span>
             </div>
-            <div class="strength">(${strength}${emptyNet})</div>
+            <div class="strength">${strength.toUpperCase()}</div>
             ${assists.length ? `
-              <div class="assist">Assists: ${assists.map(a => a.player.fullName).join(', ')}</div>
+              <div class="assist">Assists: ${assists.join(', ')}</div>
             ` : ''}
           </div>
         </div>
@@ -460,13 +471,13 @@
       return;
     }
 
-    const away = game.teams.away;
-    const home = game.teams.home;
-    const when = formatDate(game.gameDate);
+    const away = game.awayTeam;
+    const home = game.homeTeam;
+    const when = formatDate(game.startTimeUTC);
 
     el.innerHTML = `
       <div class="game-summary">
-        <div><strong>${away.team.name}</strong> at <strong>${home.team.name}</strong></div>
+        <div><strong>${away.placeName?.default || away.abbrev}</strong> at <strong>${home.placeName?.default || home.abbrev}</strong></div>
         <div>Final: ${away.score || 0} — ${home.score || 0}</div>
         <div>${when}</div>
       </div>
@@ -481,13 +492,13 @@
       return;
     }
 
-    const away = game.teams.away;
-    const home = game.teams.home;
-    const when = formatDate(game.gameDate);
+    const away = game.awayTeam;
+    const home = game.homeTeam;
+    const when = formatDate(game.startTimeUTC);
 
     el.innerHTML = `
       <div class="game-summary">
-        <div><strong>${away.team.name}</strong> at <strong>${home.team.name}</strong></div>
+        <div><strong>${away.placeName?.default || away.abbrev}</strong> at <strong>${home.placeName?.default || home.abbrev}</strong></div>
         <div>${when}</div>
       </div>
     `;
@@ -497,13 +508,13 @@
   try {
     const schedule = await getSchedule();
     
-    // Use previous game as primary display
-    const primaryGame = schedule.previous;
+    // Use last game as primary display
+    const primaryGame = schedule.lastGame;
     
     if (primaryGame) {
-      const feed = await getGameFeed(primaryGame.gamePk);
-      renderScorebar(primaryGame, feed);
-      renderGoals(feed);
+      const details = await getGameDetails(primaryGame.id);
+      renderScorebar(primaryGame, details);
+      renderGoals(details);
     } else {
       setTxt('state', 'No recent game');
       setTxt('score', '— — —');
@@ -511,13 +522,13 @@
     }
 
     // Render summaries
-    renderLastGame(schedule.previous);
-    renderNextGame(schedule.next);
+    renderLastGame(schedule.lastGame);
+    renderNextGame(schedule.nextGame);
 
   } catch (error) {
     console.error('Error loading data:', error);
     setTxt('state', 'Error loading data');
-    setHTML('goals', `<div class="error">Failed to load data: ${error.message}</div>`);
+    setHTML('goals', `<div class="error">Failed to load data. The NHL API may be temporarily unavailable.</div>`);
     setHTML('lastGameBox', '<div class="error">—</div>');
     setHTML('nextGameBox', '<div class="error">—</div>');
   }
