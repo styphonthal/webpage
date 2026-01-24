@@ -393,6 +393,7 @@
     try {
       const date = new Date(dateStr);
       return date.toLocaleDateString('en-US', {
+        timeZone: 'America/New_York',
         weekday: 'short',
         month: 'short',
         day: 'numeric',
@@ -402,6 +403,13 @@
     } catch {
       return dateStr;
     }
+  }
+
+  function nyYYYYMMDD(d) {
+    const y = d.toLocaleString('en-CA', { timeZone: 'America/New_York', year: 'numeric' });
+    const m = d.toLocaleString('en-CA', { timeZone: 'America/New_York', month: '2-digit' });
+    const day = d.toLocaleString('en-CA', { timeZone: 'America/New_York', day: '2-digit' });
+    return `${y}-${m}-${day}`;
   }
 
   function getTeamLogo(abbr) {
@@ -795,8 +803,12 @@
       
       // Auto-refresh if live
       if (isLive) {
+        console.log('Starting live game auto-refresh (every 15 seconds)');
+        
         const refreshInterval = setInterval(async () => {
           try {
+            console.log('Fetching live update...', new Date().toLocaleTimeString());
+            
             // Re-fetch schedule to check if game is still live
             const freshSchedule = await getSchedule();
             const stillLive = !!freshSchedule.liveGame;
@@ -805,14 +817,22 @@
               clearInterval(refreshInterval);
               console.log('Game ended, stopping auto-refresh');
               // Reload the page to show final state
-              location.reload();
+              setTimeout(() => location.reload(), 2000);
               return;
             }
             
-            const updatedDetails = await getGameDetails(primaryGame.id);
-            renderScorebar(primaryGame, updatedDetails, true);
+            // Fetch fresh game details
+            const updatedDetails = await getGameDetails(freshSchedule.liveGame.id);
+            
+            // Update display
+            renderScorebar(freshSchedule.liveGame, updatedDetails, true);
             renderGoals(updatedDetails);
-            console.log('Live update:', new Date().toLocaleTimeString());
+            
+            console.log('Live update complete:', {
+              score: `${updatedDetails.awayTeam?.score || 0} - ${updatedDetails.homeTeam?.score || 0}`,
+              period: updatedDetails.periodDescriptor?.number,
+              gameState: updatedDetails.gameState
+            });
           } catch (e) {
             console.error('Refresh error:', e);
           }
