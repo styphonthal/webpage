@@ -4,7 +4,6 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Buffalo Sabres — Scores & Goals</title>
-
 <style>
   :root{
     --sabres-navy: #002654;
@@ -33,30 +32,37 @@
 
   /* Team Header */
   .team-header{
-    position: relative;
+    position:relative;
     text-align:center;
     margin-bottom:24px;
-    padding:20px 220px; /* side padding so text doesn't overlap large slugs */
+    padding:24px 20px;
     background: linear-gradient(180deg, rgba(0,38,84,.65), rgba(0,28,62,.65));
     border: 2px solid rgba(252,181,20,.25);
     border-radius:18px;
     box-shadow: 0 8px 24px rgba(0,0,0,.3);
+    overflow:hidden;
   }
 
+  /* Slug images (large, centered on sides) */
   .slug{
     position:absolute;
     top:50%;
     transform:translateY(-50%);
-    height:160px;        /* ~4× typical icon size */
+    height:200px;            /* ~4× typical icon size */
     width:auto;
-    opacity:0.95;
+    opacity:.92;
     pointer-events:none;
-    user-select:none;
+    filter: drop-shadow(0 10px 18px rgba(0,0,0,.35));
   }
-  .slug-left{ left:24px; }
-  .slug-right{
-    right:24px;
-    transform:translateY(-50%) scaleX(-1);
+  .slug-left{ left:18px; }
+  .slug-right{ right:18px; transform:translateY(-50%) scaleX(-1); }
+
+  .team-header-inner{
+    position:relative;
+    z-index:1;
+    max-width:760px;
+    margin:0 auto;
+    padding:0 240px; /* prevent overlap with big slugs */
   }
 
   .team-header h1{
@@ -109,6 +115,117 @@
     font-weight:700;
   }
 
+  /* Score header */
+  .scorebar{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    background: linear-gradient(180deg, rgba(0,38,84,.85), rgba(0,28,62,.85));
+    border: 2px solid rgba(252,181,20,.35);
+    border-radius:18px;
+    padding:18px 20px;
+    box-shadow: 0 12px 30px rgba(0,0,0,.35);
+  }
+
+  .score-top{
+    display:grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items:center;
+    gap:16px;
+    min-width:0;
+  }
+
+  .team{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    min-width:0;
+  }
+
+  .team.away{ align-items:flex-end; text-align:right; }
+  .team.home{ align-items:flex-start; text-align:left; }
+
+  .team-name-row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    min-width:0;
+  }
+  .team.away .team-name-row{ justify-content:flex-end; }
+  .team.home .team-name-row{ justify-content:flex-start; }
+
+  .badge{
+    width:64px;
+    height:64px;
+    border-radius:12px;
+    background-size:contain;
+    background-position:center;
+    background-repeat:no-repeat;
+    border:2px solid rgba(252,181,20,.3);
+    flex-shrink:0;
+  }
+
+  .name{
+    font-weight:800;
+    letter-spacing:.3px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    font-size:1.18rem;
+  }
+
+  .team-metrics{
+    display:grid;
+    gap:4px;
+    color:#cfe1ff;
+    font-size:.95rem;
+    opacity:.95;
+  }
+  .metric b{ color:#ffe9b3; font-weight:700; }
+  .metric span{ color:#cfe1ff; }
+
+  .center-stack{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+    min-width:180px;
+  }
+
+  .score{
+    font-weight:900;
+    font-size:2.6rem;
+    color:var(--sabres-gold);
+    white-space:nowrap;
+    line-height:1.05;
+  }
+
+  .mid-meta{
+    text-align:center;
+    color:#cfe1ff;
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+  }
+  .state{
+    font-weight:800;
+    font-size:1.05rem;
+  }
+  .pill{
+    display:inline-block;
+    font-size:.9rem;
+    padding:5px 12px;
+    border-radius:999px;
+    background: rgba(252,181,20,.18);
+    border:1px solid rgba(252,181,20,.35);
+    color:#ffe9b3;
+    font-weight:700;
+  }
+  .muted{
+    font-size:.85rem;
+    opacity:.75;
+  }
+
   /* Panels */
   .panel{
     margin-top:20px;
@@ -126,137 +243,6 @@
     padding-bottom:8px;
   }
 
-  /* Active game box (score + goals inside one panel) */
-  .active-wrap{
-    display:flex;
-    flex-direction:column;
-    gap:14px;
-  }
-
-  /* Score header */
-  .scorebar{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:18px;
-    flex-wrap:wrap;
-    background: linear-gradient(180deg, rgba(0,38,84,.85), rgba(0,28,62,.85));
-    border: 2px solid rgba(252,181,20,.35);
-    border-radius:18px;
-    padding:18px 20px;
-    box-shadow: 0 12px 30px rgba(0,0,0,.35);
-  }
-
-  /* New layout: left team | center score/meta | right team */
-  .scoregrid{
-    display:grid;
-    grid-template-columns: 1fr auto 1fr;
-    align-items:center;
-    gap:16px;
-    width:100%;
-    min-width:0;
-  }
-
-  .team{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    min-width:0;
-  }
-  .team.away{ justify-content:flex-end; text-align:right; }
-  .team.home{ justify-content:flex-start; text-align:left; }
-
-  .badge{
-    width:50px;
-    height:50px;
-    border-radius:10px;
-    background-size:contain;
-    background-position:center;
-    background-repeat:no-repeat;
-    border:2px solid rgba(252,181,20,.3);
-    flex-shrink:0;
-  }
-
-  .team-meta{
-    display:flex;
-    flex-direction:column;
-    min-width:0;
-    gap:2px;
-  }
-
-  .name{
-    font-weight:700;
-    letter-spacing:.3px;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    font-size:1.1rem;
-  }
-
-  .sog{
-    font-size:.9rem;
-    color:#a8c5f5;
-    font-weight:600;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-  }
-  .sog strong{ color:#ffe9b3; font-weight:700; }
-
-  .center{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    gap:6px;
-    min-width:0;
-  }
-
-  .scoreline{
-    display:flex;
-    align-items:baseline;
-    justify-content:center;
-    gap:10px;
-    flex-wrap:wrap;
-    text-align:center;
-    min-width:0;
-  }
-
-  .scoreNum{
-    font-weight:900;
-    font-size:2.4rem;
-    color:var(--sabres-gold);
-    white-space:nowrap;
-  }
-
-  .midMeta{
-    font-weight:700;
-    color:#cfe1ff;
-    font-size:1.0rem;
-    white-space:nowrap;
-    max-width:100%;
-    overflow:hidden;
-    text-overflow:ellipsis;
-  }
-
-  .updated{
-    font-size:.85rem;
-    opacity:.75;
-    color:#c6d6f6;
-    white-space:nowrap;
-  }
-
-  .pill{
-    display:inline-block;
-    font-size:.9rem;
-    padding:5px 12px;
-    border-radius:999px;
-    background: rgba(252,181,20,.18);
-    border:1px solid rgba(252,181,20,.35);
-    color:#ffe9b3;
-    font-weight:600;
-  }
-
   .game-summary{
     display:flex;
     flex-direction:column;
@@ -272,11 +258,12 @@
   .goals{
     display:grid;
     gap:12px;
+    margin-top:14px;
   }
 
   .goal{
     display:grid;
-    grid-template-columns: 90px 1fr;
+    grid-template-columns: 110px 1fr;
     gap:14px;
     align-items:start;
     padding:12px 14px;
@@ -292,7 +279,7 @@
   }
 
   .time{
-    font-weight:700;
+    font-weight:800;
     color:#ffe3a3;
     font-size:.95rem;
   }
@@ -304,18 +291,18 @@
   }
 
   .who{
-    font-weight:700;
+    font-weight:800;
     color:var(--sabres-white);
   }
 
   .team-name{
     color:var(--sabres-gold);
-    font-weight:600;
+    font-weight:700;
   }
 
   .assist{
     color:#c6d6f6;
-    font-size:.9rem;
+    font-size:.92rem;
     margin-top:2px;
   }
 
@@ -332,6 +319,7 @@
   .strength{
     color:#a8c5f5;
     font-size:.85rem;
+    font-weight:700;
   }
 
   .loading, .error, .info{
@@ -350,121 +338,141 @@
     line-height:1.6;
   }
 
-  /* MOBILE SAFEGUARDS */
-  @media (max-width: 768px){
-    .team-header{ padding: 20px 150px; }
-    .slug{ height: 110px; }
+  /* Mobile safeguards */
+  @media (max-width: 980px){
+    .team-header-inner{ padding:0 200px; }
+    .slug{ height:170px; }
+  }
+  @media (max-width:768px){
+    .team-header-inner{ padding:0 96px; }
+    .slug{ height:120px; opacity:.65; }
+    .slug-left{ left:10px; }
+    .slug-right{ right:10px; }
 
-    .scoregrid{
+    .score-top{
       grid-template-columns: 1fr;
-      gap:12px;
+      gap:14px;
     }
 
     .team.away, .team.home{
-      justify-content:center;
+      align-items:center;
       text-align:center;
     }
-
-    .center{
-      order:0;
+    .team.away .team-name-row,
+    .team.home .team-name-row{
+      justify-content:center;
     }
 
-    .scoreNum{ font-size:2.0rem; }
-    .midMeta{ font-size:.95rem; }
+    .center-stack{
+      min-width:auto;
+    }
+
+    .score{ font-size:2.2rem; }
 
     .goal{
-      grid-template-columns:80px 1fr;
+      grid-template-columns: 96px 1fr;
       gap:10px;
     }
   }
 
-  @media (max-width: 480px){
-    .slug{ display:none; }
-    .team-header{ padding: 20px; }
-    .badge{width:40px; height:40px}
-    .name{font-size:1rem}
-    .scoreNum{font-size:1.8rem}
-    .midMeta{font-size:.9rem}
+  @media (max-width:480px){
+    .team-header-inner{ padding:0 18px; }
+    .slug{ display:none; } /* prevent collisions on tiny screens */
+
+    .badge{ width:56px; height:56px; }
+    .name{ font-size:1.05rem; }
+    .score{ font-size:2rem; }
   }
 </style>
 </head>
-
 <body>
   <div class="wrap">
     <!-- Team Header -->
     <div class="team-header">
       <img class="slug slug-left" src="slug.png" alt="" aria-hidden="true">
-      <h1>Buffalo Sabres</h1>
       <img class="slug slug-right" src="slug.png" alt="" aria-hidden="true">
 
-      <div class="team-stats">
-        <div class="stat-item">
-          <span class="stat-label">Record</span>
-          <span class="stat-value" id="record">0-0-0</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">Points</span>
-          <span class="stat-value" id="points">0</span>
-        </div>
-      </div>
-
-      <div class="top-scorer" id="topScorer">
-        Loading leaders...
-      </div>
-    </div>
-
-    <!-- Active Game (score + goals in one box) -->
-    <div class="panel" id="activeGamePanel">
-      <h3 id="activeGameTitle">Active Game</h3>
-
-      <div class="active-wrap">
-        <!-- Scorebar -->
-        <div class="scorebar" id="scorebar">
-          <div class="scoregrid">
-            <!-- Away -->
-            <div class="team away" id="awayTeam">
-              <div class="team-meta">
-                <div class="name">Away</div>
-                <div class="sog">SOG: <strong id="awaySog">—</strong></div>
-              </div>
-              <div class="badge" id="awayBadge"></div>
-            </div>
-
-            <!-- Center -->
-            <div class="center">
-              <div class="scoreline" aria-live="polite">
-                <span class="scoreNum" id="awayScore">0</span>
-                <span class="midMeta pill" id="midMeta">(Loading…)</span>
-                <span class="scoreNum" id="homeScore">0</span>
-              </div>
-              <div class="updated" id="updated"></div>
-            </div>
-
-            <!-- Home -->
-            <div class="team home" id="homeTeam">
-              <div class="badge" id="homeBadge"></div>
-              <div class="team-meta">
-                <div class="name">Home</div>
-                <div class="sog">SOG: <strong id="homeSog">—</strong></div>
-              </div>
-            </div>
+      <div class="team-header-inner">
+        <h1>Buffalo Sabres</h1>
+        <div class="team-stats">
+          <div class="stat-item">
+            <span class="stat-label">Record</span>
+            <span class="stat-value" id="record">0-0-0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Points</span>
+            <span class="stat-value" id="points">0</span>
           </div>
         </div>
 
-        <!-- Goals (attached to active game panel) -->
-        <div>
-          <h3 style="margin:0 0 10px 0; font-size:1.05rem; color:#ffe9b3; border-bottom:1px solid rgba(252,181,20,.2); padding-bottom:8px;">
-            Goals
-          </h3>
-          <div class="goals" id="goals"><div class="loading">Waiting for live game…</div></div>
+        <!-- Rename + add leading points -->
+        <div class="top-scorer" id="topGoals">
+          Loading leading goals...
         </div>
+        <div class="top-scorer" id="topPoints" style="margin-top:8px; border-top:none; padding-top:0;">
+          Loading leading points...
+        </div>
+      </div>
+    </div>
+
+    <!-- Primary score bar -->
+    <div class="scorebar" id="scorebar">
+      <div class="score-top">
+        <!-- Away -->
+        <div class="team away" id="awayTeam">
+          <div class="team-name-row">
+            <div class="name">Away</div>
+            <div class="badge" id="awayBadge"></div>
+          </div>
+
+          <!-- Metrics -->
+          <div class="team-metrics" id="awayMetrics">
+            <div class="metric"><b>SOG</b>: <span id="awaySog">—</span></div>
+            <div class="metric"><b>Hits</b>: <span id="awayHits">—</span></div>
+            <div class="metric"><b>Blk</b>: <span id="awayBlocks">—</span></div>
+            <div class="metric"><b>G</b>: <span id="awayGoalie">—</span></div>
+          </div>
+        </div>
+
+        <!-- Center -->
+        <div class="center-stack">
+          <div class="score" id="score">0 — 0</div>
+          <div class="mid-meta">
+            <div class="state" id="state">Loading…</div>
+            <div><span class="pill" id="when"></span></div>
+            <div class="muted" id="updated"></div>
+          </div>
+        </div>
+
+        <!-- Home -->
+        <div class="team home" id="homeTeam">
+          <div class="team-name-row">
+            <div class="badge" id="homeBadge"></div>
+            <div class="name">Home</div>
+          </div>
+
+          <!-- Metrics -->
+          <div class="team-metrics" id="homeMetrics">
+            <div class="metric"><b>SOG</b>: <span id="homeSog">—</span></div>
+            <div class="metric"><b>Hits</b>: <span id="homeHits">—</span></div>
+            <div class="metric"><b>Blk</b>: <span id="homeBlocks">—</span></div>
+            <div class="metric"><b>G</b>: <span id="homeGoalie">—</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Goals attached to active game box -->
+      <div class="panel" id="liveGoalsPanel" style="margin-top:0;">
+        <h3>Goals</h3>
+        <div class="goals" id="goals"><div class="loading">Loading goals…</div></div>
       </div>
     </div>
 
     <!-- Last Game -->
     <div class="panel" id="lastGamePanel">
-      <h3>Last Game</h3>
+      <h3>Most Recent Game</h3>
       <div id="lastGameBox" class="loading">Loading…</div>
+      <div class="goals" id="lastGameGoals"></div>
     </div>
 
     <!-- Next Game -->
@@ -506,13 +514,6 @@
     }
   }
 
-  function nyYYYYMMDD(d) {
-    const y = d.toLocaleString('en-CA', { timeZone: 'America/New_York', year: 'numeric' });
-    const m = d.toLocaleString('en-CA', { timeZone: 'America/New_York', month: '2-digit' });
-    const day = d.toLocaleString('en-CA', { timeZone: 'America/New_York', day: '2-digit' });
-    return `${y}-${m}-${day}`;
-  }
-
   function getTeamLogo(abbr) {
     return `https://assets.nhle.com/logos/nhl/svg/${abbr}_light.svg`;
   }
@@ -525,31 +526,22 @@
         || '';
   }
 
-  function nowNYTimeString() {
-    return new Date().toLocaleTimeString('en-US', {
+  function setUpdatedNow() {
+    const el = document.getElementById('updated');
+    if (!el) return;
+    el.textContent = `Updated ${new Date().toLocaleTimeString('en-US', {
       timeZone: 'America/New_York',
       hour: 'numeric',
       minute: '2-digit',
       second: '2-digit'
-    });
-  }
-
-  function setUpdatedNow() {
-    const el = document.getElementById('updated');
-    if (!el) return;
-    el.textContent = `Updated ${nowNYTimeString()}`;
+    })}`;
   }
 
   async function fetchJSON(url) {
-    try {
-      const proxiedUrl = CORS_PROXY + encodeURIComponent(url);
-      const response = await fetch(proxiedUrl, { cache: 'no-store' });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      return await response.json();
-    } catch (error) {
-      console.error('Fetch error:', url, error);
-      throw error;
-    }
+    const proxiedUrl = CORS_PROXY + encodeURIComponent(url);
+    const response = await fetch(proxiedUrl, { cache: 'no-store' });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return await response.json();
   }
 
   // Get team standings and stats
@@ -566,9 +558,7 @@
         }
       }
 
-      if (!sabres) {
-        return { wins: 0, losses: 0, otLosses: 0, points: 0 };
-      }
+      if (!sabres) return { wins: 0, losses: 0, otLosses: 0, points: 0 };
 
       return {
         wins: sabres.wins || 0,
@@ -576,46 +566,30 @@
         otLosses: sabres.otLosses || 0,
         points: sabres.points || 0
       };
-    } catch (error) {
-      console.error('Error fetching team stats:', error);
+    } catch {
       return null;
     }
   }
 
-  // Leaders (goals + points)
+  // Get roster and find leaders (goals + points)
   async function getLeaders() {
     try {
       const url = `https://api-web.nhle.com/v1/club-stats/${SABRES_ABBR}/now`;
       const data = await fetchJSON(url);
 
       const skaters = data.skaters || [];
-      if (skaters.length === 0) return null;
+      if (!skaters.length) return null;
 
-      const topGoals = skaters.reduce((top, p) => {
-        const g = p.goals || 0;
-        return g > (top.goals || 0) ? p : top;
-      }, skaters[0]);
+      const bestGoals = skaters.reduce((best, p) => (p.goals||0) > (best.goals||0) ? p : best, skaters[0]);
+      const bestPoints = skaters.reduce((best, p) => (p.points||0) > (best.points||0) ? p : best, skaters[0]);
 
-      const topPoints = skaters.reduce((top, p) => {
-        const pts = (typeof p.points === 'number') ? p.points : ((p.goals || 0) + (p.assists || 0));
-        const topPts = (typeof top.points === 'number') ? top.points : ((top.goals || 0) + (top.assists || 0));
-        return pts > topPts ? p : top;
-      }, skaters[0]);
-
-      const fmtName = (p) => `${p.firstName?.default || ''} ${p.lastName?.default || ''}`.trim();
-
-      const topPointsVal = (typeof topPoints.points === 'number')
-        ? topPoints.points
-        : ((topPoints.goals || 0) + (topPoints.assists || 0));
+      const name = (p) => `${p.firstName?.default || ''} ${p.lastName?.default || ''}`.trim();
 
       return {
-        goalsName: fmtName(topGoals),
-        goalsVal: topGoals.goals || 0,
-        pointsName: fmtName(topPoints),
-        pointsVal: topPointsVal || 0
+        goals: { name: name(bestGoals), val: bestGoals.goals || 0 },
+        points: { name: name(bestPoints), val: bestPoints.points || 0 }
       };
-    } catch (error) {
-      console.error('Error fetching leaders:', error);
+    } catch {
       return null;
     }
   }
@@ -657,129 +631,161 @@
     return await fetchJSON(url);
   }
 
-  function ordinalPeriod(n) {
-    if (n === 1) return '1st';
-    if (n === 2) return '2nd';
-    if (n === 3) return '3rd';
-    return `${n}th`;
+  // Boxscore for SOG/Hits/Blocks/Goalie sv%
+  async function getGameBoxscore(gameId) {
+    const url = `https://api-web.nhle.com/v1/gamecenter/${gameId}/boxscore?cb=${Date.now()}`;
+    return await fetchJSON(url);
   }
 
-  // Extract shots on goal from whatever field NHL returns
-  function getSOG(teamObj) {
-    if (!teamObj) return null;
-    const candidates = [
-      teamObj.sog,
-      teamObj.shotsOnGoal,
-      teamObj.shotsOnGoalCount,
-      teamObj.sogCount
-    ];
-    for (const v of candidates) {
-      if (typeof v === 'number' && Number.isFinite(v)) return v;
-      if (typeof v === 'string' && v.trim() && !Number.isNaN(Number(v))) return Number(v);
+  function formatPct(v) {
+    if (v == null) return '—';
+    if (typeof v === 'number') {
+      // sv% often comes as 0.923 or 92.3 depending on endpoint; handle both.
+      const pct = v <= 1 ? (v * 100) : v;
+      return `${pct.toFixed(1)}%`;
     }
-    return null;
+    const s = String(v).trim();
+    if (!s) return '—';
+    return s.includes('%') ? s : `${s}%`;
   }
 
-  // Render the main scorebar (new layout)
-  function renderScorebar(game, details) {
+  function goalieLabel(g) {
+    if (!g) return '—';
+    const ln = g.lastName?.default || g.lastName || '';
+    const sv = g.savePctg ?? g.savePercentage ?? g.savePct ?? g.svPct ?? null;
+    const pct = formatPct(sv);
+    const name = ln ? ln : (g.name?.default || g.name || 'Goalie');
+    return `${name} (${pct})`;
+  }
+
+  function applyTeamMetrics(side, box) {
+    // side: "away" | "home"
+    // box: boxscore object
+    const t = (side === 'away') ? (box?.awayTeam || box?.away) : (box?.homeTeam || box?.home);
+    const sog = t?.shotsOnGoal ?? t?.sog ?? t?.teamStats?.shotsOnGoal ?? '—';
+    const hits = t?.hits ?? t?.teamStats?.hits ?? '—';
+    const blocks = t?.blockedShots ?? t?.blocked ?? t?.teamStats?.blockedShots ?? '—';
+
+    // attempt goalie: use "goalies" arrays if present; otherwise infer from "playerByGameStats"
+    let goalie = null;
+    const goalies = t?.goalies || t?.goalieStats || null;
+    if (Array.isArray(goalies) && goalies.length) {
+      // try pick the one with most TOI / shots faced; otherwise first.
+      goalie = goalies.slice().sort((a,b)=> (b.timeOnIce||0)-(a.timeOnIce||0))[0] || goalies[0];
+    } else {
+      // fallback: sometimes boxscore exposes playerByGameStats.goalies
+      const pgs = box?.playerByGameStats;
+      const list = (side === 'away') ? pgs?.awayTeam?.goalies : pgs?.homeTeam?.goalies;
+      if (Array.isArray(list) && list.length) goalie = list[0];
+    }
+
+    setTxt(side + 'Sog', String(sog));
+    setTxt(side + 'Hits', String(hits));
+    setTxt(side + 'Blocks', String(blocks));
+    setTxt(side + 'Goalie', goalieLabel(goalie));
+  }
+
+  // Render the main scorebar
+  function renderScorebar(game, details, boxscore) {
     if (!game) {
-      setTxt('midMeta', '(No game data)');
-      setTxt('awayScore', '0');
-      setTxt('homeScore', '0');
-      setTxt('awaySog', '—');
-      setTxt('homeSog', '—');
+      setTxt('state', 'No game data');
+      setTxt('when', '—');
       return;
     }
 
-    // Prefer details as source of truth
     const away = details?.awayTeam || game.awayTeam;
     const home = details?.homeTeam || game.homeTeam;
 
-    // Team names
     document.querySelector('#awayTeam .name').textContent = teamLabel(away);
     document.querySelector('#homeTeam .name').textContent = teamLabel(home);
 
-    // Logos
     const awayAbbrev = away.abbrev || game.awayTeam?.abbrev;
     const homeAbbrev = home.abbrev || game.homeTeam?.abbrev;
 
     document.getElementById('awayBadge').style.backgroundImage = `url('${getTeamLogo(awayAbbrev)}')`;
     document.getElementById('homeBadge').style.backgroundImage = `url('${getTeamLogo(homeAbbrev)}')`;
 
-    // Scores
     const awayScore = details?.awayTeam?.score ?? game.awayTeam?.score ?? 0;
     const homeScore = details?.homeTeam?.score ?? game.homeTeam?.score ?? 0;
+    setTxt('score', `${awayScore} — ${homeScore}`);
 
-    setTxt('awayScore', String(awayScore));
-    setTxt('homeScore', String(homeScore));
-
-    // SOG (show if present; if not present keep em dashes)
-    const awaySog = getSOG(details?.awayTeam) ?? getSOG(game.awayTeam);
-    const homeSog = getSOG(details?.homeTeam) ?? getSOG(game.homeTeam);
-
-    setTxt('awaySog', (awaySog === null ? '—' : String(awaySog)));
-    setTxt('homeSog', (homeSog === null ? '—' : String(homeSog)));
-
-    // Build middle meta: "3rd Period • 12:34" (or "Intermission • INT 12:34")
     const gameState = details?.gameState || game.gameState;
     const isLive = ['LIVE', 'CRIT', 'CRITICAL'].includes(gameState);
 
-    let status = '';
-    let clockText = '';
-
+    let status = 'Final';
     if (isLive) {
+      status = 'LIVE';
       if (details?.periodDescriptor) {
-        const periodNum = details.periodDescriptor.number;
+        const period = details.periodDescriptor.number;
         const periodType = details.periodDescriptor.periodType;
-        if (periodType === 'OT') status = 'OT';
-        else if (periodType === 'SO') status = 'SO';
-        else status = `${ordinalPeriod(periodNum)} Period`;
-      } else {
-        status = 'LIVE';
+        if (periodType === 'OT') status = 'OVERTIME';
+        else if (periodType === 'SO') status = 'SHOOTOUT';
+        else status = `${period}${period === 1 ? 'st' : period === 2 ? 'nd' : period === 3 ? 'rd' : 'th'} Period`;
       }
+      if (details?.clock?.inIntermission) status = 'Intermission';
+    } else if (['FUT', 'PRE'].includes(gameState)) status = 'Scheduled';
+    else if (['FINAL', 'OFF'].includes(gameState)) status = 'Final';
 
+    setTxt('state', status);
+
+    // time/when
+    let when = '';
+    if (isLive) {
       if (details?.clock?.inIntermission) {
-        // prefer any intermission remaining if provided
         const ir =
           details.clock.intermissionTimeRemaining ||
           details.clock.intermissionRemaining ||
           details.clock.intermissionTimeRemainingSeconds;
 
-        if (typeof ir === 'string' && ir.trim()) clockText = `INT ${ir}`;
+        if (typeof ir === 'string' && ir.trim()) when = `INT ${ir}`;
         else if (typeof ir === 'number' && Number.isFinite(ir)) {
           const mm = Math.floor(ir / 60);
           const ss = String(ir % 60).padStart(2, '0');
-          clockText = `INT ${mm}:${ss}`;
+          when = `INT ${mm}:${ss}`;
         } else {
-          clockText = 'Intermission';
+          when = 'Intermission';
         }
       } else {
-        clockText = details?.clock?.timeRemaining || '';
+        when = details?.clock?.timeRemaining || '';
       }
-    } else if (['FUT', 'PRE'].includes(gameState)) {
-      status = 'Scheduled';
-      clockText = formatDate(game.startTimeUTC);
     } else {
-      status = 'Final';
-      clockText = formatDate(game.startTimeUTC);
+      when = formatDate(game.startTimeUTC);
     }
+    setTxt('when', when || '—');
 
-    const metaParts = [];
-    if (status) metaParts.push(status);
-    if (clockText) metaParts.push(clockText);
-
-    const mid = metaParts.length ? `(${metaParts.join(' • ')})` : '(—)';
-    setTxt('midMeta', mid);
+    // team metrics
+    if (boxscore) {
+      applyTeamMetrics('away', boxscore);
+      applyTeamMetrics('home', boxscore);
+    } else {
+      // graceful fallbacks
+      ['awaySog','homeSog','awayHits','homeHits','awayBlocks','homeBlocks','awayGoalie','homeGoalie'].forEach(id => setTxt(id, '—'));
+    }
   }
 
-  // Render goals (newest goal on top). For non-live games, show empty.
-  function renderGoals(details, isLive) {
-    const goalsEl = document.getElementById('goals');
-
-    if (!isLive) {
-      goalsEl.innerHTML = '<div class="info">No live game right now.</div>';
-      return;
+  function buildPlayerMap(details) {
+    const playerMap = new Map();
+    const roster = details?.rosterSpots || [];
+    for (const p of roster) {
+      if (!p?.playerId) continue;
+      const nm = `${p.firstName?.default || ''} ${p.lastName?.default || ''}`.trim();
+      playerMap.set(p.playerId, nm);
     }
+    return playerMap;
+  }
+
+  function timeToSec(t) {
+    if (!t) return 0;
+    const parts = String(t).split(':');
+    const mm = parseInt(parts[0] || '0', 10);
+    const ss = parseInt(parts[1] || '0', 10);
+    return (mm * 60) + ss;
+  }
+
+  // Render goals into a specific container, newest-first if requested
+  function renderGoals(details, containerId, newestFirst = true) {
+    const goalsEl = document.getElementById(containerId);
+    if (!goalsEl) return;
 
     if (!details) {
       goalsEl.innerHTML = '<div class="loading">No play data available</div>';
@@ -787,55 +793,38 @@
     }
 
     const plays = details.plays || details.gameEvents || [];
-    if (!plays || plays.length === 0) {
+    if (!plays || !plays.length) {
       goalsEl.innerHTML = '<div class="loading">No play data available</div>';
       return;
     }
 
-    // Player map
-    const playerMap = new Map();
-    const rosters = details.rosterSpots || [];
-    for (const player of rosters) {
-      if (player.playerId) {
-        const name = `${player.firstName?.default || ''} ${player.lastName?.default || ''}`.trim();
-        playerMap.set(player.playerId, name);
-      }
-    }
+    const playerMap = buildPlayerMap(details);
 
-    const timeToSec = (t) => {
-      if (!t) return 0;
-      const parts = t.split(':');
-      const mm = parseInt(parts[0] || '0', 10);
-      const ss = parseInt(parts[1] || '0', 10);
-      return mm * 60 + ss;
-    };
+    let goals = plays
+      .filter(p => p.typeDescKey === 'goal' || p.typeCode === 'GOAL')
+      .filter(p => p.periodDescriptor?.periodType !== 'SO'); // exclude shootout
 
-    // Newest first:
-    // - period DESC
-    // - timeInPeriod ASC (because it's time remaining; smaller => later)
-    const goals = plays
-      .filter(play => play.typeDescKey === 'goal' || play.typeCode === 'GOAL')
-      .filter(play => play.periodDescriptor?.periodType !== 'SO') // exclude shootout
-      .sort((a, b) => {
-        const pa = a.periodDescriptor?.number || 0;
-        const pb = b.periodDescriptor?.number || 0;
-        if (pa !== pb) return pb - pa;
-        return timeToSec(a.timeInPeriod) - timeToSec(b.timeInPeriod);
-      });
-
-    if (goals.length === 0) {
+    if (!goals.length) {
       goalsEl.innerHTML = '<div class="loading">No goals scored yet</div>';
       return;
     }
+
+    // sort by period then time; then reverse for newest-first
+    goals.sort((a,b) => {
+      const pd = (a.periodDescriptor?.number || 0) - (b.periodDescriptor?.number || 0);
+      if (pd !== 0) return pd;
+      return timeToSec(a.timeInPeriod) - timeToSec(b.timeInPeriod);
+    });
+    if (newestFirst) goals.reverse();
 
     let html = '';
     for (const goal of goals) {
       const period = goal.periodDescriptor?.number || '';
       const time = goal.timeInPeriod || '';
-      const team = goal.details?.eventOwnerTeamId;
+      const teamId = goal.details?.eventOwnerTeamId;
 
-      const teamInfo = details.homeTeam?.id === team ? details.homeTeam : details.awayTeam;
-      const teamName = teamLabel(teamInfo);
+      const teamInfo = (details.homeTeam?.id === teamId) ? details.homeTeam : details.awayTeam;
+      const tName = teamLabel(teamInfo);
 
       let scorerName = 'Unknown';
       let goalNumber = '';
@@ -849,22 +838,18 @@
 
       const assists = [];
       if (goal.details) {
-        const assist1Id = goal.details.assist1PlayerId;
-        if (assist1Id && playerMap.has(assist1Id)) {
-          const total = goal.details.assist1PlayerTotal ? ` (${goal.details.assist1PlayerTotal})` : '';
-          assists.push(`${playerMap.get(assist1Id)}${total}`);
+        const a1 = goal.details.assist1PlayerId;
+        if (a1 && playerMap.has(a1)) {
+          assists.push(`${playerMap.get(a1)}${goal.details.assist1PlayerTotal ? ` (${goal.details.assist1PlayerTotal})` : ''}`);
         } else if (goal.details.assist1Player) {
-          const total = goal.details.assist1PlayerTotal ? ` (${goal.details.assist1PlayerTotal})` : '';
-          assists.push(`${goal.details.assist1Player}${total}`);
+          assists.push(`${goal.details.assist1Player}${goal.details.assist1PlayerTotal ? ` (${goal.details.assist1PlayerTotal})` : ''}`);
         }
 
-        const assist2Id = goal.details.assist2PlayerId;
-        if (assist2Id && playerMap.has(assist2Id)) {
-          const total = goal.details.assist2PlayerTotal ? ` (${goal.details.assist2PlayerTotal})` : '';
-          assists.push(`${playerMap.get(assist2Id)}${total}`);
+        const a2 = goal.details.assist2PlayerId;
+        if (a2 && playerMap.has(a2)) {
+          assists.push(`${playerMap.get(a2)}${goal.details.assist2PlayerTotal ? ` (${goal.details.assist2PlayerTotal})` : ''}`);
         } else if (goal.details.assist2Player) {
-          const total = goal.details.assist2PlayerTotal ? ` (${goal.details.assist2PlayerTotal})` : '';
-          assists.push(`${goal.details.assist2Player}${total}`);
+          assists.push(`${goal.details.assist2Player}${goal.details.assist2PlayerTotal ? ` (${goal.details.assist2PlayerTotal})` : ''}`);
         }
       }
 
@@ -873,17 +858,15 @@
 
       html += `
         <div class="goal">
-          <div class="time">Period ${period}<br>${time}</div>
+          <div class="time">P${period}<br>${time}</div>
           <div class="goal-details">
             <div>
-              <span class="team-name">${teamName}</span>
+              <span class="team-name">${tName}</span>
               <span class="sep">—</span>
               <span class="who">${scorerName}${goalNumber}</span>
             </div>
             <div class="strength">${String(strength).toUpperCase()}${situation ? ` (${situation})` : ''}</div>
-            ${assists.length ? `
-              <div class="assist">Assists: ${assists.map(a => `<span class="assist-player">${a}</span>`).join('')}</div>
-            ` : ''}
+            ${assists.length ? `<div class="assist">Assists: ${assists.map(a => `<span class="assist-player">${a}</span>`).join('')}</div>` : ''}
           </div>
         </div>
       `;
@@ -892,7 +875,6 @@
     goalsEl.innerHTML = html;
   }
 
-  // Render last game summary
   function renderLastGame(game) {
     const el = document.getElementById('lastGameBox');
     if (!game) {
@@ -913,7 +895,6 @@
     `;
   }
 
-  // Render next game summary
   function renderNextGame(game) {
     const el = document.getElementById('nextGameBox');
     if (!game) {
@@ -933,95 +914,124 @@
     `;
   }
 
+  function setGoalsVisibility(isLiveOrHasPrimary) {
+    const liveGoalsPanel = document.getElementById('liveGoalsPanel');
+    if (!liveGoalsPanel) return;
+    liveGoalsPanel.style.display = isLiveOrHasPrimary ? '' : 'none';
+  }
+
   // Main execution
   try {
     const schedule = await getSchedule();
 
-    let teamStats = null;
-    let leaders = null;
-
-    try { teamStats = await getTeamStats(); } catch (e) { console.error('Failed to load team stats:', e); }
-    try { leaders = await getLeaders(); } catch (e) { console.error('Failed to load leaders:', e); }
-
-    // Team header
+    // team header
+    const teamStats = await getTeamStats().catch(()=>null);
     if (teamStats) {
       setTxt('record', `${teamStats.wins}-${teamStats.losses}-${teamStats.otLosses}`);
-      setTxt('points', teamStats.points.toString());
+      setTxt('points', String(teamStats.points));
     } else {
-      setHTML('record', '<span style="font-size:.9rem">Loading...</span>');
-      setHTML('points', '<span style="font-size:.9rem">...</span>');
+      setTxt('record', '—');
+      setTxt('points', '—');
     }
 
+    const leaders = await getLeaders().catch(()=>null);
     if (leaders) {
-      setHTML(
-        'topScorer',
-        `Leading goals: <strong>${leaders.goalsName}</strong> (${leaders.goalsVal})<br>` +
-        `Leading points: <strong>${leaders.pointsName}</strong> (${leaders.pointsVal})`
-      );
+      setHTML('topGoals', `Leading goals: <strong>${leaders.goals.name}</strong>, ${leaders.goals.val}`);
+      setHTML('topPoints', `Leading points: <strong>${leaders.points.name}</strong>, ${leaders.points.val}`);
     } else {
-      setHTML('topScorer', 'Leaders unavailable');
+      setHTML('topGoals', 'Leading goals unavailable');
+      setHTML('topPoints', 'Leading points unavailable');
     }
 
-    // Active game behavior:
-    // - Scorebar shows live game if available, otherwise last game.
-    // - Goals only show for LIVE game (otherwise empty/info).
+    // primary game selection
     const primaryGame = schedule.liveGame || schedule.lastGame;
     const isLive = !!schedule.liveGame;
 
-    // Title
-    setTxt('activeGameTitle', isLive ? 'Live Game' : (primaryGame ? 'Most Recent Game' : 'Active Game'));
-
-    if (primaryGame) {
-      const details = await getGameDetails(primaryGame.id);
-      renderScorebar(primaryGame, details);
-      renderGoals(details, isLive);
-      setUpdatedNow();
-
-      if (isLive) {
-        const gameId = primaryGame.id;
-
-        const refreshInterval = setInterval(async () => {
-          try {
-            const updatedDetails = await getGameDetails(gameId);
-            const gameState = updatedDetails?.gameState;
-
-            renderScorebar(primaryGame, updatedDetails);
-            renderGoals(updatedDetails, true);
-            setUpdatedNow();
-
-            if (['FINAL', 'OFF'].includes(gameState)) {
-              clearInterval(refreshInterval);
-              setTimeout(() => location.reload(), 2000);
-            }
-          } catch (e) {
-            console.error('Refresh error:', e);
-          }
-        }, 15000);
-      }
-    } else {
-      setTxt('midMeta', '(No recent game)');
-      setTxt('awayScore', '0');
-      setTxt('homeScore', '0');
-      setTxt('awaySog', '—');
-      setTxt('homeSog', '—');
-      setHTML('goals', '<div class="info">No live game right now.</div>');
-      setUpdatedNow();
-    }
-
-    // Summaries
+    // next/last summaries always
     renderLastGame(schedule.lastGame);
     renderNextGame(schedule.nextGame);
 
+    // If no primary, hide live goals panel and stop.
+    if (!primaryGame) {
+      setGoalsVisibility(false);
+      setTxt('state', 'No recent game');
+      setTxt('score', '— — —');
+      setTxt('when', '—');
+      setTxt('updated', '');
+      setHTML('goals', '<div class="info">No recent games found. Check back during the hockey season!</div>');
+      setHTML('lastGameGoals', '');
+      return;
+    }
+
+    setGoalsVisibility(true);
+
+    // Load details+boxscore for primary render
+    const [details, boxscore] = await Promise.all([
+      getGameDetails(primaryGame.id),
+      getGameBoxscore(primaryGame.id).catch(()=>null)
+    ]);
+
+    renderScorebar(primaryGame, details, boxscore);
+    renderGoals(details, 'goals', true); // newest-first for active game
+    setUpdatedNow();
+
+    // Most recent game: if finished, also show scorers/assists/etc
+    if (schedule.lastGame?.id) {
+      try {
+        const lastDetails = await getGameDetails(schedule.lastGame.id);
+        // newest-first for last game goals too
+        document.getElementById('lastGameGoals').innerHTML = '<h3 style="margin-top:18px;">Scoring</h3>';
+        // Insert a container after header
+        const lg = document.createElement('div');
+        lg.className = 'goals';
+        lg.id = 'lastGameGoalsList';
+        document.getElementById('lastGameGoals').appendChild(lg);
+        renderGoals(lastDetails, 'lastGameGoalsList', true);
+      } catch {
+        // keep empty if unavailable
+        setHTML('lastGameGoals', '');
+      }
+    }
+
+    // If live: auto-refresh
+    if (isLive) {
+      const gameId = primaryGame.id;
+
+      const refreshInterval = setInterval(async () => {
+        try {
+          const [updatedDetails, updatedBox] = await Promise.all([
+            getGameDetails(gameId),
+            // boxscore can be heavier / more rate-limited; fetch it less often if desired.
+            getGameBoxscore(gameId).catch(()=>null)
+          ]);
+
+          const gameState = updatedDetails?.gameState;
+          renderScorebar(primaryGame, updatedDetails, updatedBox);
+          renderGoals(updatedDetails, 'goals', true);
+          setUpdatedNow();
+
+          if (['FINAL', 'OFF'].includes(gameState)) {
+            clearInterval(refreshInterval);
+            setTimeout(() => location.reload(), 2000);
+          }
+        } catch (e) {
+          console.error('Refresh error:', e);
+        }
+      }, 15000);
+    } else {
+      // Not live (primary was lastGame): keep live goals panel, but set "Goals" to that game's goals already shown above.
+      // If you want goals empty when showing only next game, that only applies when there is no recent game; handled earlier.
+    }
+
   } catch (error) {
     console.error('Error loading data:', error);
-    setTxt('midMeta', '(Error loading data)');
-    setTxt('awayScore', '0');
-    setTxt('homeScore', '0');
-    setTxt('awaySog', '—');
-    setTxt('homeSog', '—');
-    setHTML('goals', `<div class="error">Unable to load NHL data. This widget uses a CORS proxy which may be rate-limited. Please try again in a few moments.</div>`);
+    setTxt('state', 'Error loading data');
+    setTxt('when', '—');
+    setTxt('updated', '');
+    setHTML('goals', `<div class="error">Unable to load NHL data. This widget uses a CORS proxy which may be rate-limited.</div>`);
     setHTML('lastGameBox', '<div class="error">—</div>');
     setHTML('nextGameBox', '<div class="error">—</div>');
+    setHTML('lastGameGoals', '');
   }
 })();
 </script>
