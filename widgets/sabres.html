@@ -43,25 +43,21 @@
     overflow:hidden;
   }
 
-  /* Slug images (large, centered on sides) — POP + 3D (1+2) */
+  /* Slug images (large, centered on sides) */
   .slug{
     position:absolute;
     top:50%;
     transform:translateY(-50%);
-    height:200px;            /* ~4× */
+    height:200px;
     width:auto;
-    opacity:.98;
+    opacity:.92;
     pointer-events:none;
 
-    /* (1) depth shadow stack + (2) rim/glow pop */
+    /* "Pop" (1+2): drop shadow + subtle glow/emboss */
     filter:
-      drop-shadow(0 0 10px rgba(252,181,20,.22))   /* gold glow */
-      drop-shadow(0 0 2px  rgba(255,255,255,.18))  /* faint rim */
-      drop-shadow(0 24px 24px rgba(0,0,0,.55))     /* main depth */
-      drop-shadow(0 10px 10px rgba(0,0,0,.35))     /* mid depth */
-      drop-shadow(0 2px  2px  rgba(0,0,0,.25));    /* edge separation */
-
-    will-change: transform, filter;
+      drop-shadow(0 12px 20px rgba(0,0,0,.45))
+      drop-shadow(0 0 10px rgba(252,181,20,.18))
+      drop-shadow(0 0 2px rgba(255,255,255,.12));
   }
   .slug-left{ left:18px; }
   .slug-right{ right:18px; transform:translateY(-50%) scaleX(-1); }
@@ -69,17 +65,19 @@
   .team-header-inner{
     position:relative;
     z-index:1;
-    max-width:760px;
+    max-width:820px;
     margin:0 auto;
     padding:0 240px; /* prevent overlap with big slugs */
   }
 
-  /* Header image replacing text */
-  .team-title{
+  /* Header image (sabres.png) */
+  .header-logo{
     display:block;
-    margin:0 auto 10px auto;
-    max-width:min(520px, 80vw);
+    margin:0 auto 12px;
+    max-width:min(520px, 86vw);
     height:auto;
+    image-rendering:auto;
+    filter: drop-shadow(0 8px 16px rgba(0,0,0,.35));
   }
 
   .team-stats{
@@ -87,7 +85,7 @@
     justify-content:center;
     gap:32px;
     flex-wrap:wrap;
-    margin-top:10px;
+    margin-top:6px;
   }
 
   .stat-item{
@@ -106,9 +104,9 @@
   }
 
   .stat-value{
-    font-size:1.3rem;
+    font-size:1.25rem;
     color:var(--sabres-gold);
-    font-weight:700;
+    font-weight:800;
   }
 
   .top-scorer{
@@ -121,7 +119,7 @@
 
   .top-scorer strong{
     color:var(--sabres-gold);
-    font-weight:700;
+    font-weight:800;
   }
 
   /* Score header */
@@ -175,7 +173,7 @@
   }
 
   .name{
-    font-weight:800;
+    font-weight:900;
     letter-spacing:.3px;
     white-space:nowrap;
     overflow:hidden;
@@ -190,7 +188,7 @@
     font-size:.95rem;
     opacity:.95;
   }
-  .metric b{ color:#ffe9b3; font-weight:700; }
+  .metric b{ color:#ffe9b3; font-weight:900; }
   .metric span{ color:#cfe1ff; }
 
   .center-stack{
@@ -198,7 +196,7 @@
     flex-direction:column;
     align-items:center;
     gap:6px;
-    min-width:180px;
+    min-width:210px;
   }
 
   .score{
@@ -217,7 +215,7 @@
     gap:4px;
   }
   .state{
-    font-weight:800;
+    font-weight:900;
     font-size:1.05rem;
   }
   .pill{
@@ -228,7 +226,7 @@
     background: rgba(252,181,20,.18);
     border:1px solid rgba(252,181,20,.35);
     color:#ffe9b3;
-    font-weight:700;
+    font-weight:900;
   }
   .muted{
     font-size:.85rem;
@@ -261,6 +259,7 @@
 
   .game-summary strong{
     color:var(--sabres-gold);
+    font-weight:900;
   }
 
   /* Goals list */
@@ -288,7 +287,7 @@
   }
 
   .time{
-    font-weight:800;
+    font-weight:900;
     color:#ffe3a3;
     font-size:.95rem;
   }
@@ -300,13 +299,13 @@
   }
 
   .who{
-    font-weight:800;
+    font-weight:900;
     color:var(--sabres-white);
   }
 
   .team-name{
     color:var(--sabres-gold);
-    font-weight:700;
+    font-weight:900;
   }
 
   .assist{
@@ -328,7 +327,7 @@
   .strength{
     color:#a8c5f5;
     font-size:.85rem;
-    font-weight:700;
+    font-weight:900;
   }
 
   .loading, .error, .info{
@@ -386,11 +385,13 @@
 
   @media (max-width:480px){
     .team-header-inner{ padding:0 18px; }
-    .slug{ display:none; } /* prevent collisions on tiny screens */
+    .slug{ display:none; }
 
     .badge{ width:56px; height:56px; }
     .name{ font-size:1.05rem; }
     .score{ font-size:2rem; }
+
+    .header-logo{ max-width:92vw; }
   }
 </style>
 </head>
@@ -402,18 +403,23 @@
       <img class="slug slug-right" src="slug.png" alt="" aria-hidden="true">
 
       <div class="team-header-inner">
-        <!-- Header text replaced with image -->
-        <img class="team-title" src="sabres.png" alt="Buffalo Sabres">
+        <!-- Replace text header with sabres.jpg -->
+        <img class="header-logo" src="sabres2.png" alt="Buffalo Sabres">
 
         <div class="team-stats">
           <div class="stat-item">
             <span class="stat-label">Record</span>
-            <span class="stat-value" id="record">0-0-0</span>
+            <span class="stat-value" id="record">—</span>
           </div>
           <div class="stat-item">
             <span class="stat-label">Points</span>
-            <span class="stat-value" id="points">0</span>
+            <span class="stat-value" id="points">—</span>
           </div>
+        </div>
+
+        <!-- NEW: standings position line -->
+        <div class="top-scorer" id="standingLine" style="margin-top:10px; border-top:1px solid rgba(252,181,20,.2);">
+          Loading standings…
         </div>
 
         <!-- Rename + add leading points -->
@@ -447,7 +453,7 @@
 
         <!-- Center -->
         <div class="center-stack">
-          <div class="score" id="score">0 — 0</div>
+          <div class="score" id="score">— — —</div>
           <div class="mid-meta">
             <div class="state" id="state">Loading…</div>
             <div><span class="pill" id="when"></span></div>
@@ -479,7 +485,7 @@
       </div>
     </div>
 
-    <!-- Most Recent Game (should be the one BEFORE live game when live) -->
+    <!-- Most Recent Game (should be the game BEFORE the live/primary game if primary is live) -->
     <div class="panel" id="lastGamePanel">
       <h3>Most Recent Game</h3>
       <div id="lastGameBox" class="loading">Loading…</div>
@@ -555,19 +561,7 @@
     return await response.json();
   }
 
-  // (Requested) Save% display as .XXX
-  function formatSavePct(v) {
-    if (v == null || v === '' || !Number.isFinite(Number(v))) return '—';
-    let x = Number(v);
-    // accept 0.923, 92.3, 923
-    if (x > 1 && x <= 100) x = x / 100;
-    if (x > 100) x = x / 1000;
-    x = Math.max(0, Math.min(0.999, x));
-    const n = Math.round(x * 1000);
-    return '.' + String(n).padStart(3, '0');
-  }
-
-  // Get team standings and stats
+  // Get team standings and stats (record + points)
   async function getTeamStats() {
     try {
       const url = `https://api-web.nhle.com/v1/standings/now`;
@@ -580,7 +574,6 @@
           break;
         }
       }
-
       if (!sabres) return { wins: 0, losses: 0, otLosses: 0, points: 0 };
 
       return {
@@ -588,6 +581,47 @@
         losses: sabres.losses || 0,
         otLosses: sabres.otLosses || 0,
         points: sabres.points || 0
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  // NEW: conference/division/league ranks
+  async function getSabresStandingsPosition() {
+    try {
+      const url = `https://api-web.nhle.com/v1/standings/now`;
+      const data = await fetchJSON(url);
+
+      let sabres = null;
+      for (const standing of data.standings || []) {
+        if (standing.teamAbbrev?.default === SABRES_ABBR) {
+          sabres = standing;
+          break;
+        }
+      }
+      if (!sabres) return null;
+
+      // Field names vary by season/API version; try common variants.
+      const conference = sabres.conferenceName || sabres.conferenceAbbrev || sabres.conference || (sabres.conferenceName?.default ?? null);
+      const conferenceRank = sabres.conferenceSequence ?? sabres.conferenceRank ?? sabres.conferencePlace ?? sabres.conferenceStanding ?? null;
+
+      const division = sabres.divisionName || sabres.divisionAbbrev || sabres.division || (sabres.divisionName?.default ?? null);
+      const divisionRank = sabres.divisionSequence ?? sabres.divisionRank ?? sabres.divisionPlace ?? sabres.divisionStanding ?? null;
+
+      const leagueRank = sabres.leagueSequence ?? sabres.leagueRank ?? sabres.leaguePlace ?? sabres.leagueStanding ?? null;
+
+      // Normalize conference label to something readable
+      const confLabel =
+        (typeof conference === 'string' && conference.trim()) ? conference :
+        (sabres.conferenceAbbrev?.default || sabres.conferenceName?.default || sabres.conference || 'Conference');
+
+      return {
+        conference: confLabel,
+        conferenceRank: conferenceRank ?? '—',
+        division: (typeof division === 'string' && division.trim()) ? division : (sabres.divisionAbbrev?.default || sabres.divisionName?.default || sabres.division || 'Division'),
+        divisionRank: divisionRank ?? '—',
+        leagueRank: leagueRank ?? '—'
       };
     } catch {
       return null;
@@ -617,7 +651,6 @@
     }
   }
 
-  // Schedule: broaden "live-ish" detection so intermission doesn't break your selection
   async function getSchedule() {
     const now = new Date();
     const formatAPIDate = (d) => d.toISOString().split('T')[0];
@@ -632,26 +665,34 @@
 
     const allGames = [...(prevData.games || []), ...(data.games || [])];
 
-    const LIVE_STATES = new Set(['LIVE','CRIT','CRITICAL','IN_PROGRESS','INPROGRESS','PROG','STARTED']);
-    const liveGame = allGames.find(g => LIVE_STATES.has(g.gameState));
+    const liveGame = allGames.find(g =>
+      g.gameState === 'LIVE' ||
+      g.gameState === 'CRIT' ||
+      g.gameState === 'CRITICAL'
+    );
 
-    const completed = allGames
+    const finalsSorted = allGames
       .filter(g => (g.gameState === 'OFF' || g.gameState === 'FINAL'))
-      .sort((a, b) => new Date(b.startTimeUTC) - new Date(a.startTimeUTC));
+      .sort((a,b) => new Date(b.startTimeUTC) - new Date(a.startTimeUTC));
 
-    // last completed excluding live game id
-    const lastGame = completed.find(g => g.id !== liveGame?.id) || completed[0] || null;
+    // "lastGame": most recent FINAL/OFF game (could be same day as live doesn't matter)
+    const lastGame = finalsSorted[0];
 
-    // "previous game" used for "Most Recent Game" panel when live:
-    // If live exists, show the most recent completed game (already lastGame).
-    // If not live, lastGame is also the most recent completed.
-    const mostRecentCompleted = lastGame;
+    // "prevFinalBefore": the finished game BEFORE the live game (or before lastGame if no live)
+    const prevFinalBefore = (() => {
+      if (liveGame) {
+        const liveStart = new Date(liveGame.startTimeUTC).getTime();
+        return finalsSorted.find(g => new Date(g.startTimeUTC).getTime() < liveStart) || null;
+      }
+      // If not live, "most recent game" should be the final immediately before lastGame
+      return finalsSorted.length > 1 ? finalsSorted[1] : null;
+    })();
 
     const nextGame = allGames
       .filter(g => g.gameState === 'FUT' || g.gameState === 'PRE')
-      .sort((a, b) => new Date(a.startTimeUTC) - new Date(b.startTimeUTC))[0] || null;
+      .sort((a, b) => new Date(a.startTimeUTC) - new Date(b.startTimeUTC))[0];
 
-    return { liveGame, mostRecentCompleted, nextGame, games: allGames };
+    return { liveGame, lastGame, prevFinalBefore, nextGame, games: allGames };
   }
 
   // Get game details with cache buster
@@ -660,119 +701,104 @@
     return await fetchJSON(url);
   }
 
-  // Boxscore (can be missing some totals depending on timing)
+  // Boxscore for SOG/Hits/Blocks/Goalie sv%
   async function getGameBoxscore(gameId) {
     const url = `https://api-web.nhle.com/v1/gamecenter/${gameId}/boxscore?cb=${Date.now()}`;
     return await fetchJSON(url);
   }
 
-  // Landing tends to have team totals (SOG/Hits/Blocks) more reliably than play-by-play
-  async function getGameLanding(gameId) {
-    const url = `https://api-web.nhle.com/v1/gamecenter/${gameId}/landing?cb=${Date.now()}`;
-    return await fetchJSON(url);
+  // Save% formatting: .XXX (standard)
+  function formatSavePctDot(v) {
+    if (v == null) return '—';
+
+    // endpoints vary: 0.923, 92.3, "0.923", "92.3", "92.3%"
+    const s = (typeof v === 'string') ? v.trim().replace('%','') : v;
+    let num = (typeof s === 'number') ? s : Number(s);
+
+    if (!Number.isFinite(num)) return '—';
+
+    if (num > 1.5) {
+      // likely percent (e.g., 92.3)
+      num = num / 100;
+    }
+    // now num is 0.xxx
+    return `.${String(Math.round(num * 1000)).padStart(3,'0')}`;
   }
 
-  function safeStr(x) {
-    if (x == null) return '—';
-    const s = String(x).trim();
-    return s ? s : '—';
-  }
-
-  function goalieLabelFromAny(g) {
+  function goalieLabel(g) {
     if (!g) return '—';
     const ln = g.lastName?.default || g.lastName || '';
-    const fn = g.firstName?.default || g.firstName || '';
-    const sv = g.savePctg ?? g.savePercentage ?? g.savePct ?? g.svPct ?? g.savePctgDecimal ?? null;
-    const pct = formatSavePct(sv);
-    const name = ln || (fn ? fn : (g.name?.default || g.name || 'Goalie'));
-    return `${name} (${pct})`;
+    const name = ln ? ln : (g.name?.default || g.name || 'Goalie');
+
+    // try multiple common keys
+    const svRaw =
+      g.savePctg ?? g.savePercentage ?? g.savePct ?? g.svPct ?? g.savePctgDecimal ??
+      g.savePctgValue ?? g.savePctValue ?? null;
+
+    const sv = formatSavePctDot(svRaw);
+    return `${name} (${sv})`;
   }
 
-  function pickGoalieFromLists(t) {
-    if (!t) return null;
-    const candidates =
-      t?.goalies ||
-      t?.goalieStats ||
-      t?.goalie ||
-      null;
-
-    if (Array.isArray(candidates) && candidates.length) {
-      // pick likely starter by TOI / shots faced
-      const sorted = candidates.slice().sort((a,b) => {
-        const toiA = a.timeOnIce ?? a.toi ?? 0;
-        const toiB = b.timeOnIce ?? b.toi ?? 0;
-        const sfA = a.shotsAgainst ?? a.shotsFaced ?? 0;
-        const sfB = b.shotsAgainst ?? b.shotsFaced ?? 0;
-        return (toiB - toiA) || (sfB - sfA);
-      });
-      return sorted[0] || candidates[0];
+  // Robust team-stat extraction: hits/blocks often live under different keys
+  function extractTeamStat(teamObj, fallbackKeys) {
+    for (const k of fallbackKeys) {
+      if (teamObj && teamObj[k] != null) return teamObj[k];
+    }
+    const ts = teamObj?.teamStats || teamObj?.teamSkaterStats || teamObj?.statistics || null;
+    if (ts) {
+      for (const k of fallbackKeys) {
+        if (ts[k] != null) return ts[k];
+      }
     }
     return null;
   }
 
-  // Extract team totals (SOG/Hits/Blocks/Goalie) from landing/boxscore with multiple fallbacks
-  function extractTeamTotals(side, landing, boxscore) {
-    const out = { sog: null, hits: null, blocks: null, goalie: null };
+  // Find the goalie more reliably (both teams)
+  function findLikelyGoalie(side, box) {
+    const t = (side === 'away') ? (box?.awayTeam || box?.away) : (box?.homeTeam || box?.home);
 
-    // LANDING: common shapes (varies)
-    try {
-      const tg =
-        landing?.summary?.teamGameStats ||
-        landing?.teamGameStats ||
-        landing?.teamGameStatistics ||
-        null;
+    // 1) explicit goalie arrays
+    const goalies =
+      t?.goalies || t?.goalieStats || t?.goaliesByPeriod || t?.goalieSummary || null;
 
-      const t =
-        tg?.[side] ||
-        (Array.isArray(tg) ? tg.find(x => x?.homeAway === side) : null) ||
-        null;
+    if (Array.isArray(goalies) && goalies.length) {
+      // pick max TOI if present, else first
+      const sorted = goalies.slice().sort((a,b) => (Number(b.timeOnIce||b.toi||0) - Number(a.timeOnIce||a.toi||0)));
+      return sorted[0] || goalies[0];
+    }
 
-      if (t) {
-        out.sog = t.sog ?? t.shotsOnGoal ?? t.shots ?? out.sog;
-        out.hits = t.hits ?? out.hits;
-        out.blocks = t.blockedShots ?? t.blocks ?? out.blocks;
-      }
+    // 2) playerByGameStats (common on this endpoint)
+    const pgs = box?.playerByGameStats || null;
+    const list = (side === 'away') ? pgs?.awayTeam?.goalies : pgs?.homeTeam?.goalies;
+    if (Array.isArray(list) && list.length) return list[0];
 
-      // goalie info sometimes exists elsewhere in landing
-      const goalieCandidate =
-        (side === 'away' ? landing?.awayTeam : landing?.homeTeam) ||
-        null;
-      out.goalie = pickGoalieFromLists(goalieCandidate) || out.goalie;
-    } catch {}
-
-    // BOXSCORE fallback
-    try {
-      const tb = (side === 'away')
-        ? (boxscore?.awayTeam || boxscore?.away)
-        : (boxscore?.homeTeam || boxscore?.home);
-
-      if (tb) {
-        out.sog = tb.shotsOnGoal ?? tb.sog ?? tb.teamStats?.shotsOnGoal ?? out.sog;
-        out.hits = tb.hits ?? tb.teamStats?.hits ?? out.hits;
-        out.blocks = tb.blockedShots ?? tb.blocked ?? tb.teamStats?.blockedShots ?? out.blocks;
-
-        out.goalie = pickGoalieFromLists(tb) || out.goalie;
-      }
-
-      // playerByGameStats.goalies fallback
-      const pgs = boxscore?.playerByGameStats;
-      const gList = (side === 'away') ? pgs?.awayTeam?.goalies : pgs?.homeTeam?.goalies;
-      if (!out.goalie && Array.isArray(gList) && gList.length) out.goalie = gList[0];
-    } catch {}
-
-    return out;
+    // 3) sometimes "players" includes goalies with positionCode === "G"
+    const players = t?.players || t?.roster || t?.skaters || null;
+    if (Array.isArray(players) && players.length) {
+      const g = players.find(p => (p.positionCode || p.position || '').toString().toUpperCase() === 'G');
+      if (g) return g;
+    }
+    return null;
   }
 
-  function applyTeamMetrics(side, landing, boxscore) {
-    const t = extractTeamTotals(side, landing, boxscore);
-    setTxt(side + 'Sog', safeStr(t.sog));
-    setTxt(side + 'Hits', safeStr(t.hits));
-    setTxt(side + 'Blocks', safeStr(t.blocks));
-    setTxt(side + 'Goalie', goalieLabelFromAny(t.goalie));
+  function applyTeamMetrics(side, box) {
+    const t = (side === 'away') ? (box?.awayTeam || box?.away) : (box?.homeTeam || box?.home);
+
+    const sog = extractTeamStat(t, ['shotsOnGoal','sog','shots']);
+    const hits = extractTeamStat(t, ['hits']);
+    const blocks = extractTeamStat(t, ['blockedShots','blocks','blocked']);
+
+    // goalie
+    const goalie = findLikelyGoalie(side, box);
+
+    setTxt(side + 'Sog', sog != null ? String(sog) : '—');
+    setTxt(side + 'Hits', hits != null ? String(hits) : '—');
+    setTxt(side + 'Blocks', blocks != null ? String(blocks) : '—');
+    setTxt(side + 'Goalie', goalieLabel(goalie));
   }
 
   // Render the main scorebar
-  function renderScorebar(game, details, landing, boxscore) {
+  function renderScorebar(game, details, boxscore) {
     if (!game) {
       setTxt('state', 'No game data');
       setTxt('when', '—');
@@ -814,14 +840,15 @@
 
     setTxt('state', status);
 
-    // time/when
+    // time/when (prefer intermission remaining if present)
     let when = '';
     if (isLive) {
       if (details?.clock?.inIntermission) {
         const ir =
           details.clock.intermissionTimeRemaining ||
           details.clock.intermissionRemaining ||
-          details.clock.intermissionTimeRemainingSeconds;
+          details.clock.intermissionTimeRemainingSeconds ||
+          details.clock.intermissionTimeLeft;
 
         if (typeof ir === 'string' && ir.trim()) when = `INT ${ir}`;
         else if (typeof ir === 'number' && Number.isFinite(ir)) {
@@ -839,9 +866,13 @@
     }
     setTxt('when', when || '—');
 
-    // metrics (prefer landing, then boxscore)
-    applyTeamMetrics('away', landing, boxscore);
-    applyTeamMetrics('home', landing, boxscore);
+    // team metrics
+    if (boxscore) {
+      applyTeamMetrics('away', boxscore);
+      applyTeamMetrics('home', boxscore);
+    } else {
+      ['awaySog','homeSog','awayHits','homeHits','awayBlocks','homeBlocks','awayGoalie','homeGoalie'].forEach(id => setTxt(id, '—'));
+    }
   }
 
   function buildPlayerMap(details) {
@@ -863,7 +894,7 @@
     return (mm * 60) + ss;
   }
 
-  // Render goals into a specific container, newest-first if requested
+  // Render goals into a specific container, newest-first by default
   function renderGoals(details, containerId, newestFirst = true) {
     const goalsEl = document.getElementById(containerId);
     if (!goalsEl) return;
@@ -890,7 +921,6 @@
       return;
     }
 
-    // sort by period then time; then reverse for newest-first
     goals.sort((a,b) => {
       const pd = (a.periodDescriptor?.number || 0) - (b.periodDescriptor?.number || 0);
       if (pd !== 0) return pd;
@@ -956,10 +986,12 @@
     goalsEl.innerHTML = html;
   }
 
-  function renderLastGame(game) {
-    const el = document.getElementById('lastGameBox');
+  function renderGameSummary(game, targetId) {
+    const el = document.getElementById(targetId);
+    if (!el) return;
+
     if (!game) {
-      el.innerHTML = '<div class="loading">No previous game data</div>';
+      el.innerHTML = '<div class="loading">No game data</div>';
       return;
     }
 
@@ -970,26 +1002,7 @@
     el.innerHTML = `
       <div class="game-summary">
         <div><strong>${teamLabel(away)}</strong> at <strong>${teamLabel(home)}</strong></div>
-        <div>Final: ${away.score || 0} — ${home.score || 0}</div>
-        <div>${when}</div>
-      </div>
-    `;
-  }
-
-  function renderNextGame(game) {
-    const el = document.getElementById('nextGameBox');
-    if (!game) {
-      el.innerHTML = '<div class="loading">No upcoming game scheduled</div>';
-      return;
-    }
-
-    const away = game.awayTeam;
-    const home = game.homeTeam;
-    const when = formatDate(game.startTimeUTC);
-
-    el.innerHTML = `
-      <div class="game-summary">
-        <div><strong>${teamLabel(away)}</strong> at <strong>${teamLabel(home)}</strong></div>
+        <div>${(game.gameState === 'OFF' || game.gameState === 'FINAL') ? `Final: ${away.score || 0} — ${home.score || 0}` : ''}</div>
         <div>${when}</div>
       </div>
     `;
@@ -1005,7 +1018,7 @@
   try {
     const schedule = await getSchedule();
 
-    // team header
+    // team header: record/points
     const teamStats = await getTeamStats().catch(()=>null);
     if (teamStats) {
       setTxt('record', `${teamStats.wins}-${teamStats.losses}-${teamStats.otLosses}`);
@@ -1015,6 +1028,18 @@
       setTxt('points', '—');
     }
 
+    // standings line
+    const pos = await getSabresStandingsPosition().catch(()=>null);
+    if (pos) {
+      setHTML(
+        'standingLine',
+        `Conference: <strong>${pos.conferenceRank}</strong> in <strong>${pos.conference}</strong> &nbsp; <span style="opacity:.8">|</span> &nbsp; Division: <strong>${pos.divisionRank}</strong> &nbsp; <span style="opacity:.8">|</span> &nbsp; League: <strong>${pos.leagueRank}</strong>`
+      );
+    } else {
+      setHTML('standingLine', 'Standings position unavailable');
+    }
+
+    // leaders
     const leaders = await getLeaders().catch(()=>null);
     if (leaders) {
       setHTML('topGoals', `Leading goals: <strong>${leaders.goals.name}</strong>, ${leaders.goals.val}`);
@@ -1024,16 +1049,16 @@
       setHTML('topPoints', 'Leading points unavailable');
     }
 
-    // primary game selection
-    const primaryGame = schedule.liveGame || schedule.mostRecentCompleted;
+    // primary game: live > last
+    const primaryGame = schedule.liveGame || schedule.lastGame;
     const isLive = !!schedule.liveGame;
 
-    // Next game always
-    renderNextGame(schedule.nextGame);
+    // Next game summary (always)
+    renderGameSummary(schedule.nextGame, 'nextGameBox');
 
-    // Most Recent Game panel should be the completed game BEFORE live (when live).
-    // schedule.mostRecentCompleted already excludes live id.
-    renderLastGame(schedule.mostRecentCompleted);
+    // "Most Recent Game" must be the game BEFORE the live/primary game
+    const mostRecentBoxGame = schedule.prevFinalBefore || schedule.lastGame || null;
+    renderGameSummary(mostRecentBoxGame, 'lastGameBox');
 
     // If no primary, hide live goals panel and stop.
     if (!primaryGame) {
@@ -1049,47 +1074,40 @@
 
     setGoalsVisibility(true);
 
-    // Load details + landing (preferred totals) + boxscore (fallback)
-    const [details, landing, boxscore] = await Promise.all([
+    // Load details+boxscore for primary render
+    const [details, boxscore] = await Promise.all([
       getGameDetails(primaryGame.id),
-      getGameLanding(primaryGame.id).catch(()=>null),
       getGameBoxscore(primaryGame.id).catch(()=>null)
     ]);
 
-    renderScorebar(primaryGame, details, landing, boxscore);
-    renderGoals(details, 'goals', true); // newest-first for active game
+    renderScorebar(primaryGame, details, boxscore);
+    renderGoals(details, 'goals', true); // newest-first
     setUpdatedNow();
 
-    // Most recent completed game: show scorers/assists if finished and not the same as primary when live
-    const recent = schedule.mostRecentCompleted;
-    if (recent?.id) {
+    // Most Recent Game scoring details (game BEFORE live/primary)
+    if (mostRecentBoxGame?.id) {
       try {
-        const recentDetails = await getGameDetails(recent.id);
-        document.getElementById('lastGameGoals').innerHTML = '<h3 style="margin-top:18px;">Scoring</h3>';
-        const lg = document.createElement('div');
-        lg.className = 'goals';
-        lg.id = 'lastGameGoalsList';
-        document.getElementById('lastGameGoals').appendChild(lg);
-        renderGoals(recentDetails, 'lastGameGoalsList', true);
+        const lastDetails = await getGameDetails(mostRecentBoxGame.id);
+        renderGoals(lastDetails, 'lastGameGoals', true);
       } catch {
         setHTML('lastGameGoals', '');
       }
+    } else {
+      setHTML('lastGameGoals', '');
     }
 
     // If live: auto-refresh
     if (isLive) {
       const gameId = primaryGame.id;
-
       const refreshInterval = setInterval(async () => {
         try {
-          const [updatedDetails, updatedLanding, updatedBox] = await Promise.all([
+          const [updatedDetails, updatedBox] = await Promise.all([
             getGameDetails(gameId),
-            getGameLanding(gameId).catch(()=>null),
             getGameBoxscore(gameId).catch(()=>null)
           ]);
 
           const gameState = updatedDetails?.gameState;
-          renderScorebar(primaryGame, updatedDetails, updatedLanding, updatedBox);
+          renderScorebar(primaryGame, updatedDetails, updatedBox);
           renderGoals(updatedDetails, 'goals', true);
           setUpdatedNow();
 
@@ -1112,6 +1130,7 @@
     setHTML('lastGameBox', '<div class="error">—</div>');
     setHTML('nextGameBox', '<div class="error">—</div>');
     setHTML('lastGameGoals', '');
+    setHTML('standingLine', 'Standings position unavailable');
   }
 })();
 </script>
