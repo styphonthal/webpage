@@ -43,16 +43,25 @@
     overflow:hidden;
   }
 
-  /* Slug images (large, centered on sides) */
+  /* Slug images (large, centered on sides) — POP + 3D (1+2) */
   .slug{
     position:absolute;
     top:50%;
     transform:translateY(-50%);
-    height:200px;            /* ~4× typical icon size */
+    height:200px;            /* ~4× */
     width:auto;
-    opacity:.92;
+    opacity:.98;
     pointer-events:none;
-    filter: drop-shadow(0 10px 18px rgba(0,0,0,.35));
+
+    /* (1) depth shadow stack + (2) rim/glow pop */
+    filter:
+      drop-shadow(0 0 10px rgba(252,181,20,.22))   /* gold glow */
+      drop-shadow(0 0 2px  rgba(255,255,255,.18))  /* faint rim */
+      drop-shadow(0 24px 24px rgba(0,0,0,.55))     /* main depth */
+      drop-shadow(0 10px 10px rgba(0,0,0,.35))     /* mid depth */
+      drop-shadow(0 2px  2px  rgba(0,0,0,.25));    /* edge separation */
+
+    will-change: transform, filter;
   }
   .slug-left{ left:18px; }
   .slug-right{ right:18px; transform:translateY(-50%) scaleX(-1); }
@@ -65,12 +74,12 @@
     padding:0 240px; /* prevent overlap with big slugs */
   }
 
-  .team-header h1{
-    margin:0 0 12px 0;
-    font-size:2rem;
-    color:var(--sabres-gold);
-    font-weight:800;
-    letter-spacing:.5px;
+  /* Header image replacing text */
+  .team-title{
+    display:block;
+    margin:0 auto 10px auto;
+    max-width:min(520px, 80vw);
+    height:auto;
   }
 
   .team-stats{
@@ -393,7 +402,9 @@
       <img class="slug slug-right" src="slug.png" alt="" aria-hidden="true">
 
       <div class="team-header-inner">
-        <h1>Buffalo Sabres</h1>
+        <!-- Header text replaced with image -->
+        <img class="team-title" src="sabres.jpg" alt="Buffalo Sabres">
+
         <div class="team-stats">
           <div class="stat-item">
             <span class="stat-label">Record</span>
@@ -468,7 +479,7 @@
       </div>
     </div>
 
-    <!-- Last Game -->
+    <!-- Most Recent Game (should be the one BEFORE live game when live) -->
     <div class="panel" id="lastGamePanel">
       <h3>Most Recent Game</h3>
       <div id="lastGameBox" class="loading">Loading…</div>
@@ -544,6 +555,18 @@
     return await response.json();
   }
 
+  // (Requested) Save% display as .XXX
+  function formatSavePct(v) {
+    if (v == null || v === '' || !Number.isFinite(Number(v))) return '—';
+    let x = Number(v);
+    // accept 0.923, 92.3, 923
+    if (x > 1 && x <= 100) x = x / 100;
+    if (x > 100) x = x / 1000;
+    x = Math.max(0, Math.min(0.999, x));
+    const n = Math.round(x * 1000);
+    return '.' + String(n).padStart(3, '0');
+  }
+
   // Get team standings and stats
   async function getTeamStats() {
     try {
@@ -594,6 +617,7 @@
     }
   }
 
+  // Schedule: broaden "live-ish" detection so intermission doesn't break your selection
   async function getSchedule() {
     const now = new Date();
     const formatAPIDate = (d) => d.toISOString().split('T')[0];
@@ -608,21 +632,26 @@
 
     const allGames = [...(prevData.games || []), ...(data.games || [])];
 
-    const liveGame = allGames.find(g =>
-      g.gameState === 'LIVE' ||
-      g.gameState === 'CRIT' ||
-      g.gameState === 'CRITICAL'
-    );
+    const LIVE_STATES = new Set(['LIVE','CRIT','CRITICAL','IN_PROGRESS','INPROGRESS','PROG','STARTED']);
+    const liveGame = allGames.find(g => LIVE_STATES.has(g.gameState));
 
-    const lastGame = allGames
-      .filter(g => (g.gameState === 'OFF' || g.gameState === 'FINAL') && g.id !== liveGame?.id)
-      .sort((a, b) => new Date(b.startTimeUTC) - new Date(a.startTimeUTC))[0];
+    const completed = allGames
+      .filter(g => (g.gameState === 'OFF' || g.gameState === 'FINAL'))
+      .sort((a, b) => new Date(b.startTimeUTC) - new Date(a.startTimeUTC));
+
+    // last completed excluding live game id
+    const lastGame = completed.find(g => g.id !== liveGame?.id) || completed[0] || null;
+
+    // "previous game" used for "Most Recent Game" panel when live:
+    // If live exists, show the most recent completed game (already lastGame).
+    // If not live, lastGame is also the most recent completed.
+    const mostRecentCompleted = lastGame;
 
     const nextGame = allGames
       .filter(g => g.gameState === 'FUT' || g.gameState === 'PRE')
-      .sort((a, b) => new Date(a.startTimeUTC) - new Date(b.startTimeUTC))[0];
+      .sort((a, b) => new Date(a.startTimeUTC) - new Date(b.startTimeUTC))[0] || null;
 
-    return { liveGame, lastGame, nextGame, games: allGames };
+    return { liveGame, mostRecentCompleted, nextGame, games: allGames };
   }
 
   // Get game details with cache buster
@@ -631,62 +660,119 @@
     return await fetchJSON(url);
   }
 
-  // Boxscore for SOG/Hits/Blocks/Goalie sv%
+  // Boxscore (can be missing some totals depending on timing)
   async function getGameBoxscore(gameId) {
     const url = `https://api-web.nhle.com/v1/gamecenter/${gameId}/boxscore?cb=${Date.now()}`;
     return await fetchJSON(url);
   }
 
-  function formatPct(v) {
-    if (v == null) return '—';
-    if (typeof v === 'number') {
-      // sv% often comes as 0.923 or 92.3 depending on endpoint; handle both.
-      const pct = v <= 1 ? (v * 100) : v;
-      return `${pct.toFixed(1)}%`;
-    }
-    const s = String(v).trim();
-    if (!s) return '—';
-    return s.includes('%') ? s : `${s}%`;
+  // Landing tends to have team totals (SOG/Hits/Blocks) more reliably than play-by-play
+  async function getGameLanding(gameId) {
+    const url = `https://api-web.nhle.com/v1/gamecenter/${gameId}/landing?cb=${Date.now()}`;
+    return await fetchJSON(url);
   }
 
-  function goalieLabel(g) {
+  function safeStr(x) {
+    if (x == null) return '—';
+    const s = String(x).trim();
+    return s ? s : '—';
+  }
+
+  function goalieLabelFromAny(g) {
     if (!g) return '—';
     const ln = g.lastName?.default || g.lastName || '';
-    const sv = g.savePctg ?? g.savePercentage ?? g.savePct ?? g.svPct ?? null;
-    const pct = formatPct(sv);
-    const name = ln ? ln : (g.name?.default || g.name || 'Goalie');
+    const fn = g.firstName?.default || g.firstName || '';
+    const sv = g.savePctg ?? g.savePercentage ?? g.savePct ?? g.svPct ?? g.savePctgDecimal ?? null;
+    const pct = formatSavePct(sv);
+    const name = ln || (fn ? fn : (g.name?.default || g.name || 'Goalie'));
     return `${name} (${pct})`;
   }
 
-  function applyTeamMetrics(side, box) {
-    // side: "away" | "home"
-    // box: boxscore object
-    const t = (side === 'away') ? (box?.awayTeam || box?.away) : (box?.homeTeam || box?.home);
-    const sog = t?.shotsOnGoal ?? t?.sog ?? t?.teamStats?.shotsOnGoal ?? '—';
-    const hits = t?.hits ?? t?.teamStats?.hits ?? '—';
-    const blocks = t?.blockedShots ?? t?.blocked ?? t?.teamStats?.blockedShots ?? '—';
+  function pickGoalieFromLists(t) {
+    if (!t) return null;
+    const candidates =
+      t?.goalies ||
+      t?.goalieStats ||
+      t?.goalie ||
+      null;
 
-    // attempt goalie: use "goalies" arrays if present; otherwise infer from "playerByGameStats"
-    let goalie = null;
-    const goalies = t?.goalies || t?.goalieStats || null;
-    if (Array.isArray(goalies) && goalies.length) {
-      // try pick the one with most TOI / shots faced; otherwise first.
-      goalie = goalies.slice().sort((a,b)=> (b.timeOnIce||0)-(a.timeOnIce||0))[0] || goalies[0];
-    } else {
-      // fallback: sometimes boxscore exposes playerByGameStats.goalies
-      const pgs = box?.playerByGameStats;
-      const list = (side === 'away') ? pgs?.awayTeam?.goalies : pgs?.homeTeam?.goalies;
-      if (Array.isArray(list) && list.length) goalie = list[0];
+    if (Array.isArray(candidates) && candidates.length) {
+      // pick likely starter by TOI / shots faced
+      const sorted = candidates.slice().sort((a,b) => {
+        const toiA = a.timeOnIce ?? a.toi ?? 0;
+        const toiB = b.timeOnIce ?? b.toi ?? 0;
+        const sfA = a.shotsAgainst ?? a.shotsFaced ?? 0;
+        const sfB = b.shotsAgainst ?? b.shotsFaced ?? 0;
+        return (toiB - toiA) || (sfB - sfA);
+      });
+      return sorted[0] || candidates[0];
     }
+    return null;
+  }
 
-    setTxt(side + 'Sog', String(sog));
-    setTxt(side + 'Hits', String(hits));
-    setTxt(side + 'Blocks', String(blocks));
-    setTxt(side + 'Goalie', goalieLabel(goalie));
+  // Extract team totals (SOG/Hits/Blocks/Goalie) from landing/boxscore with multiple fallbacks
+  function extractTeamTotals(side, landing, boxscore) {
+    const out = { sog: null, hits: null, blocks: null, goalie: null };
+
+    // LANDING: common shapes (varies)
+    try {
+      const tg =
+        landing?.summary?.teamGameStats ||
+        landing?.teamGameStats ||
+        landing?.teamGameStatistics ||
+        null;
+
+      const t =
+        tg?.[side] ||
+        (Array.isArray(tg) ? tg.find(x => x?.homeAway === side) : null) ||
+        null;
+
+      if (t) {
+        out.sog = t.sog ?? t.shotsOnGoal ?? t.shots ?? out.sog;
+        out.hits = t.hits ?? out.hits;
+        out.blocks = t.blockedShots ?? t.blocks ?? out.blocks;
+      }
+
+      // goalie info sometimes exists elsewhere in landing
+      const goalieCandidate =
+        (side === 'away' ? landing?.awayTeam : landing?.homeTeam) ||
+        null;
+      out.goalie = pickGoalieFromLists(goalieCandidate) || out.goalie;
+    } catch {}
+
+    // BOXSCORE fallback
+    try {
+      const tb = (side === 'away')
+        ? (boxscore?.awayTeam || boxscore?.away)
+        : (boxscore?.homeTeam || boxscore?.home);
+
+      if (tb) {
+        out.sog = tb.shotsOnGoal ?? tb.sog ?? tb.teamStats?.shotsOnGoal ?? out.sog;
+        out.hits = tb.hits ?? tb.teamStats?.hits ?? out.hits;
+        out.blocks = tb.blockedShots ?? tb.blocked ?? tb.teamStats?.blockedShots ?? out.blocks;
+
+        out.goalie = pickGoalieFromLists(tb) || out.goalie;
+      }
+
+      // playerByGameStats.goalies fallback
+      const pgs = boxscore?.playerByGameStats;
+      const gList = (side === 'away') ? pgs?.awayTeam?.goalies : pgs?.homeTeam?.goalies;
+      if (!out.goalie && Array.isArray(gList) && gList.length) out.goalie = gList[0];
+    } catch {}
+
+    return out;
+  }
+
+  function applyTeamMetrics(side, landing, boxscore) {
+    const t = extractTeamTotals(side, landing, boxscore);
+    setTxt(side + 'Sog', safeStr(t.sog));
+    setTxt(side + 'Hits', safeStr(t.hits));
+    setTxt(side + 'Blocks', safeStr(t.blocks));
+    setTxt(side + 'Goalie', goalieLabelFromAny(t.goalie));
   }
 
   // Render the main scorebar
-  function renderScorebar(game, details, boxscore) {
+  function renderScorebar(game, details, landing, boxscore) {
     if (!game) {
       setTxt('state', 'No game data');
       setTxt('when', '—');
@@ -753,14 +839,9 @@
     }
     setTxt('when', when || '—');
 
-    // team metrics
-    if (boxscore) {
-      applyTeamMetrics('away', boxscore);
-      applyTeamMetrics('home', boxscore);
-    } else {
-      // graceful fallbacks
-      ['awaySog','homeSog','awayHits','homeHits','awayBlocks','homeBlocks','awayGoalie','homeGoalie'].forEach(id => setTxt(id, '—'));
-    }
+    // metrics (prefer landing, then boxscore)
+    applyTeamMetrics('away', landing, boxscore);
+    applyTeamMetrics('home', landing, boxscore);
   }
 
   function buildPlayerMap(details) {
@@ -914,10 +995,10 @@
     `;
   }
 
-  function setGoalsVisibility(isLiveOrHasPrimary) {
+  function setGoalsVisibility(show) {
     const liveGoalsPanel = document.getElementById('liveGoalsPanel');
     if (!liveGoalsPanel) return;
-    liveGoalsPanel.style.display = isLiveOrHasPrimary ? '' : 'none';
+    liveGoalsPanel.style.display = show ? '' : 'none';
   }
 
   // Main execution
@@ -944,12 +1025,15 @@
     }
 
     // primary game selection
-    const primaryGame = schedule.liveGame || schedule.lastGame;
+    const primaryGame = schedule.liveGame || schedule.mostRecentCompleted;
     const isLive = !!schedule.liveGame;
 
-    // next/last summaries always
-    renderLastGame(schedule.lastGame);
+    // Next game always
     renderNextGame(schedule.nextGame);
+
+    // Most Recent Game panel should be the completed game BEFORE live (when live).
+    // schedule.mostRecentCompleted already excludes live id.
+    renderLastGame(schedule.mostRecentCompleted);
 
     // If no primary, hide live goals panel and stop.
     if (!primaryGame) {
@@ -965,30 +1049,29 @@
 
     setGoalsVisibility(true);
 
-    // Load details+boxscore for primary render
-    const [details, boxscore] = await Promise.all([
+    // Load details + landing (preferred totals) + boxscore (fallback)
+    const [details, landing, boxscore] = await Promise.all([
       getGameDetails(primaryGame.id),
+      getGameLanding(primaryGame.id).catch(()=>null),
       getGameBoxscore(primaryGame.id).catch(()=>null)
     ]);
 
-    renderScorebar(primaryGame, details, boxscore);
+    renderScorebar(primaryGame, details, landing, boxscore);
     renderGoals(details, 'goals', true); // newest-first for active game
     setUpdatedNow();
 
-    // Most recent game: if finished, also show scorers/assists/etc
-    if (schedule.lastGame?.id) {
+    // Most recent completed game: show scorers/assists if finished and not the same as primary when live
+    const recent = schedule.mostRecentCompleted;
+    if (recent?.id) {
       try {
-        const lastDetails = await getGameDetails(schedule.lastGame.id);
-        // newest-first for last game goals too
+        const recentDetails = await getGameDetails(recent.id);
         document.getElementById('lastGameGoals').innerHTML = '<h3 style="margin-top:18px;">Scoring</h3>';
-        // Insert a container after header
         const lg = document.createElement('div');
         lg.className = 'goals';
         lg.id = 'lastGameGoalsList';
         document.getElementById('lastGameGoals').appendChild(lg);
-        renderGoals(lastDetails, 'lastGameGoalsList', true);
+        renderGoals(recentDetails, 'lastGameGoalsList', true);
       } catch {
-        // keep empty if unavailable
         setHTML('lastGameGoals', '');
       }
     }
@@ -999,14 +1082,14 @@
 
       const refreshInterval = setInterval(async () => {
         try {
-          const [updatedDetails, updatedBox] = await Promise.all([
+          const [updatedDetails, updatedLanding, updatedBox] = await Promise.all([
             getGameDetails(gameId),
-            // boxscore can be heavier / more rate-limited; fetch it less often if desired.
+            getGameLanding(gameId).catch(()=>null),
             getGameBoxscore(gameId).catch(()=>null)
           ]);
 
           const gameState = updatedDetails?.gameState;
-          renderScorebar(primaryGame, updatedDetails, updatedBox);
+          renderScorebar(primaryGame, updatedDetails, updatedLanding, updatedBox);
           renderGoals(updatedDetails, 'goals', true);
           setUpdatedNow();
 
@@ -1018,9 +1101,6 @@
           console.error('Refresh error:', e);
         }
       }, 15000);
-    } else {
-      // Not live (primary was lastGame): keep live goals panel, but set "Goals" to that game's goals already shown above.
-      // If you want goals empty when showing only next game, that only applies when there is no recent game; handled earlier.
     }
 
   } catch (error) {
