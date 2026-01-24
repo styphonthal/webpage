@@ -3,67 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modern Redesign</title>
+    <title>Modern CommandBridge Design</title>
     <style>
         body {
-            font-family: 'Helvetica Neue', sans-serif;
-            margin: 0;
-            padding: 0;
-            background: linear-gradient(135deg, #c2c2f0, #f0f0c2);
-            transition: background 0.5s;
-        }
-        .glassmorphism {
-            background: rgba(255, 255, 255, 0.1);
+            font-family: 'Arial', sans-serif;
+            background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            color: #333;
         }
-        h1 {
-            font-size: 3em;
-            background: linear-gradient(45deg, #ff6ec4, #7873f5);
+        h1, h2, h3 {
+            background: linear-gradient(90deg, #6e7bff, #a2c2ff);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            text-align: center;
-            transition: transform 0.3s;
         }
-        h1:hover {
-            transform: scale(1.05);
-        }
-        .content-section {
-            margin: 20px;
+        .card {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
             padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
         }
-        .section {
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 40px rgba(0,0,0,0.2);
+        }
+        .glow {
+            box-shadow: 0 0 20px rgba(255, 204, 0, 0.9);
+        }
+        .featured-projects {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
             margin: 20px 0;
-            padding: 20px;
-            border: 2px solid #fff;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-            transition: box-shadow 0.3s;
         }
-        .section:hover {
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        .featured-project {
+            flex: 1 0 45%;
+            margin: 10px;
+            transition: transform 0.2s;
+        }
+        .featured-project:hover {
+            transform: scale(1.05);
         }
     </style>
 </head>
 <body>
-    <div class="glassmorphism">
-        <h1>Welcome to My Modern Redesigned Page!</h1>
-        <div class="content-section">
-            <div class="section">
-                <h2>About</h2>
-                <p>This section contains information about the website.</p>
+    <header>
+        <h1>Welcome to CommandBridge</h1>
+        <nav>
+            <ul>
+                <li><a href="#">Home</a></li>
+                <li><a href="#">Projects</a></li>
+                <li><a href="#">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section class="hero">
+            <h2>Experience the Future of Sci-Fi Design</h2>
+            <p>Explore our innovative projects designed to inspire and engage.</p>
+        </section>
+        <section class="featured-projects">
+            <h2>Featured Projects</h2>
+            <div class="featured-project card glow">
+                <h3>Project One</h3>
+                <p>Description of the project goes here.</p>
             </div>
-            <div class="section">
-                <h2>Gallery</h2>
-                <p>Check out our amazing gallery of images.</p>
+            <div class="featured-project card glow">
+                <h3>Project Two</h3>
+                <p>Description of the project goes here.</p>
             </div>
-            <div class="section">
-                <h2>Contact</h2>
-                <p>Feel free to reach out via the contact form.</p>
+            <div class="featured-project card glow">
+                <h3>Project Three</h3>
+                <p>Description of the project goes here.</p>
             </div>
-        </div>
-    </div>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2026 CommandBridge. All rights reserved.</p>
+    </footer>
 </body>
 </html>
