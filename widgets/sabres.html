@@ -427,17 +427,28 @@
       const data = await fetchJSON(url);
       
       // Find Sabres in standings
-      const sabres = data.standings?.find(team => team.teamAbbrev?.default === SABRES_ABBR);
+      let sabres = null;
+      for (const standing of data.standings || []) {
+        if (standing.teamAbbrev?.default === SABRES_ABBR) {
+          sabres = standing;
+          break;
+        }
+      }
+      
+      if (!sabres) {
+        console.log('Sabres not found in standings, trying team common name...');
+        return { wins: 0, losses: 0, otLosses: 0, points: 0 };
+      }
       
       return {
-        wins: sabres?.wins || 0,
-        losses: sabres?.losses || 0,
-        otLosses: sabres?.otLosses || 0,
-        points: sabres?.points || 0
+        wins: sabres.wins || 0,
+        losses: sabres.losses || 0,
+        otLosses: sabres.otLosses || 0,
+        points: sabres.points || 0
       };
     } catch (error) {
       console.error('Error fetching team stats:', error);
-      return { wins: 0, losses: 0, otLosses: 0, points: 0 };
+      return null;
     }
   }
 
@@ -449,7 +460,10 @@
       
       // Find player with most goals
       const skaters = data.skaters || [];
-      if (skaters.length === 0) return null;
+      if (skaters.length === 0) {
+        console.log('No skaters found');
+        return null;
+      }
       
       const topScorer = skaters.reduce((top, player) => {
         const goals = player.goals || 0;
@@ -541,7 +555,9 @@
 
     // Update status
     let status = 'Final';
-    if (isLive || game.gameState === 'LIVE' || game.gameState === 'CRIT' || game.gameState === 'CRITICAL') {
+    const gameState = details?.gameState || game.gameState;
+    
+    if (gameState === 'LIVE' || gameState === 'CRIT' || gameState === 'CRITICAL') {
       status = 'LIVE';
       
       // Show period and time if available
@@ -556,15 +572,25 @@
           status = `${period}${period === 1 ? 'st' : period === 2 ? 'nd' : period === 3 ? 'rd' : 'th'} Period`;
         }
       }
-    } else if (game.gameState === 'FUT') {
+    } else if (gameState === 'FUT' || gameState === 'PRE') {
       status = 'Scheduled';
+    } else if (gameState === 'OFF' || gameState === 'FINAL') {
+      status = 'Final';
     }
+    
+    // Check for intermission
+    if (details?.gameState === 'LIVE' && details?.clock?.inIntermission) {
+      status = 'Intermission';
+    }
+    
     setTxt('state', status);
 
     // Update time/date
     let when = '';
-    if (isLive && details?.clock) {
+    if (details?.clock && !details.clock.inIntermission) {
       when = details.clock.timeRemaining || '';
+    } else if (details?.clock?.inIntermission) {
+      when = 'Break';
     } else {
       when = formatDate(game.startTimeUTC);
     }
@@ -724,7 +750,39 @@
 
   // Main execution
   try {
+    // Fetch schedule first
     const schedule = await getSchedule();
+    
+    // Fetch team stats and top scorer (don't let these block the main display)
+    let teamStats = null;
+    let topScorer = null;
+    
+    try {
+      teamStats = await getTeamStats();
+    } catch (e) {
+      console.error('Failed to load team stats:', e);
+    }
+    
+    try {
+      topScorer = await getTopScorer();
+    } catch (e) {
+      console.error('Failed to load top scorer:', e);
+    }
+    
+    // Render team header
+    if (teamStats) {
+      setTxt('record', `${teamStats.wins}-${teamStats.losses}-${teamStats.otLosses}`);
+      setTxt('points', teamStats.points.toString());
+    } else {
+      setHTML('record', '<span style="font-size:.9rem">Loading...</span>');
+      setHTML('points', '<span style="font-size:.9rem">...</span>');
+    }
+    
+    if (topScorer) {
+      setHTML('topScorer', `Current leading scorer: <strong>${topScorer.name}</strong>, ${topScorer.goals} goals`);
+    } else {
+      setHTML('topScorer', '<span style="font-size:.9rem">Loading top scorer...</span>');
+    }
     
     // Prioritize: live game > last game
     const primaryGame = schedule.liveGame || schedule.lastGame;
@@ -737,15 +795,28 @@
       
       // Auto-refresh if live
       if (isLive) {
-        setInterval(async () => {
+        const refreshInterval = setInterval(async () => {
           try {
+            // Re-fetch schedule to check if game is still live
+            const freshSchedule = await getSchedule();
+            const stillLive = !!freshSchedule.liveGame;
+            
+            if (!stillLive) {
+              clearInterval(refreshInterval);
+              console.log('Game ended, stopping auto-refresh');
+              // Reload the page to show final state
+              location.reload();
+              return;
+            }
+            
             const updatedDetails = await getGameDetails(primaryGame.id);
             renderScorebar(primaryGame, updatedDetails, true);
             renderGoals(updatedDetails);
+            console.log('Live update:', new Date().toLocaleTimeString());
           } catch (e) {
             console.error('Refresh error:', e);
           }
-        }, 20000); // Refresh every 20 seconds
+        }, 15000); // Refresh every 15 seconds
       }
     } else {
       setTxt('state', 'No recent game');
