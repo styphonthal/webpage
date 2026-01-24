@@ -340,29 +340,36 @@
     const now = new Date();
     const formatAPIDate = (d) => d.toISOString().split('T')[0];
     
+    // Get current week
     const url = `https://api-web.nhle.com/v1/club-schedule/${SABRES_ABBR}/week/${formatAPIDate(now)}`;
     const data = await fetchJSON(url);
     
-    const games = data.games || [];
+    // Also get previous week to ensure we catch recent games
+    const prevWeek = new Date(now);
+    prevWeek.setDate(prevWeek.getDate() - 7);
+    const prevUrl = `https://api-web.nhle.com/v1/club-schedule/${SABRES_ABBR}/week/${formatAPIDate(prevWeek)}`;
+    const prevData = await fetchJSON(prevUrl);
+    
+    const allGames = [...(prevData.games || []), ...(data.games || [])];
     
     // Find live game
-    const liveGame = games.find(g => 
+    const liveGame = allGames.find(g => 
       g.gameState === 'LIVE' || 
       g.gameState === 'CRIT' ||
       g.gameState === 'CRITICAL'
     );
     
-    // Find last completed game
-    const lastGame = games
-      .filter(g => g.gameState === 'OFF' || g.gameState === 'FINAL')
+    // Find last completed game (excluding current live game)
+    const lastGame = allGames
+      .filter(g => (g.gameState === 'OFF' || g.gameState === 'FINAL') && g.id !== liveGame?.id)
       .sort((a, b) => new Date(b.startTimeUTC) - new Date(a.startTimeUTC))[0];
     
     // Find next upcoming game
-    const nextGame = games
+    const nextGame = allGames
       .filter(g => g.gameState === 'FUT' || g.gameState === 'PRE')
       .sort((a, b) => new Date(a.startTimeUTC) - new Date(b.startTimeUTC))[0];
     
-    return { liveGame, lastGame, nextGame, games };
+    return { liveGame, lastGame, nextGame, games: allGames };
   }
 
   // Get game details
@@ -463,15 +470,36 @@
       const teamInfo = details.homeTeam?.id === team ? details.homeTeam : details.awayTeam;
       const teamName = teamInfo?.name?.default || teamInfo?.commonName?.default || teamInfo?.abbrev || '';
       
-      const scorer = goal.details?.scoringPlayerTotal 
-        ? `${goal.details.scoringPlayer || 'Unknown'} (${goal.details.scoringPlayerTotal})`
-        : goal.details?.scoringPlayer || 'Unknown';
+      // Get scorer info - check multiple possible fields
+      let scorerName = 'Unknown';
+      let goalNumber = '';
       
+      if (goal.details?.scoringPlayer) {
+        scorerName = goal.details.scoringPlayer;
+      } else if (goal.details?.firstName && goal.details?.lastName) {
+        scorerName = `${goal.details.firstName.default} ${goal.details.lastName.default}`;
+      }
+      
+      if (goal.details?.scoringPlayerTotal) {
+        goalNumber = ` (${goal.details.scoringPlayerTotal})`;
+      }
+      
+      // Get assists
       const assists = [];
-      if (goal.details?.assist1Player) assists.push(goal.details.assist1Player);
-      if (goal.details?.assist2Player) assists.push(goal.details.assist2Player);
+      if (goal.details?.assist1Player) {
+        assists.push(goal.details.assist1Player);
+      } else if (goal.details?.assist1firstName && goal.details?.assist1lastName) {
+        assists.push(`${goal.details.assist1firstName.default} ${goal.details.assist1lastName.default}`);
+      }
+      
+      if (goal.details?.assist2Player) {
+        assists.push(goal.details.assist2Player);
+      } else if (goal.details?.assist2firstName && goal.details?.assist2lastName) {
+        assists.push(`${goal.details.assist2firstName.default} ${goal.details.assist2lastName.default}`);
+      }
       
       const strength = goal.details?.strength || 'ev';
+      const situation = goal.details?.situationCode || '';
       
       html += `
         <div class="goal">
@@ -480,9 +508,9 @@
             <div>
               <span class="team-name">${teamName}</span>
               <span class="sep">—</span>
-              <span class="who">${scorer}</span>
+              <span class="who">${scorerName}${goalNumber}</span>
             </div>
-            <div class="strength">${strength.toUpperCase()}</div>
+            <div class="strength">${strength.toUpperCase()}${situation ? ` (${situation})` : ''}</div>
             ${assists.length ? `
               <div class="assist">Assists: ${assists.join(', ')}</div>
             ` : ''}
@@ -567,8 +595,8 @@
       setHTML('goals', '<div class="info">No recent games found. Check back during the hockey season!</div>');
     }
 
-    // Render summaries - show last game only if not currently live
-    renderLastGame(isLive ? null : schedule.lastGame);
+    // Render summaries - always show last game even if currently live
+    renderLastGame(schedule.lastGame);
     renderNextGame(schedule.nextGame);
 
   } catch (error) {
