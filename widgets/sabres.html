@@ -32,14 +32,15 @@
 
   /* Team Header */
   .team-header{
-    text-align:center;
-    margin-bottom:24px;
-    padding:20px;
-    background: linear-gradient(180deg, rgba(0,38,84,.65), rgba(0,28,62,.65));
-    border: 2px solid rgba(252,181,20,.25);
-    border-radius:18px;
-    box-shadow: 0 8px 24px rgba(0,0,0,.3);
-  }
+  position: relative;
+  text-align: center;
+  margin-bottom: 24px;
+  padding: 28px 120px; /* extra side padding so text doesn’t overlap logos */
+  background: linear-gradient(180deg, rgba(0,38,84,.65), rgba(0,28,62,.65));
+  border: 2px solid rgba(252,181,20,.25);
+  border-radius: 18px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.3);
+}
 
   /* NEW: header row w/ slug images */
   .team-header-row{
@@ -50,21 +51,25 @@
   }
 
   .slug{
-    width:72px;
-    height:auto;
-    display:block;
-    filter: drop-shadow(0 6px 14px rgba(0,0,0,.35));
-    opacity:.95;
-  }
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 160px;        /* ~4× typical icon size */
+  width: auto;
+  opacity: 0.95;
+  pointer-events: none;
+}
+  .slug-right{
+  right: 24px;
+  transform: translateY(-50%) scaleX(-1);
+}
 
-  .slug.right{
-    transform: scaleX(-1);
-    justify-self:end;
-  }
 
-  .slug.left{
-    justify-self:start;
-  }
+  .slug-left{
+  left: 24px;
+}
+
+
 
   .team-header h1{
     margin:0;
