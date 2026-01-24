@@ -352,6 +352,7 @@
       <div class="meta">
         <div class="state" id="state">Loading…</div>
         <div><span class="pill" id="when"></span></div>
+        <div class="muted" id="updated" style="font-size:.85rem; opacity:.75; margin-top:4px;"></div>
       </div>
     </div>
 
@@ -423,6 +424,17 @@
         || t?.name?.default
         || t?.abbrev
         || '';
+  }
+
+  function setUpdatedNow() {
+    const el = document.getElementById('updated');
+    if (!el) return;
+    el.textContent = `Updated ${new Date().toLocaleTimeString('en-US', { 
+      timeZone: 'America/New_York',
+      hour: 'numeric',
+      minute: '2-digit',
+      second: '2-digit'
+    })}`;
   }
 
   async function fetchJSON(url) {
@@ -532,9 +544,9 @@
     return { liveGame, lastGame, nextGame, games: allGames };
   }
 
-  // Get game details
+  // Get game details with cache buster
   async function getGameDetails(gameId) {
-    const url = `https://api-web.nhle.com/v1/gamecenter/${gameId}/play-by-play`;
+    const url = `https://api-web.nhle.com/v1/gamecenter/${gameId}/play-by-play?cb=${Date.now()}`;
     return await fetchJSON(url);
   }
 
@@ -546,27 +558,26 @@
       return;
     }
 
-    const away = game.awayTeam;
-    const home = game.homeTeam;
+    // Use details as source of truth when available
+    const away = details?.awayTeam || game.awayTeam;
+    const home = details?.homeTeam || game.homeTeam;
     
     // Update team names using centralized function
     document.querySelector('#awayTeam .name').textContent = teamLabel(away);
     document.querySelector('#homeTeam .name').textContent = teamLabel(home);
     
     // Update logos
-    document.getElementById('awayBadge').style.backgroundImage = 
-      `url('${getTeamLogo(away.abbrev)}')`;
-    document.getElementById('homeBadge').style.backgroundImage = 
-      `url('${getTeamLogo(home.abbrev)}')`;
-
-    // Update scores - use live data if available
-    let awayScore = game.awayTeam.score || 0;
-    let homeScore = game.homeTeam.score || 0;
+    const awayAbbrev = away.abbrev || game.awayTeam?.abbrev;
+    const homeAbbrev = home.abbrev || game.homeTeam?.abbrev;
     
-    if (details?.homeTeam && details?.awayTeam) {
-      awayScore = details.awayTeam.score || awayScore;
-      homeScore = details.homeTeam.score || homeScore;
-    }
+    document.getElementById('awayBadge').style.backgroundImage = 
+      `url('${getTeamLogo(awayAbbrev)}')`;
+    document.getElementById('homeBadge').style.backgroundImage = 
+      `url('${getTeamLogo(homeAbbrev)}')`;
+
+    // Update scores - prefer details over game object
+    let awayScore = details?.awayTeam?.score ?? game.awayTeam?.score ?? 0;
+    let homeScore = details?.homeTeam?.score ?? game.homeTeam?.score ?? 0;
     
     setTxt('score', `${awayScore} — ${homeScore}`);
 
@@ -606,13 +617,31 @@
 
     // Update time/date
     let when = '';
-    if (isActuallyLive && details?.clock && !details.clock.inIntermission) {
-      when = details.clock.timeRemaining || '';
-    } else if (isActuallyLive && details?.clock?.inIntermission) {
-      when = 'Break';
+    
+    if (isActuallyLive) {
+      if (details?.clock?.inIntermission) {
+        // Prefer intermission remaining if API provides it
+        const ir = details.clock.intermissionTimeRemaining 
+                || details.clock.intermissionRemaining 
+                || details.clock.intermissionTimeRemainingSeconds;
+        
+        if (typeof ir === 'string' && ir.trim()) {
+          when = `INT ${ir}`;
+        } else if (typeof ir === 'number' && Number.isFinite(ir)) {
+          const mm = Math.floor(ir / 60);
+          const ss = String(ir % 60).padStart(2, '0');
+          when = `INT ${mm}:${ss}`;
+        } else {
+          when = 'Intermission';
+        }
+      } else {
+        // Not intermission: show live clock
+        when = details?.clock?.timeRemaining || '';
+      }
     } else {
       when = formatDate(game.startTimeUTC);
     }
+    
     setTxt('when', when || '—');
   }
 
@@ -634,9 +663,33 @@
       return;
     }
 
-    const goals = plays.filter(play => 
-      play.typeDescKey === 'goal' || play.typeCode === 'GOAL'
-    );
+    // Build player name map from roster
+    const playerMap = new Map();
+    const rosters = details.rosterSpots || details.homeTeam?.players || details.awayTeam?.players || [];
+    
+    for (const player of rosters) {
+      if (player.playerId) {
+        const name = `${player.firstName?.default || ''} ${player.lastName?.default || ''}`.trim();
+        playerMap.set(player.playerId, name);
+      }
+    }
+
+    const goals = plays
+      .filter(play => play.typeDescKey === 'goal' || play.typeCode === 'GOAL')
+      .filter(play => play.periodDescriptor?.periodType !== 'SO') // Exclude shootout
+      .sort((a, b) => {
+        // Sort by period, then by time
+        const periodDiff = (a.periodDescriptor?.number || 0) - (b.periodDescriptor?.number || 0);
+        if (periodDiff !== 0) return periodDiff;
+        
+        // Convert time to seconds for comparison
+        const timeToSec = (t) => {
+          if (!t) return 0;
+          const parts = t.split(':');
+          return parseInt(parts[0]) * 60 + parseInt(parts[1] || 0);
+        };
+        return timeToSec(a.timeInPeriod) - timeToSec(b.timeInPeriod);
+      });
 
     if (goals.length === 0) {
       goalsEl.innerHTML = '<div class="loading">No goals scored yet</div>';
@@ -653,25 +706,16 @@
       const teamInfo = details.homeTeam?.id === team ? details.homeTeam : details.awayTeam;
       const teamName = teamLabel(teamInfo);
       
-      // Get scorer info - need to look at the full player list
+      // Get scorer info using player map
       let scorerName = 'Unknown';
       let goalNumber = '';
       
-      // Try to find scorer in the goal details
       if (goal.details) {
-        // Look through players involved in the play
         const scorerId = goal.details.scoringPlayerId || goal.details.playerId;
         
-        // Check if we have player details in the response
-        if (details.rosterSpots) {
-          const scorerRoster = details.rosterSpots.find(p => p.playerId === scorerId);
-          if (scorerRoster) {
-            scorerName = `${scorerRoster.firstName?.default || ''} ${scorerRoster.lastName?.default || ''}`.trim();
-          }
-        }
-        
-        // Fallback to direct fields
-        if (scorerName === 'Unknown' && goal.details.scoringPlayer) {
+        if (scorerId && playerMap.has(scorerId)) {
+          scorerName = playerMap.get(scorerId);
+        } else if (goal.details.scoringPlayer) {
           scorerName = goal.details.scoringPlayer;
         }
         
@@ -680,31 +724,27 @@
         }
       }
       
-      // Get assists with numbers
+      // Get assists with numbers using player map
       const assists = [];
       
       if (goal.details) {
         // Assist 1
-        if (goal.details.assist1PlayerId && details.rosterSpots) {
-          const assist1 = details.rosterSpots.find(p => p.playerId === goal.details.assist1PlayerId);
-          if (assist1) {
-            const name = `${assist1.firstName?.default || ''} ${assist1.lastName?.default || ''}`.trim();
-            const total = goal.details.assist1PlayerTotal ? ` (${goal.details.assist1PlayerTotal})` : '';
-            assists.push(`${name}${total}`);
-          }
+        const assist1Id = goal.details.assist1PlayerId;
+        if (assist1Id && playerMap.has(assist1Id)) {
+          const name = playerMap.get(assist1Id);
+          const total = goal.details.assist1PlayerTotal ? ` (${goal.details.assist1PlayerTotal})` : '';
+          assists.push(`${name}${total}`);
         } else if (goal.details.assist1Player) {
           const total = goal.details.assist1PlayerTotal ? ` (${goal.details.assist1PlayerTotal})` : '';
           assists.push(`${goal.details.assist1Player}${total}`);
         }
         
         // Assist 2
-        if (goal.details.assist2PlayerId && details.rosterSpots) {
-          const assist2 = details.rosterSpots.find(p => p.playerId === goal.details.assist2PlayerId);
-          if (assist2) {
-            const name = `${assist2.firstName?.default || ''} ${assist2.lastName?.default || ''}`.trim();
-            const total = goal.details.assist2PlayerTotal ? ` (${goal.details.assist2PlayerTotal})` : '';
-            assists.push(`${name}${total}`);
-          }
+        const assist2Id = goal.details.assist2PlayerId;
+        if (assist2Id && playerMap.has(assist2Id)) {
+          const name = playerMap.get(assist2Id);
+          const total = goal.details.assist2PlayerTotal ? ` (${goal.details.assist2PlayerTotal})` : '';
+          assists.push(`${name}${total}`);
         } else if (goal.details.assist2Player) {
           const total = goal.details.assist2PlayerTotal ? ` (${goal.details.assist2PlayerTotal})` : '';
           assists.push(`${goal.details.assist2Player}${total}`);
