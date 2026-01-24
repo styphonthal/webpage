@@ -203,7 +203,7 @@
     font-size:.85rem;
   }
 
-  .loading, .error{
+  .loading, .error, .info{
     text-align:center;
     padding:20px;
     color:#c6d6f6;
@@ -211,6 +211,12 @@
   
   .error{
     color:#ff9999;
+  }
+  
+  .info{
+    color:#a8c5f5;
+    font-size:.95rem;
+    line-height:1.6;
   }
 
   @media (max-width:768px){
@@ -285,6 +291,7 @@
 <script>
 (async function(){
   const SABRES_ABBR = 'BUF';
+  const CORS_PROXY = 'https://corsproxy.io/?';
   
   // Helper functions
   const setTxt = (id, t) => {
@@ -318,7 +325,8 @@
 
   async function fetchJSON(url) {
     try {
-      const response = await fetch(url);
+      const proxiedUrl = CORS_PROXY + encodeURIComponent(url);
+      const response = await fetch(proxiedUrl);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       return await response.json();
     } catch (error) {
@@ -330,18 +338,12 @@
   // Get team schedule
   async function getSchedule() {
     const now = new Date();
-    const startDate = new Date(now);
-    startDate.setDate(startDate.getDate() - 7);
-    const endDate = new Date(now);
-    endDate.setDate(endDate.getDate() + 14);
-    
     const formatAPIDate = (d) => d.toISOString().split('T')[0];
     
     const url = `https://api-web.nhle.com/v1/club-schedule/${SABRES_ABBR}/week/${formatAPIDate(now)}`;
     const data = await fetchJSON(url);
     
     const games = data.games || [];
-    const currentDate = new Date();
     
     // Find last completed game
     const lastGame = games
@@ -370,13 +372,12 @@
       return;
     }
 
-    const isHomeGame = game.homeTeam.abbrev === SABRES_ABBR;
     const away = game.awayTeam;
     const home = game.homeTeam;
     
     // Update team names
-    document.querySelector('#awayTeam .name').textContent = away.placeName?.default || away.abbrev;
-    document.querySelector('#homeTeam .name').textContent = home.placeName?.default || home.abbrev;
+    document.querySelector('#awayTeam .name').textContent = away.placeName?.default || away.commonName?.default || away.abbrev;
+    document.querySelector('#homeTeam .name').textContent = home.placeName?.default || home.commonName?.default || home.abbrev;
     
     // Update logos
     document.getElementById('awayBadge').style.backgroundImage = 
@@ -430,7 +431,7 @@
       
       // Find team name
       const teamInfo = details.homeTeam?.id === team ? details.homeTeam : details.awayTeam;
-      const teamName = teamInfo?.name?.default || teamInfo?.abbrev || '';
+      const teamName = teamInfo?.name?.default || teamInfo?.commonName?.default || teamInfo?.abbrev || '';
       
       const scorer = goal.details?.scoringPlayerTotal 
         ? `${goal.details.scoringPlayer || 'Unknown'} (${goal.details.scoringPlayerTotal})`
@@ -477,7 +478,7 @@
 
     el.innerHTML = `
       <div class="game-summary">
-        <div><strong>${away.placeName?.default || away.abbrev}</strong> at <strong>${home.placeName?.default || home.abbrev}</strong></div>
+        <div><strong>${away.placeName?.default || away.commonName?.default || away.abbrev}</strong> at <strong>${home.placeName?.default || home.commonName?.default || home.abbrev}</strong></div>
         <div>Final: ${away.score || 0} — ${home.score || 0}</div>
         <div>${when}</div>
       </div>
@@ -498,7 +499,7 @@
 
     el.innerHTML = `
       <div class="game-summary">
-        <div><strong>${away.placeName?.default || away.abbrev}</strong> at <strong>${home.placeName?.default || home.abbrev}</strong></div>
+        <div><strong>${away.placeName?.default || away.commonName?.default || away.abbrev}</strong> at <strong>${home.placeName?.default || home.commonName?.default || home.abbrev}</strong></div>
         <div>${when}</div>
       </div>
     `;
@@ -519,6 +520,7 @@
       setTxt('state', 'No recent game');
       setTxt('score', '— — —');
       setTxt('when', '—');
+      setHTML('goals', '<div class="info">No recent games found. Check back during the hockey season!</div>');
     }
 
     // Render summaries
@@ -528,7 +530,7 @@
   } catch (error) {
     console.error('Error loading data:', error);
     setTxt('state', 'Error loading data');
-    setHTML('goals', `<div class="error">Failed to load data. The NHL API may be temporarily unavailable.</div>`);
+    setHTML('goals', `<div class="error">Unable to load NHL data. This widget uses a CORS proxy which may be rate-limited. Please try again in a few moments.</div>`);
     setHTML('lastGameBox', '<div class="error">—</div>');
     setHTML('nextGameBox', '<div class="error">—</div>');
   }
