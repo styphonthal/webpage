@@ -17,46 +17,60 @@
     "id": "proj-002",
     "title": "Meta Smart Glasses WhatsApp bot",
     "description": "Experimental overlays for Meta Display Glasses using data relayed through WhatsApp API.",
-    "tags": ["meta", "glasses", "home assistant"],
+    "tags": ["meta", "smart glasses", "home assistant"],
     "updated": "2025-01-03",
     "started": "2025-11-20",
-    "status": "Near Complete",
+    "status": "Stalled",
     "tech": ["Node.js", "n8n", "WhatsApp API", "Home Assistant"],
     "changelog": [    
-      {"date": "2026-01-05", "note": "Project completed - alpha"},
+      {"date": "2026-01-05", "note": "Unable to proceed due to lack of Meta support"},
       {"date": "2025-11-20", "note": "Project started"}
       ]
   },
   {
     "id": "proj-003",
-    "title": "Movie/Series Tracker",
-    "description": "Android + Linux *via QT* movie database engine using TMDb, caching, and multi-page settings.",
-    "tags": ["android", "linux", "tmdb"],
-    "updated": "2025-01-06", 
-    "started": "2025-11-20",
+    "title": "Movie/Series Tracker - Android Version",
+    "description": "Android movie database engine using TMDb, caching, and multi-page settings.",
+    "tags": ["android", "tmdb", "movietracker"],
+    "updated": "2026-01-06", 
+    "started": "2025-06-20",
   "status": "Near Complete",
-  "tech": ["Node.js", "n8n", "WhatsApp API", "Home Assistant"],
+  "tech": ["QML", "linux"],
   "changelog": [    
-    {"date": "2026-01-05", "note": "Project completed - alpha"},
+    {"date": "2026-01-05", "note": "Project near completion"},
     {"date": "2025-11-20", "note": "Project started"}
   ]
   },
-  {
+    {
     "id": "proj-004",
-    "title": "Linux Clock widgit",
-    "description": "Linux clock widget based on windows ME widget",
-    "tags": ["linux", "clock", "widget"],
-    "updated": "2025-01-06", 
-    "started": "2025-11-20",
+    "title": "Movie/Series Tracker - Linux version",
+    "description": "Linux *via QT* movie database engine using TMDb, caching, and multi-page settings.",
+    "tags": ["Qt", "linux", "tmdb", "movietracker"],
+    "updated": "2025-06-06", 
+    "started": "2025-01-20",
   "status": "Near Complete",
-  "tech": ["Node.js", "n8n", "WhatsApp API", "Home Assistant"],
+  "tech": ["android studio", "QML", "Qt"],
   "changelog": [    
-    {"date": "2026-01-05", "note": "Project completed - alpha"},
-    {"date": "2025-11-20", "note": "Project started"}
+    {"date": "2025-06-06", "note": "Project completed - alpha"},
+    {"date": "2025-01-20", "note": "Project started"}
   ]
   },
   {
     "id": "proj-005",
+    "title": "Analog Lofi Linux Clock plasmoid",
+    "description": "Linux analog clock widget based on windows ME widget for kde Plasma desktop",
+    "tags": ["linux", "clock", "plasmoid", "kde"],
+    "updated": "2026-01-22", 
+    "started": "2025-01-20",
+  "status": "Complete - beta version",
+  "tech": ["linux", "plasma"],
+  "changelog": [    
+    {"date": "2026-01-20", "note": "Plasma 6 update. Configuration handling corrected. Tooltip updates fixed. Adaptive repaint timing added. Performance improved. Font handling hardened. Aspect-ratio resizing stabilized. File structure cleaned up. Deprecated code removed."},
+    {"date": "2025-01-20", "note": "Project started"}
+  ]
+  },
+  {
+    "id": "proj-006",
     "title": "Linux Penny Arcade Comic Displayer",
     "description": "Linux widget that displays the latest penny arcade comics",
     "tags": ["linux", "comic", "widget"],
@@ -70,7 +84,7 @@
   ]
   },
   {
-    "id": "proj-006",
+    "id": "proj-007",
     "title": "Conky haloween clock",
     "description": "Conky digital clock for halloween",
     "tags": ["linux", "clock", "conky"],
@@ -84,6 +98,7 @@
   ]
   }
 ]
+
 
 
 
