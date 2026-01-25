@@ -70,7 +70,7 @@
     padding:0 240px; /* prevent overlap with big slugs */
   }
 
-  /* Header image (sabres.png) */
+  /* Header image (sabres2.png with cache-buster) */
   .header-logo{
     display:block;
     margin:0 auto 12px;
@@ -403,7 +403,6 @@
       <img class="slug slug-right" src="slug.png" alt="" aria-hidden="true">
 
       <div class="team-header-inner">
-        <!-- Replace text header with sabres.jpg -->
         <img class="header-logo" src="sabres2.png?v=123" alt="Buffalo Sabres">
 
         <div class="team-stats">
@@ -417,15 +416,12 @@
           </div>
         </div>
 
-        <!-- NEW: standings position line -->
+        <!-- standings position line -->
         <div class="top-scorer" id="standingLine" style="margin-top:10px; border-top:1px solid rgba(252,181,20,.2);">
           Loading standings…
         </div>
 
-        <!-- Rename + add leading points -->
-        <div class="top-scorer" id="topGoals">
-          Loading leading goals...
-        </div>
+        <div class="top-scorer" id="topGoals">Loading leading goals...</div>
         <div class="top-scorer" id="topPoints" style="margin-top:8px; border-top:none; padding-top:0;">
           Loading leading points...
         </div>
@@ -442,7 +438,6 @@
             <div class="badge" id="awayBadge"></div>
           </div>
 
-          <!-- Metrics -->
           <div class="team-metrics" id="awayMetrics">
             <div class="metric"><b>SOG</b>: <span id="awaySog">—</span></div>
             <div class="metric"><b>Hits</b>: <span id="awayHits">—</span></div>
@@ -468,7 +463,6 @@
             <div class="name">Home</div>
           </div>
 
-          <!-- Metrics -->
           <div class="team-metrics" id="homeMetrics">
             <div class="metric"><b>SOG</b>: <span id="homeSog">—</span></div>
             <div class="metric"><b>Hits</b>: <span id="homeHits">—</span></div>
@@ -485,7 +479,7 @@
       </div>
     </div>
 
-    <!-- Most Recent Game (should be the game BEFORE the live/primary game if primary is live) -->
+    <!-- Most Recent Game (game BEFORE the live/primary game if primary is live) -->
     <div class="panel" id="lastGamePanel">
       <h3>Most Recent Game</h3>
       <div id="lastGameBox" class="loading">Loading…</div>
@@ -561,6 +555,23 @@
     return await response.json();
   }
 
+  // ---------- NEW helpers for robust extraction ----------
+  function deepGet(obj, path) {
+    try {
+      return path.split('.').reduce((acc, k) => (acc == null ? undefined : acc[k]), obj);
+    } catch {
+      return undefined;
+    }
+  }
+
+  function firstDefined(...vals) {
+    for (const v of vals) {
+      if (v !== undefined && v !== null) return v;
+    }
+    return undefined;
+  }
+  // ------------------------------------------------------
+
   // Get team standings and stats (record + points)
   async function getTeamStats() {
     try {
@@ -587,7 +598,7 @@
     }
   }
 
-  // NEW: conference/division/league ranks
+  // conference/division/league ranks
   async function getSabresStandingsPosition() {
     try {
       const url = `https://api-web.nhle.com/v1/standings/now`;
@@ -602,7 +613,6 @@
       }
       if (!sabres) return null;
 
-      // Field names vary by season/API version; try common variants.
       const conference = sabres.conferenceName || sabres.conferenceAbbrev || sabres.conference || (sabres.conferenceName?.default ?? null);
       const conferenceRank = sabres.conferenceSequence ?? sabres.conferenceRank ?? sabres.conferencePlace ?? sabres.conferenceStanding ?? null;
 
@@ -611,7 +621,6 @@
 
       const leagueRank = sabres.leagueSequence ?? sabres.leagueRank ?? sabres.leaguePlace ?? sabres.leagueStanding ?? null;
 
-      // Normalize conference label to something readable
       const confLabel =
         (typeof conference === 'string' && conference.trim()) ? conference :
         (sabres.conferenceAbbrev?.default || sabres.conferenceName?.default || sabres.conference || 'Conference');
@@ -675,16 +684,13 @@
       .filter(g => (g.gameState === 'OFF' || g.gameState === 'FINAL'))
       .sort((a,b) => new Date(b.startTimeUTC) - new Date(a.startTimeUTC));
 
-    // "lastGame": most recent FINAL/OFF game (could be same day as live doesn't matter)
     const lastGame = finalsSorted[0];
 
-    // "prevFinalBefore": the finished game BEFORE the live game (or before lastGame if no live)
     const prevFinalBefore = (() => {
       if (liveGame) {
         const liveStart = new Date(liveGame.startTimeUTC).getTime();
         return finalsSorted.find(g => new Date(g.startTimeUTC).getTime() < liveStart) || null;
       }
-      // If not live, "most recent game" should be the final immediately before lastGame
       return finalsSorted.length > 1 ? finalsSorted[1] : null;
     })();
 
@@ -711,68 +717,64 @@
   function formatSavePctDot(v) {
     if (v == null) return '—';
 
-    // endpoints vary: 0.923, 92.3, "0.923", "92.3", "92.3%"
     const s = (typeof v === 'string') ? v.trim().replace('%','') : v;
     let num = (typeof s === 'number') ? s : Number(s);
 
     if (!Number.isFinite(num)) return '—';
 
     if (num > 1.5) {
-      // likely percent (e.g., 92.3)
-      num = num / 100;
+      num = num / 100; // percent -> decimal
     }
-    // now num is 0.xxx
     return `.${String(Math.round(num * 1000)).padStart(3,'0')}`;
   }
 
+  // ---------- UPDATED goalie label (compute if needed) ----------
   function goalieLabel(g) {
     if (!g) return '—';
+
     const ln = g.lastName?.default || g.lastName || '';
     const name = ln ? ln : (g.name?.default || g.name || 'Goalie');
 
-    // try multiple common keys
     const svRaw =
       g.savePctg ?? g.savePercentage ?? g.savePct ?? g.svPct ?? g.savePctgDecimal ??
       g.savePctgValue ?? g.savePctValue ?? null;
 
-    const sv = formatSavePctDot(svRaw);
-    return `${name} (${sv})`;
-  }
+    let sv = null;
 
-  // Robust team-stat extraction: hits/blocks often live under different keys
-  function extractTeamStat(teamObj, fallbackKeys) {
-    for (const k of fallbackKeys) {
-      if (teamObj && teamObj[k] != null) return teamObj[k];
-    }
-    const ts = teamObj?.teamStats || teamObj?.teamSkaterStats || teamObj?.statistics || null;
-    if (ts) {
-      for (const k of fallbackKeys) {
-        if (ts[k] != null) return ts[k];
+    if (svRaw != null) {
+      sv = formatSavePctDot(svRaw);
+    } else {
+      const saves = firstDefined(g.saves, g.savesAgainst, g.totalSaves);
+      const sa    = firstDefined(g.shotsAgainst, g.shotsFaced, g.shots, g.sa);
+
+      const savesNum = Number(saves);
+      const saNum = Number(sa);
+
+      if (Number.isFinite(savesNum) && Number.isFinite(saNum) && saNum > 0) {
+        sv = formatSavePctDot(savesNum / saNum);
       }
     }
-    return null;
+
+    return `${name} (${sv ?? '—'})`;
   }
+  // ------------------------------------------------------------
 
   // Find the goalie more reliably (both teams)
   function findLikelyGoalie(side, box) {
     const t = (side === 'away') ? (box?.awayTeam || box?.away) : (box?.homeTeam || box?.home);
 
-    // 1) explicit goalie arrays
     const goalies =
       t?.goalies || t?.goalieStats || t?.goaliesByPeriod || t?.goalieSummary || null;
 
     if (Array.isArray(goalies) && goalies.length) {
-      // pick max TOI if present, else first
       const sorted = goalies.slice().sort((a,b) => (Number(b.timeOnIce||b.toi||0) - Number(a.timeOnIce||a.toi||0)));
       return sorted[0] || goalies[0];
     }
 
-    // 2) playerByGameStats (common on this endpoint)
     const pgs = box?.playerByGameStats || null;
     const list = (side === 'away') ? pgs?.awayTeam?.goalies : pgs?.homeTeam?.goalies;
     if (Array.isArray(list) && list.length) return list[0];
 
-    // 3) sometimes "players" includes goalies with positionCode === "G"
     const players = t?.players || t?.roster || t?.skaters || null;
     if (Array.isArray(players) && players.length) {
       const g = players.find(p => (p.positionCode || p.position || '').toString().toUpperCase() === 'G');
@@ -781,14 +783,71 @@
     return null;
   }
 
-  function applyTeamMetrics(side, box) {
+  // ---------- NEW: robust team stat extraction across variants ----------
+  function extractTeamStat(side, box, statName) {
+    const sideKey = side === 'away' ? 'awayTeam' : 'homeTeam';
     const t = (side === 'away') ? (box?.awayTeam || box?.away) : (box?.homeTeam || box?.home);
 
-    const sog = extractTeamStat(t, ['shotsOnGoal','sog','shots']);
-    const hits = extractTeamStat(t, ['hits']);
-    const blocks = extractTeamStat(t, ['blockedShots','blocks','blocked']);
+    const keysByStat = {
+      sog:   ['shotsOnGoal', 'sog', 'shots', 'shotsOnNet'],
+      hits:  ['hits', 'hitCount'],
+      blocks:['blockedShots', 'blocks', 'blocked', 'shotsBlocked', 'blockedShotCount'],
+    };
+    const keys = keysByStat[statName] || [];
 
-    // goalie
+    const roots = [
+      t,
+      t?.teamStats,
+      t?.teamSkaterStats,
+      t?.statistics,
+      (side === 'away' ? box?.playerByGameStats?.awayTeam?.teamSkaterStats : box?.playerByGameStats?.homeTeam?.teamSkaterStats),
+      (side === 'away' ? box?.awayTeam?.teamStats : box?.homeTeam?.teamStats),
+      (side === 'away' ? box?.awayTeam?.teamSkaterStats : box?.homeTeam?.teamSkaterStats),
+    ];
+
+    for (const r of roots) {
+      if (!r) continue;
+      for (const k of keys) {
+        if (r[k] !== undefined && r[k] !== null) return r[k];
+      }
+    }
+
+    // deep-path last ditch
+    const deepPaths = {
+      sog: [
+        `${sideKey}.shotsOnGoal`,
+        `${sideKey}.teamStats.shotsOnGoal`,
+        `playerByGameStats.${sideKey}.teamSkaterStats.shotsOnGoal`,
+        `playerByGameStats.${sideKey}.teamSkaterStats.sog`,
+      ],
+      hits: [
+        `${sideKey}.hits`,
+        `${sideKey}.teamStats.hits`,
+        `playerByGameStats.${sideKey}.teamSkaterStats.hits`,
+      ],
+      blocks: [
+        `${sideKey}.blockedShots`,
+        `${sideKey}.teamStats.blockedShots`,
+        `playerByGameStats.${sideKey}.teamSkaterStats.blockedShots`,
+        `playerByGameStats.${sideKey}.teamSkaterStats.blocks`,
+      ]
+    };
+
+    for (const p of (deepPaths[statName] || [])) {
+      const v = deepGet(box, p);
+      if (v !== undefined && v !== null) return v;
+    }
+
+    return null;
+  }
+  // ---------------------------------------------------------------------
+
+  // ---------- UPDATED: uses new extractor + goalie compute ----------
+  function applyTeamMetrics(side, box) {
+    const sog = extractTeamStat(side, box, 'sog');
+    const hits = extractTeamStat(side, box, 'hits');
+    const blocks = extractTeamStat(side, box, 'blocks');
+
     const goalie = findLikelyGoalie(side, box);
 
     setTxt(side + 'Sog', sog != null ? String(sog) : '—');
@@ -796,6 +855,7 @@
     setTxt(side + 'Blocks', blocks != null ? String(blocks) : '—');
     setTxt(side + 'Goalie', goalieLabel(goalie));
   }
+  // ---------------------------------------------------------------
 
   // Render the main scorebar
   function renderScorebar(game, details, boxscore) {
@@ -866,7 +926,6 @@
     }
     setTxt('when', when || '—');
 
-    // team metrics
     if (boxscore) {
       applyTeamMetrics('away', boxscore);
       applyTeamMetrics('home', boxscore);
@@ -1079,6 +1138,15 @@
       getGameDetails(primaryGame.id),
       getGameBoxscore(primaryGame.id).catch(()=>null)
     ]);
+
+    // Optional debug (leave commented unless needed)
+    // if (boxscore) {
+    //   console.log('BOX TOP KEYS:', Object.keys(boxscore));
+    //   console.log('AWAY TEAM KEYS:', Object.keys(boxscore.awayTeam || boxscore.away || {}));
+    //   console.log('HOME TEAM KEYS:', Object.keys(boxscore.homeTeam || boxscore.home || {}));
+    //   console.log('PGS AWAY TEAM SKATER:', boxscore.playerByGameStats?.awayTeam?.teamSkaterStats);
+    //   console.log('PGS HOME TEAM SKATER:', boxscore.playerByGameStats?.homeTeam?.teamSkaterStats);
+    // }
 
     renderScorebar(primaryGame, details, boxscore);
     renderGoals(details, 'goals', true); // newest-first
