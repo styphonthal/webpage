@@ -811,6 +811,7 @@
     return null;
   }
 
+  // UPDATED: sums can come from nested stat objects too
   function sumSkaterStat(pgsTeam, keys) {
     const skaters = pgsTeam?.skaters;
     if (!Array.isArray(skaters) || !skaters.length) return null;
@@ -819,55 +820,83 @@
     let found = false;
 
     for (const s of skaters) {
+      // direct field + common nesting patterns
+      let got = null;
       for (const k of keys) {
-        const v = s?.[k];
-        if (v === undefined || v === null) continue;
-        const n = Number(String(v).replace(/[^\d.-]/g,''));
-        if (!Number.isFinite(n)) continue;
-        sum += n;
-        found = true;
-        break;
+        if (s?.[k] != null) { got = s[k]; break; }
+        if (s?.stats?.[k] != null) { got = s.stats[k]; break; }
+        if (s?.gameStats?.[k] != null) { got = s.gameStats[k]; break; }
+        if (s?.skaterStats?.[k] != null) { got = s.skaterStats[k]; break; }
       }
+      if (got == null) continue;
+
+      const n = Number(String(got).replace(/[^\d.-]/g,''));
+      if (!Number.isFinite(n)) continue;
+
+      sum += n;
+      found = true;
     }
     return found ? sum : null;
   }
 
+  // UPDATED: broader root coverage for hits/blocks
   function extractTeamTotal(side, box, stat) {
     const top = getTopTeam(side, box);
     const pgsTeam = getPGSTeam(side, box);
 
-    // common direct keys
+    // Additional common roots seen across versions
+    const teamStatsRoot =
+      side === 'away'
+        ? (box?.teamStats?.awayTeam || box?.teamStats?.away || null)
+        : (box?.teamStats?.homeTeam || box?.teamStats?.home || null);
+
+    const summaryRoot =
+      side === 'away'
+        ? (box?.summary?.awayTeam || box?.summary?.away || null)
+        : (box?.summary?.homeTeam || box?.summary?.home || null);
+
+    const topTeamStats = top?.teamStats || null;
+    const pgsTeamStats = pgsTeam?.teamStats || null;
+
     if (stat === 'sog') {
       return pickFirstNonNull(
         top?.shotsOnGoal, top?.sog, top?.shots,
-        top?.teamStats?.shotsOnGoal, top?.teamStats?.sog,
+        topTeamStats?.shotsOnGoal, topTeamStats?.sog, topTeamStats?.shots,
         pgsTeam?.shotsOnGoal, pgsTeam?.sog, pgsTeam?.shots,
-        pgsTeam?.teamStats?.shotsOnGoal, pgsTeam?.teamStats?.sog
+        pgsTeamStats?.shotsOnGoal, pgsTeamStats?.sog, pgsTeamStats?.shots,
+        teamStatsRoot?.shotsOnGoal, teamStatsRoot?.sog, teamStatsRoot?.shots,
+        teamStatsRoot?.teamStats?.shotsOnGoal, teamStatsRoot?.teamStats?.sog, teamStatsRoot?.teamStats?.shots,
+        summaryRoot?.shotsOnGoal, summaryRoot?.sog, summaryRoot?.shots,
+        summaryRoot?.teamStats?.shotsOnGoal, summaryRoot?.teamStats?.sog, summaryRoot?.teamStats?.shots
       );
     }
 
     if (stat === 'hits') {
       const direct = pickFirstNonNull(
-        top?.hits, top?.teamStats?.hits,
-        pgsTeam?.hits, pgsTeam?.teamStats?.hits
+        top?.hits, topTeamStats?.hits,
+        pgsTeam?.hits, pgsTeamStats?.hits,
+        teamStatsRoot?.hits, teamStatsRoot?.teamStats?.hits,
+        summaryRoot?.hits, summaryRoot?.teamStats?.hits
       );
       if (direct != null) return direct;
 
-      // compute from skaters
-      return sumSkaterStat(pgsTeam, ['hits', 'hitCount']);
+      return sumSkaterStat(pgsTeam, ['hits', 'hitCount', 'hitsCount']);
     }
 
     if (stat === 'blockedShots') {
       const direct = pickFirstNonNull(
         top?.blockedShots, top?.blocks, top?.blocked,
-        top?.teamStats?.blockedShots, top?.teamStats?.blocks, top?.teamStats?.blocked,
+        topTeamStats?.blockedShots, topTeamStats?.blocks, topTeamStats?.blocked,
         pgsTeam?.blockedShots, pgsTeam?.blocks, pgsTeam?.blocked,
-        pgsTeam?.teamStats?.blockedShots, pgsTeam?.teamStats?.blocks, pgsTeam?.teamStats?.blocked
+        pgsTeamStats?.blockedShots, pgsTeamStats?.blocks, pgsTeamStats?.blocked,
+        teamStatsRoot?.blockedShots, teamStatsRoot?.blocks, teamStatsRoot?.blocked,
+        teamStatsRoot?.teamStats?.blockedShots, teamStatsRoot?.teamStats?.blocks, teamStatsRoot?.teamStats?.blocked,
+        summaryRoot?.blockedShots, summaryRoot?.blocks, summaryRoot?.blocked,
+        summaryRoot?.teamStats?.blockedShots, summaryRoot?.teamStats?.blocks, summaryRoot?.teamStats?.blocked
       );
       if (direct != null) return direct;
 
-      // compute from skaters
-      return sumSkaterStat(pgsTeam, ['blockedShots', 'blocks', 'blocked']);
+      return sumSkaterStat(pgsTeam, ['blockedShots', 'blocks', 'blocked', 'blockedShotsCount', 'blocksCount']);
     }
 
     return null;
@@ -906,7 +935,6 @@
       }
     }
 
-    // if everyone is 0 shots, fallback to first (still deterministic)
     return best || candidates[0];
   }
 
@@ -921,6 +949,56 @@
     setTxt(side + 'Hits', hits != null ? String(hits) : '—');
     setTxt(side + 'Blocks', blocks != null ? String(blocks) : '—');
     setTxt(side + 'Goalie', goalieLabel(goalie));
+  }
+
+  // --- NEW: one-time boxscore audit (console only) ---
+  let __boxAuditDoneForGame = new Set();
+
+  function auditBoxscoreOncePerGame(gameId, box) {
+    if (!gameId || __boxAuditDoneForGame.has(gameId)) return;
+    __boxAuditDoneForGame.add(gameId);
+
+    try {
+      const topAway = box?.awayTeam || box?.away || null;
+      const topHome = box?.homeTeam || box?.home || null;
+
+      const pgs = box?.playerByGameStats || null;
+      const pgsAway = pgs?.awayTeam || null;
+      const pgsHome = pgs?.homeTeam || null;
+
+      console.log("=== BOXSCORE AUDIT ===");
+      console.log("keys(box):", Object.keys(box || {}));
+      console.log("topAway keys:", Object.keys(topAway || {}));
+      console.log("topHome keys:", Object.keys(topHome || {}));
+      console.log("playerByGameStats keys:", Object.keys(pgs || {}));
+      console.log("pgsAway keys:", Object.keys(pgsAway || {}));
+      console.log("pgsHome keys:", Object.keys(pgsHome || {}));
+
+      const probe = (label, obj) => {
+        if (!obj) return console.log(label, "null");
+        console.log(label, {
+          hits: obj.hits,
+          blockedShots: obj.blockedShots,
+          blocks: obj.blocks,
+          shotsOnGoal: obj.shotsOnGoal,
+          sog: obj.sog,
+          teamStats: obj.teamStats ? Object.keys(obj.teamStats) : null
+        });
+      };
+
+      probe("topAway probe:", topAway);
+      probe("topHome probe:", topHome);
+      probe("pgsAway probe:", pgsAway);
+      probe("pgsHome probe:", pgsHome);
+
+      const skA = pgsAway?.skaters;
+      const skH = pgsHome?.skaters;
+      if (Array.isArray(skA) && skA.length) console.log("pgsAway.skaters[0] keys:", Object.keys(skA[0]));
+      if (Array.isArray(skH) && skH.length) console.log("pgsHome.skaters[0] keys:", Object.keys(skH[0]));
+      console.log("======================");
+    } catch (e) {
+      console.log("Boxscore audit error:", e);
+    }
   }
 
   // Render the main scorebar
@@ -1266,6 +1344,9 @@
       getGameBoxscore(primaryGame.id).catch(()=>null)
     ]);
 
+    // NEW: one-time boxscore audit (console only)
+    if (boxscore) auditBoxscoreOncePerGame(primaryGame.id, boxscore);
+
     renderScorebar(primaryGame, details, boxscore);
     renderGoals(details, 'goals', true); // newest-first
     setUpdatedNow();
@@ -1291,6 +1372,9 @@
             getGameDetails(gameId),
             getGameBoxscore(gameId).catch(()=>null)
           ]);
+
+          // NEW: one-time boxscore audit (console only)
+          if (updatedBox) auditBoxscoreOncePerGame(gameId, updatedBox);
 
           const gameState = updatedDetails?.gameState;
           renderScorebar(primaryGame, updatedDetails, updatedBox);
