@@ -16,6 +16,13 @@
       --border:#1e293b;
       --radius:16px;
       --shadow:0 20px 60px rgba(0,0,0,.4);
+
+      /* status colors */
+      --status-active:#22c55e;
+      --status-near:#eab308;
+      --status-stalled:#f97316;
+      --status-complete:#22c55e;
+      --status-default:#64748b;
     }
     
     *{box-sizing:border-box; margin:0; padding:0}
@@ -236,11 +243,11 @@
       background:linear-gradient(145deg, rgba(15,23,42,.8), rgba(10,17,32,.9));
       border:1px solid rgba(59,130,246,.25);
       border-radius:var(--radius);
-      padding:24px;
+      padding:20px 20px 20px;
       box-shadow:0 10px 40px rgba(0,0,0,.3);
       display:flex;
       flex-direction:column;
-      gap:12px;
+      gap:10px;
       min-height:180px;
       transition:all .4s cubic-bezier(.4,0,.2,1);
       position:relative;
@@ -265,8 +272,30 @@
 
     .card:hover::before{opacity:1}
 
+    .card-thumb{
+      border-radius:12px;
+      overflow:hidden;
+      margin-bottom:10px;
+      border:1px solid rgba(15,23,42,.8);
+      background:radial-gradient(circle at top, rgba(148,163,184,.25), transparent);
+    }
+
+    .card-thumb img{
+      display:block;
+      width:100%;
+      height:160px;
+      object-fit:cover;
+    }
+
+    .card-header-row{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+    }
+
     .card-title{
-      font-size:20px;
+      font-size:18px;
       font-weight:800;
       position:relative;
       z-index:1;
@@ -277,6 +306,27 @@
       line-height:1.3;
     }
 
+    .status-pill{
+      padding:4px 10px;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:700;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      white-space:nowrap;
+    }
+
+    .status-dot{
+      width:7px;
+      height:7px;
+      border-radius:999px;
+      background:currentColor;
+      box-shadow:0 0 8px currentColor;
+    }
+
     .card-desc{
       color:var(--muted);
       line-height:1.6;
@@ -284,6 +334,34 @@
       z-index:1;
       font-size:14px;
       flex:1;
+    }
+
+    .card-progress{
+      margin-top:4px;
+    }
+
+    .card-progress-bar{
+      position:relative;
+      width:100%;
+      height:6px;
+      background:rgba(15,23,42,.9);
+      border-radius:999px;
+      overflow:hidden;
+      border:1px solid rgba(15,23,42,1);
+    }
+
+    .card-progress-fill{
+      height:100%;
+      width:0%;
+      background:linear-gradient(90deg, #22c55e, #3b82f6);
+      border-radius:inherit;
+      transition:width .4s ease-out;
+    }
+
+    .card-progress-label{
+      margin-top:4px;
+      font-size:11px;
+      color:var(--muted);
     }
 
     .card-meta{
@@ -355,12 +433,13 @@
       background:linear-gradient(145deg, rgba(15,23,42,.95), rgba(10,17,32,.95));
       border:1px solid rgba(59,130,246,.3);
       border-radius:20px;
-      max-width:800px;
+      max-width:900px;
       width:100%;
       max-height:90vh;
       overflow-y:auto;
       box-shadow:0 30px 90px rgba(0,0,0,.6), 0 0 80px rgba(59,130,246,.2);
       animation:slide-up .4s ease-out;
+      position:relative;
     }
 
     @keyframes slide-up{
@@ -421,6 +500,13 @@
       font-size:18px;
       font-weight:800;
       color:var(--accent-bright);
+    }
+
+    .info-value-small{
+      font-size:13px;
+      font-weight:500;
+      color:var(--muted);
+      margin-top:4px;
     }
 
     .section-title{
@@ -484,6 +570,52 @@
       font-weight:600;
     }
 
+    .links-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-bottom:8px;
+    }
+
+    .link-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:8px 14px;
+      border-radius:999px;
+      border:1px solid rgba(59,130,246,.4);
+      background:rgba(15,23,42,.9);
+      color:var(--accent-bright);
+      font-size:13px;
+      font-weight:600;
+      text-decoration:none;
+      transition:all .25s;
+    }
+
+    .link-pill:hover{
+      background:rgba(59,130,246,.2);
+      transform:translateY(-1px);
+    }
+
+    .gallery{
+      display:grid;
+      grid-template-columns:repeat(auto-fit, minmax(200px,1fr));
+      gap:12px;
+    }
+
+    .gallery img{
+      width:100%;
+      border-radius:12px;
+      border:1px solid rgba(15,23,42,.9);
+      object-fit:cover;
+      max-height:220px;
+    }
+
+    .gallery-empty{
+      font-size:13px;
+      color:var(--muted);
+    }
+
     .close-btn{
       position:absolute;
       top:24px;
@@ -500,6 +632,7 @@
       cursor:pointer;
       transition:all .25s;
       font-size:20px;
+      z-index:10;
     }
 
     .close-btn:hover{
@@ -579,6 +712,7 @@
           <div class="info-item">
             <div class="info-label">Status</div>
             <div class="info-value" id="modalStatus"></div>
+            <div class="info-value-small" id="modalStatusHint"></div>
           </div>
           <div class="info-item">
             <div class="info-label">Started</div>
@@ -588,10 +722,21 @@
             <div class="info-label">Last Updated</div>
             <div class="info-value" id="modalUpdated"></div>
           </div>
+          <div class="info-item">
+            <div class="info-label">Completion</div>
+            <div class="info-value" id="modalPercent"></div>
+            <div class="info-value-small" id="modalPercentHint"></div>
+          </div>
         </div>
 
         <div class="section-title">Technologies</div>
         <div class="tech-stack" id="modalTech"></div>
+
+        <div class="section-title">Links</div>
+        <div class="links-row" id="modalLinks"></div>
+
+        <div class="section-title">Screenshots</div>
+        <div class="gallery" id="modalGallery"></div>
 
         <div class="section-title">Changelog</div>
         <div class="changelog" id="modalChangelog"></div>
@@ -631,6 +776,9 @@
         status: String(p.status || 'Active'),
         changelog: Array.isArray(p.changelog) ? p.changelog : [],
         tech: Array.isArray(p.tech) ? p.tech : p.tags || [],
+        percentComplete: typeof p.percentComplete === 'number' ? p.percentComplete : 0,
+        github: p.github ? String(p.github) : '',
+        images: Array.isArray(p.images) ? p.images : [],
         _search: (String(p.title) + ' ' + String(p.description) + ' ' + (Array.isArray(p.tags) ? p.tags.join(' ') : '')).toLowerCase()
       };
     }
@@ -697,6 +845,24 @@
       return d.toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
     }
 
+    function statusStyles(status){
+      const s = status.toLowerCase();
+      if(s.includes('complete') && s.includes('beta')) return {label: 'Complete (Beta)', color:'var(--status-complete)'};
+      if(s.includes('near')) return {label: 'Near Complete', color:'var(--status-near)'};
+      if(s.includes('stall')) return {label: 'Stalled', color:'var(--status-stalled)'};
+      if(s.includes('complete')) return {label: 'Complete', color:'var(--status-complete)'};
+      if(s.includes('active')) return {label: 'Active', color:'var(--status-active)'};
+      return {label: status, color:'var(--status-default)'};
+    }
+
+    function percentHint(p){
+      if(p >= 95) return 'Ready for everyday use with minor polish ongoing.';
+      if(p >= 80) return 'Feature complete, polishing and stability work in progress.';
+      if(p >= 50) return 'Core functionality present; active development.';
+      if(p > 0) return 'Early prototype phase.';
+      return 'Not started or concept only.';
+    }
+
     function renderGrid(){
       el.grid.innerHTML = '';
       if(!state.filtered.length){
@@ -711,10 +877,29 @@
         card.onclick = ()=>showModal(p);
         
         const tags = p.tags.map(t=>`<span class="tag-pill">${esc(t)}</span>`).join('');
-        
+        const thumb = p.images && p.images.length
+          ? `<div class="card-thumb"><img src="${esc(p.images[0])}" alt="${esc(p.title)} screenshot"></div>`
+          : '';
+
+        const status = statusStyles(p.status);
+        const percent = Math.max(0, Math.min(100, p.percentComplete || 0));
+
         card.innerHTML = `
-          <div class="card-title">${esc(p.title)}</div>
+          ${thumb}
+          <div class="card-header-row">
+            <div class="card-title">${esc(p.title)}</div>
+            <div class="status-pill" style="color:${status.color}; border:1px solid ${status.color}33; background:rgba(15,23,42,.9);">
+              <span class="status-dot"></span>
+              <span>${esc(status.label)}</span>
+            </div>
+          </div>
           <div class="card-desc">${esc(p.description)}</div>
+          <div class="card-progress">
+            <div class="card-progress-bar">
+              <div class="card-progress-fill" style="width:${percent}%;"></div>
+            </div>
+            <div class="card-progress-label">${percent}% complete</div>
+          </div>
           <div class="card-meta">
             <div class="card-tags">${tags}</div>
             <div class="card-date">${fmtDate(p.updated)}</div>
@@ -725,14 +910,42 @@
     }
 
     function showModal(p){
+      const status = statusStyles(p.status);
+      const percent = Math.max(0, Math.min(100, p.percentComplete || 0));
+
       document.getElementById('modalTitle').textContent = p.title;
       document.getElementById('modalDesc').textContent = p.description;
-      document.getElementById('modalStatus').textContent = p.status;
+      document.getElementById('modalStatus').textContent = status.label;
+      document.getElementById('modalStatus').style.color = status.color;
       document.getElementById('modalStarted').textContent = fmtDate(p.started);
       document.getElementById('modalUpdated').textContent = fmtDate(p.updated);
+      document.getElementById('modalPercent').textContent = percent + '%';
+      document.getElementById('modalPercent').style.color = percent >= 80 ? 'var(--status-active)' : 'var(--accent-bright)';
+      document.getElementById('modalStatusHint').textContent = p.status;
+      document.getElementById('modalPercentHint').textContent = percentHint(percent);
       
       const techEl = document.getElementById('modalTech');
       techEl.innerHTML = p.tech.map(t=>`<span class="tech-badge">${esc(t)}</span>`).join('');
+      
+      const linksEl = document.getElementById('modalLinks');
+      if(p.github){
+        linksEl.innerHTML = `
+          <a class="link-pill" href="${esc(p.github)}" target="_blank" rel="noopener noreferrer">
+            <span>GitHub Repo</span>
+          </a>
+        `;
+      }else{
+        linksEl.innerHTML = '<span style="color:var(--muted); font-size:13px;">No public repository linked yet.</span>';
+      }
+
+      const galleryEl = document.getElementById('modalGallery');
+      if(p.images && p.images.length){
+        galleryEl.innerHTML = p.images.map(src=>`
+          <img src="${esc(src)}" alt="${esc(p.title)} screenshot">
+        `).join('');
+      }else{
+        galleryEl.innerHTML = '<div class="gallery-empty">No screenshots added yet.</div>';
+      }
       
       const changelogEl = document.getElementById('modalChangelog');
       if(p.changelog.length){
@@ -754,7 +967,7 @@
     }
 
     function esc(s){
-      return String(s).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+      return String(s).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[m]));
     }
 
     async function init(){
