@@ -8,7 +8,7 @@
     "started": "2025-11-20",
     "status": "Near Complete",
     "tech": ["Node.js", "n8n", "WhatsApp API", "Home Assistant"],
-    "percentComplete": 90,
+    "percentComplete": 70,
     "github": "https://github.com/youruser/whatsapp-n8n-homeassistant",
     "images": [
       "../images/projects/proj-001-1.png",
@@ -19,7 +19,7 @@
       "Handling WhatsApp API quirks, retries, and error states in long-running automations.",
       "Structuring n8n workflows so they stay maintainable as more devices and triggers are added."
     ],
-    "bestFor": "Home Assistant users who want to trigger and control automations over WhatsApp from anywhere.",
+    "bestFor": "Home Assistant users who want to trigger and control automations over WhatsApp from anywhere. (except metaglasses)",
     "featureToggle": {
       "featured": false,
       "reason": "Core automation backbone and foundation for multiple other experiments."
@@ -27,11 +27,12 @@
     "futurePlans": [
       "Add templated flows for common Home Assistant routines (lights, climate, media).",
       "Introduce a simple configuration UI so non-technical users can customize commands.",
-      "Experiment with multi-user support and basic access control per WhatsApp account."
+      "Experiment with multi-user support and basic access control per WhatsApp account.",
+      "Interacting with a commercial weather API."
     ],
     "statusForContributors": "Actively accepting PRs, especially around reliability, configuration UX, and new example flows.",
     "changelog": [
-      { "date": "2026-01-05", "note": "Project completed - alpha" },
+      { "date": "2025-12-25", "note": "Project still being developed" },
       { "date": "2025-11-20", "note": "Project started" }
     ]
   },
@@ -131,7 +132,7 @@
       "reason": "Desktop companion to the Android tracker, good showcase of Qt/QML work."
     },
     "futurePlans": [
-      "Improve keyboard shortcuts and power-user features for fast library navigation.",
+      "Improve power-user features for fast library navigation.",
       "Add optional integration with local media libraries or players.",
       "Align UI patterns with the Android version for a cohesive cross-device experience."
     ],
@@ -249,5 +250,51 @@
       { "date": "2025-01-20", "note": "Project started" }
     ]
   }
+  {
+  "id": "proj-008",
+  "title": "Android Subscription Tracker",
+  "description": "A native Android app for tracking recurring subscriptions with category filtering, icon-based visual identification, and automated reminder scheduling that advances billing dates intelligently.",
+  "tags": ["android", "subscriptions", "reminders", "workmanager"],
+  "updated": "2025-11-26",
+  "started": "2025-07-10",
+  "status": "Stalled - not functioning",
+  "tech": [
+    "Kotlin",
+    "Android SDK",
+    "Room",
+    "WorkManager",
+    "RecyclerView",
+    "Material Components"
+  ],
+  "percentComplete": 40,
+  "github": null,
+  "images": [],
+  "whatILearned": [
+    "Designing a Room-backed data model that safely evolves with schema changes and type converters.",
+    "Correctly using WorkManager for one-shot and self-rescheduling background tasks without duplicate execution.",
+    "Managing reminder logic so notifications trigger exactly once while persisting state changes (next billing date).",
+    "Separating UI-triggered scheduling from worker-triggered rescheduling to avoid race conditions.",
+    "Implementing icon selection using resource-name persistence instead of fragile reflection at runtime."
+  ],
+  "bestFor": "Android users who want a lightweight, local-first way to track subscriptions and receive reliable billing reminders without cloud dependencies.",
+  "featureToggle": {
+    "featured": false,
+    "reason": "Demonstrates a full end-to-end Android architecture: Room, ViewModels, background work, and complex state handling."
+  },
+  "futurePlans": [
+    "Add analytics views (monthly cost totals, category breakdowns).",
+    "Support custom reminder offsets (e.g., 3 days before billing).",
+    "Optional export/import of subscriptions as JSON.",
+    "Polish UI animations and theming for larger and smaller screens."
+  ],
+  "statusForContributors": "Open to focused contributions around UI polish, test coverage, and edge-case handling for reminders.",
+  "changelog": [
+    { "date": "2025-11-26", "note": "Reminder rescheduling stabilized; duplicate notification bug resolved, recent updates broke reminders" },
+    { "date": "2025-10-18", "note": "Icon picker and category filtering implemented" },
+    { "date": "2025-07-10", "note": "Project started" }
+  ]
+}
+
 ]
+
 
