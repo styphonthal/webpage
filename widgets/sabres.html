@@ -1,638 +1,1326 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>NHL Panel (PBP + Boxscore)</title>
-  <style>
-    /* Minimal styling; swap in your existing CSS if you want the full theme */
-    :root { color-scheme: dark; }
-    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background:#0e0f13; color:#fff; }
-    .wrap { max-width: 980px; margin: 0 auto; padding: 16px; }
-    .row { display:flex; gap:12px; flex-wrap: wrap; }
-    .card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 12px; flex: 1 1 280px; }
-    .title { font-weight: 800; font-size: 18px; margin-bottom: 8px; }
-    .muted { color: rgba(255,255,255,0.65); font-size: 13px; }
-    .big { font-size: 44px; font-weight: 900; line-height: 1; }
-    .sep { opacity: 0.35; padding: 0 10px; font-weight: 600; }
-    .statgrid { display:grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
-    .stat { text-align:center; padding: 10px; border-radius: 10px; background: rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); }
-    .stat .k { font-size: 12px; color: rgba(255,255,255,0.6); font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; }
-    .stat .v { font-size: 20px; font-weight: 900; margin-top: 4px; }
-    .plays { max-height: 260px; overflow:auto; display:flex; flex-direction:column; gap:8px; }
-    .play { padding: 10px; border-radius: 10px; background: rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); }
-    .play .t { font-size: 12px; color: rgba(255,255,255,0.65); font-weight: 700; }
-    .play .d { font-size: 14px; font-weight: 650; margin-top: 4px; }
-    .btn { cursor:pointer; background: transparent; border: 1px solid rgba(255,255,255,0.25); color:#fff; padding:6px 10px; border-radius: 10px; font-weight: 700; }
-    /* Debug panel */
-    #nhlDebugLog { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); width: 420px; max-height: 420px;
-      background: rgba(0,0,0,0.92); border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; padding: 10px;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; font-size: 11px; overflow:auto; z-index: 9999;
-      box-shadow: 0 12px 40px rgba(0,0,0,0.6); backdrop-filter: blur(10px); }
-    #nhlDebugLog .hdr { display:flex; justify-content: space-between; align-items:center; padding-bottom: 8px; margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.15); }
-    #nhlDebugLog .hdr b { font-size: 12px; }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Buffalo Sabres — Scores & Goals</title>
+<style>
+  :root{
+    --sabres-navy: #002654;
+    --sabres-gold: #FCB514;
+    --sabres-white: #f7f9fc;
+    --bg-deep: #001631;
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  html,body{height:100%; min-height:100vh}
+  body{
+    color:var(--sabres-white);
+    background:
+      radial-gradient(1200px 700px at 80% 10%, rgba(252,181,20,.12), transparent 60%),
+      radial-gradient(900px 500px at 20% 80%, rgba(0,38,84,.35), transparent 70%),
+      var(--bg-deep);
+    font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+
+  .wrap{
+    max-width:1200px;
+    width:100%;
+    margin:0 auto;
+    padding:28px clamp(16px, 3vw, 36px);
+  }
+
+  /* Team Header */
+  .team-header{
+    position:relative;
+    text-align:center;
+    margin-bottom:24px;
+    padding:24px 20px;
+    background: linear-gradient(180deg, rgba(0,38,84,.65), rgba(0,28,62,.65));
+    border: 2px solid rgba(252,181,20,.25);
+    border-radius:18px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.3);
+    overflow:hidden;
+  }
+
+  /* Slug images (large, centered on sides) */
+  .slug{
+    position:absolute;
+    top:50%;
+    transform:translateY(-50%);
+    height:200px;
+    width:auto;
+    opacity:.92;
+    pointer-events:none;
+
+    /* "Pop" (1+2): drop shadow + subtle glow/emboss */
+    filter:
+      drop-shadow(0 12px 20px rgba(0,0,0,.45))
+      drop-shadow(0 0 10px rgba(252,181,20,.18))
+      drop-shadow(0 0 2px rgba(255,255,255,.12));
+  }
+  .slug-left{ left:18px; }
+  .slug-right{ right:18px; transform:translateY(-50%) scaleX(-1); }
+
+  .team-header-inner{
+    position:relative;
+    z-index:1;
+    max-width:820px;
+    margin:0 auto;
+    padding:0 240px; /* prevent overlap with big slugs */
+  }
+
+  /* Header image (sabres2.png) */
+  .header-logo{
+    display:block;
+    margin:0 auto 12px;
+    max-width:min(520px, 86vw);
+    height:auto;
+    image-rendering:auto;
+    filter: drop-shadow(0 8px 16px rgba(0,0,0,.35));
+  }
+
+  .team-stats{
+    display:flex;
+    justify-content:center;
+    gap:32px;
+    flex-wrap:wrap;
+    margin-top:6px;
+  }
+
+  .stat-item{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:4px;
+  }
+
+  .stat-label{
+    font-size:.9rem;
+    color:#a8c5f5;
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:.5px;
+  }
+
+  .stat-value{
+    font-size:1.25rem;
+    color:var(--sabres-gold);
+    font-weight:800;
+  }
+
+  .top-scorer{
+    margin-top:12px;
+    padding-top:12px;
+    border-top:1px solid rgba(252,181,20,.2);
+    color:#cfe1ff;
+    font-size:1.05rem;
+  }
+
+  .top-scorer strong{
+    color:var(--sabres-gold);
+    font-weight:800;
+  }
+
+  /* Score header */
+  .scorebar{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    background: linear-gradient(180deg, rgba(0,38,84,.85), rgba(0,28,62,.85));
+    border: 2px solid rgba(252,181,20,.35);
+    border-radius:18px;
+    padding:18px 20px;
+    box-shadow: 0 12px 30px rgba(0,0,0,.35);
+  }
+
+  .score-top{
+    display:grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items:center;
+    gap:16px;
+    min-width:0;
+  }
+
+  .team{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    min-width:0;
+  }
+
+  .team.away{ align-items:flex-end; text-align:right; }
+  .team.home{ align-items:flex-start; text-align:left; }
+
+  .team-name-row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    min-width:0;
+  }
+  .team.away .team-name-row{ justify-content:flex-end; }
+  .team.home .team-name-row{ justify-content:flex-start; }
+
+  .badge{
+    width:64px;
+    height:64px;
+    border-radius:12px;
+    background-size:contain;
+    background-position:center;
+    background-repeat:no-repeat;
+    border:2px solid rgba(252,181,20,.3);
+    flex-shrink:0;
+  }
+
+  .name{
+    font-weight:900;
+    letter-spacing:.3px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    font-size:1.18rem;
+  }
+
+  .team-metrics{
+    display:grid;
+    gap:4px;
+    color:#cfe1ff;
+    font-size:.95rem;
+    opacity:.95;
+  }
+  .metric b{ color:#ffe9b3; font-weight:900; }
+  .metric span{ color:#cfe1ff; }
+
+  .center-stack{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+    min-width:210px;
+  }
+
+  .score{
+    font-weight:900;
+    font-size:2.6rem;
+    color:var(--sabres-gold);
+    white-space:nowrap;
+    line-height:1.05;
+  }
+
+  .mid-meta{
+    text-align:center;
+    color:#cfe1ff;
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+  }
+  .state{
+    font-weight:900;
+    font-size:1.05rem;
+  }
+  .pill{
+    display:inline-block;
+    font-size:.9rem;
+    padding:5px 12px;
+    border-radius:999px;
+    background: rgba(252,181,20,.18);
+    border:1px solid rgba(252,181,20,.35);
+    color:#ffe9b3;
+    font-weight:900;
+  }
+  .muted{
+    font-size:.85rem;
+    opacity:.75;
+  }
+
+  /* Panels */
+  .panel{
+    margin-top:20px;
+    background: linear-gradient(180deg, rgba(0,38,84,.72), rgba(0,28,62,.72));
+    border: 1px solid rgba(252,181,20,.28);
+    border-radius:16px;
+    padding:18px 20px;
+  }
+
+  .panel h3{
+    margin:0 0 14px 0;
+    font-size:1.15rem;
+    color:#ffe9b3;
+    border-bottom:1px solid rgba(252,181,20,.2);
+    padding-bottom:8px;
+  }
+
+  .game-summary{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    font-size:1rem;
+  }
+
+  .game-summary strong{
+    color:var(--sabres-gold);
+    font-weight:900;
+  }
+
+  /* Goals list */
+  .goals{
+    display:grid;
+    gap:12px;
+    margin-top:14px;
+  }
+
+  .goal{
+    display:grid;
+    grid-template-columns: 110px 1fr;
+    gap:14px;
+    align-items:start;
+    padding:12px 14px;
+    border-radius:12px;
+    background: rgba(255,255,255,.04);
+    border:1px solid rgba(252,181,20,.15);
+    transition:all .2s;
+  }
+
+  .goal:hover{
+    background: rgba(252,181,20,.08);
+    border-color:rgba(252,181,20,.3);
+  }
+
+  .time{
+    font-weight:900;
+    color:#ffe3a3;
+    font-size:.95rem;
+  }
+
+  .goal-details{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+  }
+
+  .who{
+    font-weight:900;
+    color:var(--sabres-white);
+  }
+
+  .team-name{
+    color:var(--sabres-gold);
+    font-weight:900;
+  }
+
+  .assist{
+    color:#c6d6f6;
+    font-size:.92rem;
+    margin-top:2px;
+  }
+
+  .assist-player{
+    display:inline-block;
+    margin-right:8px;
+  }
+
+  .sep{
+    opacity:.4;
+    padding:0 6px;
+  }
+
+  .strength{
+    color:#a8c5f5;
+    font-size:.85rem;
+    font-weight:900;
+  }
+
+  .loading, .error, .info{
+    text-align:center;
+    padding:20px;
+    color:#c6d6f6;
+  }
+
+  .error{
+    color:#ff9999;
+  }
+
+  .info{
+    color:#a8c5f5;
+    font-size:.95rem;
+    line-height:1.6;
+  }
+
+  /* Mobile safeguards */
+  @media (max-width: 980px){
+    .team-header-inner{ padding:0 200px; }
+    .slug{ height:170px; }
+  }
+  @media (max-width:768px){
+    .team-header-inner{ padding:0 96px; }
+    .slug{ height:120px; opacity:.65; }
+    .slug-left{ left:10px; }
+    .slug-right{ right:10px; }
+
+    .score-top{
+      grid-template-columns: 1fr;
+      gap:14px;
+    }
+
+    .team.away, .team.home{
+      align-items:center;
+      text-align:center;
+    }
+    .team.away .team-name-row,
+    .team.home .team-name-row{
+      justify-content:center;
+    }
+
+    .center-stack{
+      min-width:auto;
+    }
+
+    .score{ font-size:2.2rem; }
+
+    .goal{
+      grid-template-columns: 96px 1fr;
+      gap:10px;
+    }
+  }
+
+  @media (max-width:480px){
+    .team-header-inner{ padding:0 18px; }
+    .slug{ display:none; }
+
+    .badge{ width:56px; height:56px; }
+    .name{ font-size:1.05rem; }
+    .score{ font-size:2rem; }
+
+    .header-logo{ max-width:92vw; }
+  }
+</style>
 </head>
 <body>
   <div class="wrap">
-    <div class="row">
-      <div class="card" style="flex:1 1 100%;">
-        <div style="display:flex; justify-content: space-between; align-items:center; gap:12px;">
-          <div>
-            <div class="title" id="hdrTitle">NHL Panel</div>
-            <div class="muted" id="hdrSub">Loading…</div>
+    <!-- Team Header -->
+    <div class="team-header">
+      <img class="slug slug-left" src="slug.png" alt="" aria-hidden="true">
+      <img class="slug slug-right" src="slug.png" alt="" aria-hidden="true">
+
+      <div class="team-header-inner">
+        <img class="header-logo" src="sabres2.png?v=123" alt="Buffalo Sabres">
+
+        <div class="team-stats">
+          <div class="stat-item">
+            <span class="stat-label">Record</span>
+            <span class="stat-value" id="record">—</span>
           </div>
-          <div style="display:flex; gap:10px; align-items:center;">
-            <button class="btn" id="refreshNow">Refresh</button>
-            <select id="teamSelect" class="btn" style="padding: 6px 10px;">
-              <!-- abbreviations -->
-              <option value="BUF" selected>BUF</option>
-              <option value="TOR">TOR</option><option value="MTL">MTL</option><option value="BOS">BOS</option>
-              <option value="NYR">NYR</option><option value="NYI">NYI</option><option value="NJD">NJD</option>
-              <option value="PIT">PIT</option><option value="PHI">PHI</option><option value="WSH">WSH</option>
-              <option value="TBL">TBL</option><option value="FLA">FLA</option><option value="CAR">CAR</option>
-              <option value="DET">DET</option><option value="OTT">OTT</option><option value="CBJ">CBJ</option>
-              <option value="CHI">CHI</option><option value="STL">STL</option><option value="NSH">NSH</option>
-              <option value="DAL">DAL</option><option value="COL">COL</option><option value="MIN">MIN</option>
-              <option value="WPG">WPG</option><option value="EDM">EDM</option><option value="CGY">CGY</option>
-              <option value="VAN">VAN</option><option value="SEA">SEA</option><option value="VGK">VGK</option>
-              <option value="LAK">LAK</option><option value="SJS">SJS</option><option value="ANA">ANA</option>
-              <option value="UTA">UTA</option>
-            </select>
+          <div class="stat-item">
+            <span class="stat-label">Points</span>
+            <span class="stat-value" id="points">—</span>
           </div>
         </div>
-      </div>
-    </div>
 
-    <div class="row">
-      <div class="card">
-        <div class="title">Last Game</div>
-        <div class="muted" id="lastGameLine">—</div>
-      </div>
-      <div class="card">
-        <div class="title">Next Game</div>
-        <div class="muted" id="nextGameLine">—</div>
-      </div>
-    </div>
-
-    <div class="row">
-      <div class="card" style="flex:1 1 100%;">
-        <div class="title">Score</div>
-        <div style="display:flex; align-items:baseline; gap:10px;">
-          <div class="big" id="scoreLeft">0</div>
-          <div class="sep">—</div>
-          <div class="big" id="scoreRight">0</div>
+        <!-- NEW: last 5 + streak (below record/points, above standings) -->
+        <div class="top-scorer" id="formStreakLine" style="margin-top:10px;">
+          Loading form…
         </div>
-        <div class="muted" id="scoreMeta">—</div>
-      </div>
-    </div>
 
-    <div class="row">
-      <div class="card" style="flex:1 1 100%;">
-        <div class="title">Team totals (Boxscore)</div>
-        <div class="statgrid">
-          <div class="stat"><div class="k">Shots</div><div class="v" id="stShots">—</div></div>
-          <div class="stat"><div class="k">Faceoffs</div><div class="v" id="stFO">—</div></div>
-          <div class="stat"><div class="k">Hits</div><div class="v" id="stHits">—</div></div>
-          <div class="stat"><div class="k">Blocks</div><div class="v" id="stBlocks">—</div></div>
+        <!-- standings position line -->
+        <div class="top-scorer" id="standingLine" style="margin-top:10px; border-top:1px solid rgba(252,181,20,.2);">
+          Loading standings…
         </div>
-        <div class="muted" id="statsNote" style="margin-top:10px;">Uses boxscore team totals. PBP used only for plays/goals/penalties/situation.</div>
+
+        <!-- leaders -->
+        <div class="top-scorer" id="topGoals">
+          Loading leading goals...
+        </div>
+        <div class="top-scorer" id="topPoints" style="margin-top:8px; border-top:none; padding-top:0;">
+          Loading leading points...
+        </div>
       </div>
     </div>
 
-    <div class="row">
-      <div class="card" style="flex:1 1 100%;">
-        <div class="title">Recent plays (PBP)</div>
-        <div class="plays" id="playsBox"></div>
+    <!-- Primary score bar -->
+    <div class="scorebar" id="scorebar">
+      <div class="score-top">
+        <!-- Away -->
+        <div class="team away" id="awayTeam">
+          <div class="team-name-row">
+            <div class="name">Away</div>
+            <div class="badge" id="awayBadge"></div>
+          </div>
+
+          <!-- Metrics -->
+          <div class="team-metrics" id="awayMetrics">
+            <div class="metric"><b>SOG</b>: <span id="awaySog">—</span></div>
+            <div class="metric"><b>Hits</b>: <span id="awayHits">—</span></div>
+            <div class="metric"><b>Blk</b>: <span id="awayBlocks">—</span></div>
+            <div class="metric"><b>G</b>: <span id="awayGoalie">—</span></div>
+          </div>
+        </div>
+
+        <!-- Center -->
+        <div class="center-stack">
+          <div class="score" id="score">— — —</div>
+          <div class="mid-meta">
+            <div class="state" id="state">Loading…</div>
+            <div><span class="pill" id="when"></span></div>
+            <div class="muted" id="updated"></div>
+          </div>
+        </div>
+
+        <!-- Home -->
+        <div class="team home" id="homeTeam">
+          <div class="team-name-row">
+            <div class="badge" id="homeBadge"></div>
+            <div class="name">Home</div>
+          </div>
+
+          <!-- Metrics -->
+          <div class="team-metrics" id="homeMetrics">
+            <div class="metric"><b>SOG</b>: <span id="homeSog">—</span></div>
+            <div class="metric"><b>Hits</b>: <span id="homeHits">—</span></div>
+            <div class="metric"><b>Blk</b>: <span id="homeBlocks">—</span></div>
+            <div class="metric"><b>G</b>: <span id="homeGoalie">—</span></div>
+          </div>
+        </div>
       </div>
+
+      <!-- Live Goals attached to active game box -->
+      <div class="panel" id="liveGoalsPanel" style="margin-top:0;">
+        <h3>Goals</h3>
+        <div class="goals" id="goals"><div class="loading">Loading goals…</div></div>
+      </div>
+    </div>
+
+    <!-- Most Recent Game (game BEFORE the live/primary game if primary is live) -->
+    <div class="panel" id="lastGamePanel">
+      <h3>Most Recent Game</h3>
+      <div id="lastGameBox" class="loading">Loading…</div>
+      <div class="goals" id="lastGameGoals"></div>
+    </div>
+
+    <!-- Next Game -->
+    <div class="panel" id="nextGamePanel">
+      <h3>Next Game</h3>
+      <div id="nextGameBox" class="loading">Loading…</div>
     </div>
   </div>
 
-  <script>
-    // ============================================================
-    // CONFIG
-    // ============================================================
-    const REFRESH_MS_LIVE = 15000;
-    const REFRESH_MS_IDLE = 120000;
+<script>
+(async function(){
+  const SABRES_ABBR = 'BUF';
+  const CORS_PROXY = 'https://corsproxy.io/?';
 
-    // ============================================================
-    // LOGGING (kept structure, standalone)
-    // ============================================================
-    let logMessages = [];
-    const MAX_LOG_MESSAGES = 15;
+  // Helper functions
+  const setTxt = (id, t) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = t;
+  };
 
-    function addLog(message, type = "info") {
-      const timestamp = new Date().toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit" });
-      logMessages.unshift({ time: timestamp, message, type });
-      if (logMessages.length > MAX_LOG_MESSAGES) logMessages = logMessages.slice(0, MAX_LOG_MESSAGES);
-      updateLogPanel();
-      console.log(`[NHL ${timestamp}]`, message);
+  const setHTML = (id, html) => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = html;
+  };
+
+  function formatDate(dateStr) {
+    try {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('en-US', {
+        timeZone: 'America/New_York',
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit'
+      });
+    } catch {
+      return dateStr;
     }
+  }
 
-    function updateLogPanel() {
-      let logPanel = document.getElementById("nhlDebugLog");
-      if (!logPanel) {
-        logPanel = document.createElement("div");
-        logPanel.id = "nhlDebugLog";
-        logPanel.innerHTML = `
-          <div class="hdr">
-            <b>🏒 Debug Log</b>
-            <div style="display:flex; gap:6px;">
-              <button class="btn" id="clearLogBtn" style="padding:4px 8px;">Clear</button>
-              <button class="btn" id="toggleLogBtn" style="padding:4px 8px;">−</button>
-            </div>
-          </div>
-          <div id="logMessages"></div>
-        `;
-        document.body.appendChild(logPanel);
+  function getTeamLogo(abbr) {
+    return `https://assets.nhle.com/logos/nhl/svg/${abbr}_light.svg`;
+  }
 
-        document.getElementById("clearLogBtn").addEventListener("click", () => {
-          logMessages = [];
-          updateLogPanel();
-        });
+  function teamLabel(t) {
+    return t?.placeName?.default
+        || t?.commonName?.default
+        || t?.name?.default
+        || t?.abbrev
+        || '';
+  }
 
-        let minimized = false;
-        document.getElementById("toggleLogBtn").addEventListener("click", (e) => {
-          minimized = !minimized;
-          document.getElementById("logMessages").style.display = minimized ? "none" : "block";
-          e.target.textContent = minimized ? "+" : "−";
-          logPanel.style.maxHeight = minimized ? "46px" : "420px";
-        });
-      }
+  function setUpdatedNow() {
+    const el = document.getElementById('updated');
+    if (!el) return;
+    el.textContent = `Updated ${new Date().toLocaleTimeString('en-US', {
+      timeZone: 'America/New_York',
+      hour: 'numeric',
+      minute: '2-digit',
+      second: '2-digit'
+    })}`;
+  }
 
-      const box = document.getElementById("logMessages");
-      if (!box) return;
+  async function fetchJSON(url) {
+    const proxiedUrl = CORS_PROXY + encodeURIComponent(url);
+    const response = await fetch(proxiedUrl, { cache: 'no-store' });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return await response.json();
+  }
 
-      const typeColors = { info:"#00bfff", success:"#00ff88", warning:"#ffaa00", error:"#ff3b30" };
-      box.innerHTML = logMessages.map(l => `
-        <div style="margin-bottom:6px; padding:6px; background: rgba(255,255,255,0.03); border-radius:8px; border-left:3px solid ${typeColors[l.type] || typeColors.info};">
-          <div style="color: rgba(255,255,255,0.55); font-size:10px;">${l.time}</div>
-          <div style="color:${typeColors[l.type] || typeColors.info};">${l.message}</div>
-        </div>
-      `).join("");
-    }
+  // Get team standings and stats (record + points)
+  async function getTeamStats() {
+    try {
+      const url = `https://api-web.nhle.com/v1/standings/now`;
+      const data = await fetchJSON(url);
 
-    // ============================================================
-    // FETCH HELPERS
-    // ============================================================
-    async function fetchJson(url) {
-      const r = await fetch(url, { cache: "no-store" });
-      if (!r.ok) throw new Error(`HTTP ${r.status}: ${url}`);
-      return r.json();
-    }
-
-    // ============================================================
-    // SCHEDULE -> find last/next + current (live/pre)
-    // ============================================================
-    async function fetchScheduleNow() {
-      return fetchJson("https://api-web.nhle.com/v1/schedule/now");
-    }
-
-    function parseDateMs(d) {
-      const t = Date.parse(d);
-      return Number.isFinite(t) ? t : null;
-    }
-
-    function buildFullName(team) {
-      const place = team?.placeName?.default || "";
-      const common = team?.commonName?.default || "";
-      return `${place} ${common}`.trim();
-    }
-
-    function isTeamInGame(game, abbr) {
-      const h = (game?.homeTeam?.abbrev || "").toUpperCase();
-      const a = (game?.awayTeam?.abbrev || "").toUpperCase();
-      return (h === abbr.toUpperCase() || a === abbr.toUpperCase());
-    }
-
-    function extractGames(scheduleNow) {
-      const out = [];
-      for (const week of (scheduleNow?.gameWeek || [])) {
-        for (const g of (week?.games || [])) out.push(g);
-      }
-      return out;
-    }
-
-    function findRelevantGames(scheduleNow, teamAbbr) {
-      const games = extractGames(scheduleNow).filter(g => isTeamInGame(g, teamAbbr));
-      const now = Date.now();
-
-      // pick last finished (POST / FINAL-ish) and next future (PRE/FUT)
-      let last = null;
-      let next = null;
-      let current = null;
-
-      for (const g of games) {
-        const start = parseDateMs(g?.startTimeUTC) ?? null;
-
-        const state = String(g?.gameState || "").toUpperCase(); // IN, PRE, FUT, POST, ...
-        const isFinished = (state === "POST" || state === "FINAL" || state === "OFF");
-        const isLive = (state === "IN");
-        const isUpcoming = (state === "PRE" || state === "FUT");
-
-        if (isLive) current = g;
-
-        if (start != null) {
-          if (isFinished && start <= now) {
-            if (!last || start > (parseDateMs(last.startTimeUTC) ?? -Infinity)) last = g;
-          }
-          if (isUpcoming && start >= now) {
-            if (!next || start < (parseDateMs(next.startTimeUTC) ?? Infinity)) next = g;
-          }
-          // handle edge case: a live game started in the past
-          if (isLive && start <= now) current = g;
+      let sabres = null;
+      for (const standing of data.standings || []) {
+        if (standing.teamAbbrev?.default === SABRES_ABBR) {
+          sabres = standing;
+          break;
         }
       }
-
-      // If no explicit "IN", still allow "PRE" as current candidate if very close and you want it; not needed here.
-      return { last, next, current };
-    }
-
-    // ============================================================
-    // GAMECENTER ENDPOINTS
-    // ============================================================
-    async function fetchPlayByPlay(gameId) {
-      return fetchJson(`https://api-web.nhle.com/v1/gamecenter/${gameId}/play-by-play`);
-    }
-
-    async function fetchBoxscore(gameId) {
-      return fetchJson(`https://api-web.nhle.com/v1/gamecenter/${gameId}/boxscore`);
-    }
-
-    // ============================================================
-    // AUDIT (exactly what you requested)
-    // ============================================================
-    function auditPlays(playByPlayData) {
-      const counts = {};
-      let missingOwner = 0;
-
-      for (const p of (playByPlayData?.plays || [])) {
-        const k = String(p.typeDescKey || "NONE");
-        counts[k] = (counts[k] || 0) + 1;
-        if (!p.details || p.details.eventOwnerTeamId == null) missingOwner++;
-      }
-
-      addLog(`AUDIT typeDescKey counts: ${JSON.stringify(counts)}`, "info");
-      addLog(`AUDIT plays missing eventOwnerTeamId: ${missingOwner}`, "info");
-    }
-
-    // ============================================================
-    // PBP -> plays/goals/penalties/situation (display only)
-    // ============================================================
-    function formatClock(play) {
-      return play?.timeInPeriod || play?.timeRemaining || play?.clock || "";
-    }
-    function formatPeriod(play) {
-      const n = play?.periodDescriptor?.number ?? play?.period ?? "";
-      return n ? `P${n}` : "";
-    }
-    function getSituation(play) {
-      return (play?.situationCode || play?.strength || play?.details?.strength || play?.details?.situation || "");
-    }
-    function describePlay(play) {
-      // Prefer explicit descriptions if present
-      return (
-        play?.details?.eventDescription ||
-        play?.details?.description ||
-        play?.description ||
-        play?.typeDescKey ||
-        "play"
-      );
-    }
-    function summarizePlay(play) {
-      const k = String(play?.typeDescKey || "").toLowerCase().trim();
-      const per = formatPeriod(play);
-      const clk = formatClock(play);
-      const sit = getSituation(play);
-      const head = [per, clk, sit].filter(Boolean).join(" ");
-      const desc = describePlay(play);
-      return { key: k, head, desc };
-    }
-
-    function getLastPlays(playByPlayData, n = 10) {
-      const plays = (playByPlayData?.plays || []);
-      return plays.slice(-n).map(summarizePlay).reverse(); // newest first
-    }
-
-    // ============================================================
-    // FIX 1 (your exact replacement): robust key normalize + blocked-shot inversion
-    // NOTE: kept even though you will use boxscore totals; this is a fallback/debug tool.
-    // ============================================================
-    function extractGameStats(playByPlayData, isHome) {
-      if (!playByPlayData?.plays) return null;
-
-      let faceoffTeam = 0, faceoffOpp = 0;
-      let hitsTeam = 0, hitsOpp = 0;
-      let blocksTeam = 0, blocksOpp = 0;
-
-      const homeTeamId = playByPlayData.homeTeam?.id;
-      const awayTeamId = playByPlayData.awayTeam?.id;
-      const ourTeamId = isHome ? homeTeamId : awayTeamId;
-      const oppTeamId = isHome ? awayTeamId : homeTeamId;
-
-      for (const play of playByPlayData.plays) {
-        const rawKey = play.typeDescKey;
-        const key = String(rawKey || "").toLowerCase().trim();
-        const eventTeamId = play.details?.eventOwnerTeamId ?? null;
-
-        const isFaceoff = (key === "faceoff");
-        const isHit = (key === "hit");
-        const isBlock =
-          (key === "blocked-shot" || key === "blocked_shot" || key === "blockedshot");
-
-        if (isFaceoff) {
-          if (eventTeamId === ourTeamId) faceoffTeam++;
-          else if (eventTeamId === oppTeamId) faceoffOpp++;
-          continue;
-        }
-
-        if (isHit) {
-          if (eventTeamId === ourTeamId) hitsTeam++;
-          else if (eventTeamId === oppTeamId) hitsOpp++;
-          continue;
-        }
-
-        if (isBlock) {
-          // IMPORTANT:
-          // Many feeds set eventOwnerTeamId = SHOOTING team on a blocked shot.
-          // The "block" is credited to the DEFENDING team => invert attribution.
-          if (eventTeamId === ourTeamId) blocksOpp++;       // our shot got blocked by opp
-          else if (eventTeamId === oppTeamId) blocksTeam++; // opp shot got blocked by us
-          continue;
-        }
-      }
-
-      return { faceoffTeam, faceoffOpp, hitsTeam, hitsOpp, blocksTeam, blocksOpp };
-    }
-
-    // ============================================================
-    // BOXSCORE -> totals (hits/blocks/faceoffs/shots)
-    // Defensive path picking (avoids guessing JSON shape).
-    // ============================================================
-    function pickFirst(obj, paths) {
-      for (const path of paths) {
-        const parts = path.split(".");
-        let cur = obj;
-        let ok = true;
-        for (const p of parts) {
-          if (cur && Object.prototype.hasOwnProperty.call(cur, p)) cur = cur[p];
-          else { ok = false; break; }
-        }
-        if (ok && cur != null) return cur;
-      }
-      return null;
-    }
-
-    function getTeamNodeFromBox(box, side) {
-      return (
-        box?.[`${side}Team`] ||
-        box?.teams?.[side] ||
-        box?.gameState?.teams?.[side] ||
-        null
-      );
-    }
-
-    function getTeamTotalsFromBox(box, side) {
-      const teamNode = getTeamNodeFromBox(box, side);
-
-      const statsRoot =
-        pickFirst(teamNode, ["teamStats", "gameStats", "summary.teamGameStats", "summary.teamStats", "teamGameStats"]) ||
-        pickFirst(box, [`${side}Team.teamStats`, `summary.${side}Team.teamStats`, `summary.${side}Team.teamGameStats`]) ||
-        {};
-
-      const shots =
-        pickFirst(statsRoot, ["sog", "shotsOnGoal", "shots"]) ??
-        pickFirst(teamNode, ["sog", "shotsOnGoal", "shots"]) ??
-        null;
-
-      const hits =
-        pickFirst(statsRoot, ["hits"]) ??
-        pickFirst(teamNode, ["hits"]) ??
-        null;
-
-      const blocks =
-        pickFirst(statsRoot, ["blockedShots", "blocks", "blocked"]) ??
-        pickFirst(teamNode, ["blockedShots", "blocks", "blocked"]) ??
-        null;
-
-      const foWins =
-        pickFirst(statsRoot, ["faceoffWins", "faceoffsWon", "foWins"]) ??
-        pickFirst(teamNode, ["faceoffWins", "faceoffsWon", "foWins"]) ??
-        null;
-
-      const foLoss =
-        pickFirst(statsRoot, ["faceoffLosses", "faceoffsLost", "foLosses"]) ??
-        pickFirst(teamNode, ["faceoffLosses", "faceoffsLost", "foLosses"]) ??
-        null;
-
-      const foPct =
-        pickFirst(statsRoot, ["faceoffWinningPctg", "faceoffWinPct", "foPct"]) ??
-        pickFirst(teamNode, ["faceoffWinningPctg", "faceoffWinPct", "foPct"]) ??
-        null;
+      if (!sabres) return { wins: 0, losses: 0, otLosses: 0, points: 0 };
 
       return {
-        shots,
-        hits,
-        blocks,
-        faceoffs: { wins: foWins, losses: foLoss, pct: foPct }
+        wins: sabres.wins || 0,
+        losses: sabres.losses || 0,
+        otLosses: sabres.otLosses || 0,
+        points: sabres.points || 0
       };
+    } catch {
+      return null;
     }
+  }
 
-    // ============================================================
-    // UI helpers
-    // ============================================================
-    function setText(id, text) {
-      const el = document.getElementById(id);
-      if (el) el.textContent = text;
-    }
+  // conference/division/league ranks
+  async function getSabresStandingsPosition() {
+    try {
+      const url = `https://api-web.nhle.com/v1/standings/now`;
+      const data = await fetchJSON(url);
 
-    function fmtStartTime(game) {
-      const t = game?.startTimeUTC;
-      if (!t) return "TBD";
-      const d = new Date(t);
-      return d.toLocaleString(undefined, { weekday:"short", month:"numeric", day:"numeric", hour:"numeric", minute:"2-digit" });
-    }
-
-    function renderPlays(plays) {
-      const box = document.getElementById("playsBox");
-      if (!box) return;
-
-      if (!plays || plays.length === 0) {
-        box.innerHTML = `<div class="muted">No plays available.</div>`;
-        return;
+      let sabres = null;
+      for (const standing of data.standings || []) {
+        if (standing.teamAbbrev?.default === SABRES_ABBR) {
+          sabres = standing;
+          break;
+        }
       }
+      if (!sabres) return null;
 
-      box.innerHTML = plays.map(p => `
-        <div class="play">
-          <div class="t">${p.head || "—"}${p.key ? ` • ${p.key}` : ""}</div>
-          <div class="d">${escapeHtml(p.desc || "")}</div>
-        </div>
-      `).join("");
+      const conference = sabres.conferenceName || sabres.conferenceAbbrev || sabres.conference || (sabres.conferenceName?.default ?? null);
+      const conferenceRank = sabres.conferenceSequence ?? sabres.conferenceRank ?? sabres.conferencePlace ?? sabres.conferenceStanding ?? null;
+
+      const division = sabres.divisionName || sabres.divisionAbbrev || sabres.division || (sabres.divisionName?.default ?? null);
+      const divisionRank = sabres.divisionSequence ?? sabres.divisionRank ?? sabres.divisionPlace ?? sabres.divisionStanding ?? null;
+
+      const leagueRank = sabres.leagueSequence ?? sabres.leagueRank ?? sabres.leaguePlace ?? sabres.leagueStanding ?? null;
+
+      const confLabel =
+        (typeof conference === 'string' && conference.trim()) ? conference :
+        (sabres.conferenceAbbrev?.default || sabres.conferenceName?.default || sabres.conference || 'Conference');
+
+      return {
+        conference: confLabel,
+        conferenceRank: conferenceRank ?? '—',
+        division: (typeof division === 'string' && division.trim()) ? division : (sabres.divisionAbbrev?.default || sabres.divisionName?.default || sabres.division || 'Division'),
+        divisionRank: divisionRank ?? '—',
+        leagueRank: leagueRank ?? '—'
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  // Get roster and find leaders (goals + points)
+  async function getLeaders() {
+    try {
+      const url = `https://api-web.nhle.com/v1/club-stats/${SABRES_ABBR}/now`;
+      const data = await fetchJSON(url);
+
+      const skaters = data.skaters || [];
+      if (!skaters.length) return null;
+
+      const bestGoals = skaters.reduce((best, p) => (p.goals||0) > (best.goals||0) ? p : best, skaters[0]);
+      const bestPoints = skaters.reduce((best, p) => (p.points||0) > (best.points||0) ? p : best, skaters[0]);
+
+      const name = (p) => `${p.firstName?.default || ''} ${p.lastName?.default || ''}`.trim();
+
+      return {
+        goals: { name: name(bestGoals), val: bestGoals.goals || 0 },
+        points: { name: name(bestPoints), val: bestPoints.points || 0 }
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  async function getSchedule() {
+    const now = new Date();
+    const formatAPIDate = (d) => d.toISOString().split('T')[0];
+
+    const url = `https://api-web.nhle.com/v1/club-schedule/${SABRES_ABBR}/week/${formatAPIDate(now)}`;
+    const data = await fetchJSON(url);
+
+    const prevWeek = new Date(now);
+    prevWeek.setDate(prevWeek.getDate() - 7);
+    const prevUrl = `https://api-web.nhle.com/v1/club-schedule/${SABRES_ABBR}/week/${formatAPIDate(prevWeek)}`;
+    const prevData = await fetchJSON(prevUrl);
+
+    const allGames = [...(prevData.games || []), ...(data.games || [])];
+
+    const liveGame = allGames.find(g =>
+      g.gameState === 'LIVE' ||
+      g.gameState === 'CRIT' ||
+      g.gameState === 'CRITICAL'
+    );
+
+    const finalsSorted = allGames
+      .filter(g => (g.gameState === 'OFF' || g.gameState === 'FINAL'))
+      .sort((a,b) => new Date(b.startTimeUTC) - new Date(a.startTimeUTC));
+
+    const lastGame = finalsSorted[0];
+
+    const prevFinalBefore = (() => {
+      if (liveGame) {
+        const liveStart = new Date(liveGame.startTimeUTC).getTime();
+        return finalsSorted.find(g => new Date(g.startTimeUTC).getTime() < liveStart) || null;
+      }
+      return finalsSorted.length > 1 ? finalsSorted[1] : null;
+    })();
+
+    const nextGame = allGames
+      .filter(g => g.gameState === 'FUT' || g.gameState === 'PRE')
+      .sort((a, b) => new Date(a.startTimeUTC) - new Date(b.startTimeUTC))[0];
+
+    return { liveGame, lastGame, prevFinalBefore, nextGame, games: allGames, finalsSorted };
+  }
+
+  // Get game details with cache buster
+  async function getGameDetails(gameId) {
+    const url = `https://api-web.nhle.com/v1/gamecenter/${gameId}/play-by-play?cb=${Date.now()}`;
+    return await fetchJSON(url);
+  }
+
+  // Boxscore for SOG/Hits/Blocks/Goalie sv%
+  async function getGameBoxscore(gameId) {
+    const url = `https://api-web.nhle.com/v1/gamecenter/${gameId}/boxscore?cb=${Date.now()}`;
+    return await fetchJSON(url);
+  }
+
+  // Save% formatting: .XXX (standard)
+  function formatSavePctDotFromSavesShots(saves, shots) {
+    const s = Number(saves);
+    const sh = Number(shots);
+    if (!Number.isFinite(s) || !Number.isFinite(sh) || sh <= 0) return '—';
+    const pct = s / sh; // 0.xxx
+    const thou = Math.round(pct * 1000);
+    return `.${String(thou).padStart(3,'0')}`;
+  }
+
+  // Parse strings like "16/20" (saves/shots) anywhere on goalie object
+  function parseSavesShotsFromGoalie(goalieObj) {
+    if (!goalieObj) return null;
+
+    // direct numeric-ish fields (varies)
+    const saves =
+      goalieObj.saves ?? goalieObj.saveCount ?? goalieObj.totalSaves ?? null;
+    const shots =
+      goalieObj.shotsAgainst ?? goalieObj.shots ?? goalieObj.totalShotsAgainst ?? goalieObj.sa ?? null;
+
+    if (saves != null && shots != null) {
+      const s = Number(String(saves).replace(/[^\d.]/g,''));
+      const sh = Number(String(shots).replace(/[^\d.]/g,''));
+      if (Number.isFinite(s) && Number.isFinite(sh)) return { saves:s, shots:sh };
     }
 
-    function escapeHtml(s) {
-      return String(s).replace(/[&<>"']/g, m => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#039;" }[m]));
-    }
+    // sum all "*ShotsAgainst" strings like "16/20"
+    let totalSaves = 0;
+    let totalShots = 0;
+    let foundAny = false;
 
-    // ============================================================
-    // MAIN UPDATE LOOP
-    // ============================================================
-    let refreshTimer = null;
-    let refreshMs = REFRESH_MS_IDLE;
-
-    function setRefreshInterval(ms) {
-      if (refreshTimer) clearInterval(refreshTimer);
-      refreshMs = ms;
-      refreshTimer = setInterval(updatePanel, refreshMs);
-    }
-
-    async function updatePanel() {
-      const teamAbbr = document.getElementById("teamSelect").value.toUpperCase();
-
-      try {
-        setText("hdrTitle", `NHL Panel — ${teamAbbr}`);
-        setText("hdrSub", "Loading schedule…");
-
-        const scheduleNow = await fetchScheduleNow();
-        const { last, next, current } = findRelevantGames(scheduleNow, teamAbbr);
-
-        // Last/Next lines
-        if (last) {
-          const lastLine = `${buildFullName(last.awayTeam)} @ ${buildFullName(last.homeTeam)} • ${fmtStartTime(last)} • ${String(last.gameState || "").toUpperCase()}`;
-          setText("lastGameLine", lastLine);
-        } else {
-          setText("lastGameLine", "No recent final game found in /schedule/now window.");
-        }
-
-        if (next) {
-          const nextLine = `${buildFullName(next.awayTeam)} @ ${buildFullName(next.homeTeam)} • ${fmtStartTime(next)} • ${String(next.gameState || "").toUpperCase()}`;
-          setText("nextGameLine", nextLine);
-        } else {
-          setText("nextGameLine", "No upcoming game found in /schedule/now window.");
-        }
-
-        // Decide which game to show details for: live if exists, else next, else last.
-        const chosen = current || next || last;
-        if (!chosen?.id) {
-          setText("hdrSub", "No game available to display.");
-          setText("scoreMeta", "—");
-          setText("scoreLeft", "0");
-          setText("scoreRight", "0");
-          setText("stShots", "—");
-          setText("stFO", "—");
-          setText("stHits", "—");
-          setText("stBlocks", "—");
-          renderPlays([]);
-          setRefreshInterval(REFRESH_MS_IDLE);
-          return;
-        }
-
-        const state = String(chosen.gameState || "").toUpperCase();
-        const isLive = (state === "IN");
-
-        setText("hdrSub", `${buildFullName(chosen.awayTeam)} @ ${buildFullName(chosen.homeTeam)} • ${state} • GameID ${chosen.id}`);
-
-        // Pull play-by-play + boxscore in parallel (your requested split)
-        const [pbp, box] = await Promise.all([
-          fetchPlayByPlay(chosen.id),
-          fetchBoxscore(chosen.id)
-        ]);
-
-        // One-time audit per refresh (you requested)
-        auditPlays(pbp);
-
-        // Score: prefer boxscore fields if present; else pbp score fields if present.
-        const homeScore = (
-          pickFirst(box, ["homeTeam.score", "teams.home.score"]) ??
-          pickFirst(pbp, ["homeTeam.score", "homeTeam.goals"]) ??
-          0
-        );
-        const awayScore = (
-          pickFirst(box, ["awayTeam.score", "teams.away.score"]) ??
-          pickFirst(pbp, ["awayTeam.score", "awayTeam.goals"]) ??
-          0
-        );
-
-        // Determine whether selected team is home or away in this game
-        const homeAbbr = String(chosen?.homeTeam?.abbrev || "").toUpperCase();
-        const awayAbbr = String(chosen?.awayTeam?.abbrev || "").toUpperCase();
-        const isSelectedHome = (teamAbbr === homeAbbr);
-
-        // Set left/right as "selected team" vs opponent (so the panel stays consistent)
-        const leftScore = isSelectedHome ? homeScore : awayScore;
-        const rightScore = isSelectedHome ? awayScore : homeScore;
-
-        setText("scoreLeft", String(leftScore));
-        setText("scoreRight", String(rightScore));
-        setText("scoreMeta", `${teamAbbr} vs ${isSelectedHome ? awayAbbr : homeAbbr} • ${isLive ? "LIVE" : state}`);
-
-        // Boxscore totals (team totals)
-        const ourSide = isSelectedHome ? "home" : "away";
-        const oppSide = isSelectedHome ? "away" : "home";
-        const ourTotals = getTeamTotalsFromBox(box, ourSide);
-        const oppTotals = getTeamTotalsFromBox(box, oppSide);
-
-        // Shots: show "ours:opp"
-        const shotsLine = (ourTotals.shots != null && oppTotals.shots != null)
-          ? `${ourTotals.shots}:${oppTotals.shots}`
-          : "—";
-        setText("stShots", shotsLine);
-
-        // Faceoffs: prefer wins/losses; else show pct if all you have
-        let foLine = "—";
-        const ow = ourTotals.faceoffs?.wins, ol = ourTotals.faceoffs?.losses;
-        const pw = oppTotals.faceoffs?.wins, pl = oppTotals.faceoffs?.losses;
-        if (ow != null && pw != null) {
-          foLine = `${ow}:${pw}`;
-        } else if (ourTotals.faceoffs?.pct != null) {
-          foLine = `${String(ourTotals.faceoffs.pct)}%`;
-        }
-        setText("stFO", foLine);
-
-        const hitsLine = (ourTotals.hits != null && oppTotals.hits != null) ? `${ourTotals.hits}:${oppTotals.hits}` : "—";
-        setText("stHits", hitsLine);
-
-        const blocksLine = (ourTotals.blocks != null && oppTotals.blocks != null) ? `${ourTotals.blocks}:${oppTotals.blocks}` : "—";
-        setText("stBlocks", blocksLine);
-
-        // PBP plays
-        const plays = getLastPlays(pbp, 10);
-        renderPlays(plays);
-
-        // Optional: log fallback PBP counting (debug comparison only)
-        const pbpCounts = extractGameStats(pbp, isSelectedHome);
-        if (pbpCounts) {
-          addLog(
-            `PBP fallback counts (debug): FO ${pbpCounts.faceoffTeam}:${pbpCounts.faceoffOpp} | Hits ${pbpCounts.hitsTeam}:${pbpCounts.hitsOpp} | Blocks ${pbpCounts.blocksTeam}:${pbpCounts.blocksOpp}`,
-            "info"
-          );
-        }
-
-        // Refresh cadence
-        setRefreshInterval(isLive ? REFRESH_MS_LIVE : REFRESH_MS_IDLE);
-
-        // Your falsifier for “key mismatch” (printed every refresh):
-        // If AUDIT shows non-zero for "hit" and for a blocked-shot key, and totals still show "—",
-        // the cause is not missing keys; it's boxscore parse paths or upstream boxscore not including those stats.
-      } catch (err) {
-        addLog(`Update failed: ${err.message}`, "error");
-        setText("hdrSub", `Error: ${err.message}`);
-        setRefreshInterval(REFRESH_MS_IDLE);
+    for (const [k,v] of Object.entries(goalieObj)) {
+      if (!v) continue;
+      if (!/ShotsAgainst$/i.test(k)) continue;
+      const m = String(v).match(/(\d+)\s*\/\s*(\d+)/);
+      if (!m) continue;
+      const s = Number(m[1]);
+      const sh = Number(m[2]);
+      if (Number.isFinite(s) && Number.isFinite(sh)) {
+        totalSaves += s;
+        totalShots += sh;
+        foundAny = true;
       }
     }
 
-    // ============================================================
-    // INIT + UI wiring
-    // ============================================================
-    document.getElementById("refreshNow").addEventListener("click", () => updatePanel());
-    document.getElementById("teamSelect").addEventListener("change", () => {
-      addLog(`Team changed -> ${document.getElementById("teamSelect").value}`, "warning");
-      updatePanel();
+    return foundAny ? { saves: totalSaves, shots: totalShots } : null;
+  }
+
+  function goalieName(goalieObj) {
+    if (!goalieObj) return 'Goalie';
+    const ln = goalieObj.lastName?.default || goalieObj.lastName || goalieObj.name?.default || goalieObj.name || '';
+    if (typeof ln === 'string' && ln.trim()) return ln.trim();
+
+    // sometimes: name.default = "Lastname"
+    const nm = goalieObj.name?.default || goalieObj.name;
+    return (typeof nm === 'string' && nm.trim()) ? nm.trim() : 'Goalie';
+  }
+
+  function goalieLabel(goalieObj) {
+    if (!goalieObj) return '—';
+    const nm = goalieName(goalieObj);
+
+    // prefer computed from saves/shots; fallback to any raw savePct fields if present
+    const ss = parseSavesShotsFromGoalie(goalieObj);
+    if (ss && ss.shots > 0) {
+      return `${nm} (${formatSavePctDotFromSavesShots(ss.saves, ss.shots)})`;
+    }
+
+    const svRaw =
+      goalieObj.savePctg ?? goalieObj.savePercentage ?? goalieObj.savePct ?? goalieObj.svPct ?? goalieObj.savePctgDecimal ??
+      goalieObj.savePctgValue ?? goalieObj.savePctValue ?? null;
+
+    if (svRaw != null) {
+      const s = (typeof svRaw === 'string') ? svRaw.trim().replace('%','') : svRaw;
+      let num = (typeof s === 'number') ? s : Number(s);
+      if (Number.isFinite(num)) {
+        if (num > 1.5) num = num / 100;
+        return `${nm} (.${String(Math.round(num * 1000)).padStart(3,'0')})`;
+      }
+    }
+
+    return `${nm} (—)`;
+  }
+
+  // Extract team totals:
+  // - First try top-level team totals
+  // - Then try playerByGameStats.team object
+  // - Then compute by summing player stats (hits/blockedShots) on skaters list
+  function getPGSTeam(side, box) {
+    const pgs = box?.playerByGameStats;
+    if (!pgs) return null;
+    return side === 'away' ? pgs.awayTeam : pgs.homeTeam;
+  }
+
+  function getTopTeam(side, box) {
+    return side === 'away' ? (box?.awayTeam || box?.away) : (box?.homeTeam || box?.home);
+  }
+
+  function pickFirstNonNull(...vals) {
+    for (const v of vals) {
+      if (v !== undefined && v !== null && v !== '') return v;
+    }
+    return null;
+  }
+
+  function sumSkaterStat(pgsTeam, keys) {
+    const skaters = pgsTeam?.skaters;
+    if (!Array.isArray(skaters) || !skaters.length) return null;
+
+    let sum = 0;
+    let found = false;
+
+    for (const s of skaters) {
+      for (const k of keys) {
+        const v = s?.[k];
+        if (v === undefined || v === null) continue;
+        const n = Number(String(v).replace(/[^\d.-]/g,''));
+        if (!Number.isFinite(n)) continue;
+        sum += n;
+        found = true;
+        break;
+      }
+    }
+    return found ? sum : null;
+  }
+
+  function extractTeamTotal(side, box, stat) {
+    const top = getTopTeam(side, box);
+    const pgsTeam = getPGSTeam(side, box);
+
+    // common direct keys
+    if (stat === 'sog') {
+      return pickFirstNonNull(
+        top?.shotsOnGoal, top?.sog, top?.shots,
+        top?.teamStats?.shotsOnGoal, top?.teamStats?.sog,
+        pgsTeam?.shotsOnGoal, pgsTeam?.sog, pgsTeam?.shots,
+        pgsTeam?.teamStats?.shotsOnGoal, pgsTeam?.teamStats?.sog
+      );
+    }
+
+    if (stat === 'hits') {
+      const direct = pickFirstNonNull(
+        top?.hits, top?.teamStats?.hits,
+        pgsTeam?.hits, pgsTeam?.teamStats?.hits
+      );
+      if (direct != null) return direct;
+
+      // compute from skaters
+      return sumSkaterStat(pgsTeam, ['hits', 'hitCount']);
+    }
+
+    if (stat === 'blockedShots') {
+      const direct = pickFirstNonNull(
+        top?.blockedShots, top?.blocks, top?.blocked,
+        top?.teamStats?.blockedShots, top?.teamStats?.blocks, top?.teamStats?.blocked,
+        pgsTeam?.blockedShots, pgsTeam?.blocks, pgsTeam?.blocked,
+        pgsTeam?.teamStats?.blockedShots, pgsTeam?.teamStats?.blocks, pgsTeam?.teamStats?.blocked
+      );
+      if (direct != null) return direct;
+
+      // compute from skaters
+      return sumSkaterStat(pgsTeam, ['blockedShots', 'blocks', 'blocked']);
+    }
+
+    return null;
+  }
+
+  // Pick goalie: choose the goalie who actually faced shots (max shots), not index 0
+  function findLikelyGoalie(side, box) {
+    const pgsTeam = getPGSTeam(side, box);
+    const top = getTopTeam(side, box);
+
+    const candidates = [];
+
+    const pgsGoalies = pgsTeam?.goalies;
+    if (Array.isArray(pgsGoalies)) candidates.push(...pgsGoalies);
+
+    const topGoalies = top?.goalies || top?.goalieStats;
+    if (Array.isArray(topGoalies)) candidates.push(...topGoalies);
+
+    if (!candidates.length) return null;
+
+    // choose by max total shots against (derived from saves/shots strings or shotsAgainst)
+    let best = null;
+    let bestShots = -1;
+
+    for (const g of candidates) {
+      const ss = parseSavesShotsFromGoalie(g);
+      const shots = ss?.shots ?? (() => {
+        const raw = g.shotsAgainst ?? g.shots ?? g.sa ?? null;
+        const n = Number(String(raw).replace(/[^\d.]/g,''));
+        return Number.isFinite(n) ? n : 0;
+      })();
+
+      if (shots > bestShots) {
+        bestShots = shots;
+        best = g;
+      }
+    }
+
+    // if everyone is 0 shots, fallback to first (still deterministic)
+    return best || candidates[0];
+  }
+
+  function applyTeamMetrics(side, box) {
+    const sog = extractTeamTotal(side, box, 'sog');
+    const hits = extractTeamTotal(side, box, 'hits');
+    const blocks = extractTeamTotal(side, box, 'blockedShots');
+
+    const goalie = findLikelyGoalie(side, box);
+
+    setTxt(side + 'Sog', sog != null ? String(sog) : '—');
+    setTxt(side + 'Hits', hits != null ? String(hits) : '—');
+    setTxt(side + 'Blocks', blocks != null ? String(blocks) : '—');
+    setTxt(side + 'Goalie', goalieLabel(goalie));
+  }
+
+  // Render the main scorebar
+  function renderScorebar(game, details, boxscore) {
+    if (!game) {
+      setTxt('state', 'No game data');
+      setTxt('when', '—');
+      return;
+    }
+
+    const away = details?.awayTeam || game.awayTeam;
+    const home = details?.homeTeam || game.homeTeam;
+
+    document.querySelector('#awayTeam .name').textContent = teamLabel(away);
+    document.querySelector('#homeTeam .name').textContent = teamLabel(home);
+
+    const awayAbbrev = away.abbrev || game.awayTeam?.abbrev;
+    const homeAbbrev = home.abbrev || game.homeTeam?.abbrev;
+
+    document.getElementById('awayBadge').style.backgroundImage = `url('${getTeamLogo(awayAbbrev)}')`;
+    document.getElementById('homeBadge').style.backgroundImage = `url('${getTeamLogo(homeAbbrev)}')`;
+
+    const awayScore = details?.awayTeam?.score ?? game.awayTeam?.score ?? 0;
+    const homeScore = details?.homeTeam?.score ?? game.homeTeam?.score ?? 0;
+    setTxt('score', `${awayScore} — ${homeScore}`);
+
+    const gameState = details?.gameState || game.gameState;
+    const isLive = ['LIVE', 'CRIT', 'CRITICAL'].includes(gameState);
+
+    let status = 'Final';
+    if (isLive) {
+      status = 'LIVE';
+      if (details?.periodDescriptor) {
+        const period = details.periodDescriptor.number;
+        const periodType = details.periodDescriptor.periodType;
+        if (periodType === 'OT') status = 'OVERTIME';
+        else if (periodType === 'SO') status = 'SHOOTOUT';
+        else status = `${period}${period === 1 ? 'st' : period === 2 ? 'nd' : period === 3 ? 'rd' : 'th'} Period`;
+      }
+      if (details?.clock?.inIntermission) status = 'Intermission';
+    } else if (['FUT', 'PRE'].includes(gameState)) status = 'Scheduled';
+    else if (['FINAL', 'OFF'].includes(gameState)) status = 'Final';
+
+    setTxt('state', status);
+
+    // time/when (prefer intermission remaining if present)
+    let when = '';
+    if (isLive) {
+      if (details?.clock?.inIntermission) {
+        const ir =
+          details.clock.intermissionTimeRemaining ||
+          details.clock.intermissionRemaining ||
+          details.clock.intermissionTimeRemainingSeconds ||
+          details.clock.intermissionTimeLeft;
+
+        if (typeof ir === 'string' && ir.trim()) when = `INT ${ir}`;
+        else if (typeof ir === 'number' && Number.isFinite(ir)) {
+          const mm = Math.floor(ir / 60);
+          const ss = String(ir % 60).padStart(2, '0');
+          when = `INT ${mm}:${ss}`;
+        } else {
+          when = 'Intermission';
+        }
+      } else {
+        when = details?.clock?.timeRemaining || '';
+      }
+    } else {
+      when = formatDate(game.startTimeUTC);
+    }
+    setTxt('when', when || '—');
+
+    // team metrics
+    if (boxscore) {
+      applyTeamMetrics('away', boxscore);
+      applyTeamMetrics('home', boxscore);
+    } else {
+      ['awaySog','homeSog','awayHits','homeHits','awayBlocks','homeBlocks','awayGoalie','homeGoalie'].forEach(id => setTxt(id, '—'));
+    }
+  }
+
+  function buildPlayerMap(details) {
+    const playerMap = new Map();
+    const roster = details?.rosterSpots || [];
+    for (const p of roster) {
+      if (!p?.playerId) continue;
+      const nm = `${p.firstName?.default || ''} ${p.lastName?.default || ''}`.trim();
+      playerMap.set(p.playerId, nm);
+    }
+    return playerMap;
+  }
+
+  function timeToSec(t) {
+    if (!t) return 0;
+    const parts = String(t).split(':');
+    const mm = parseInt(parts[0] || '0', 10);
+    const ss = parseInt(parts[1] || '0', 10);
+    return (mm * 60) + ss;
+  }
+
+  // Render goals into a specific container, newest-first by default
+  function renderGoals(details, containerId, newestFirst = true) {
+    const goalsEl = document.getElementById(containerId);
+    if (!goalsEl) return;
+
+    if (!details) {
+      goalsEl.innerHTML = '<div class="loading">No play data available</div>';
+      return;
+    }
+
+    const plays = details.plays || details.gameEvents || [];
+    if (!plays || !plays.length) {
+      goalsEl.innerHTML = '<div class="loading">No play data available</div>';
+      return;
+    }
+
+    const playerMap = buildPlayerMap(details);
+
+    let goals = plays
+      .filter(p => p.typeDescKey === 'goal' || p.typeCode === 'GOAL')
+      .filter(p => p.periodDescriptor?.periodType !== 'SO'); // exclude shootout
+
+    if (!goals.length) {
+      goalsEl.innerHTML = '<div class="loading">No goals scored yet</div>';
+      return;
+    }
+
+    goals.sort((a,b) => {
+      const pd = (a.periodDescriptor?.number || 0) - (b.periodDescriptor?.number || 0);
+      if (pd !== 0) return pd;
+      return timeToSec(a.timeInPeriod) - timeToSec(b.timeInPeriod);
     });
+    if (newestFirst) goals.reverse();
 
-    addLog("System started (direct NHL endpoints, no Home Assistant)", "success");
-    updatePanel();
-    setRefreshInterval(REFRESH_MS_IDLE);
-  </script>
+    let html = '';
+    for (const goal of goals) {
+      const period = goal.periodDescriptor?.number || '';
+      const time = goal.timeInPeriod || '';
+      const teamId = goal.details?.eventOwnerTeamId;
+
+      const teamInfo = (details.homeTeam?.id === teamId) ? details.homeTeam : details.awayTeam;
+      const tName = teamLabel(teamInfo);
+
+      let scorerName = 'Unknown';
+      let goalNumber = '';
+
+      if (goal.details) {
+        const scorerId = goal.details.scoringPlayerId || goal.details.playerId;
+        if (scorerId && playerMap.has(scorerId)) scorerName = playerMap.get(scorerId);
+        else if (goal.details.scoringPlayer) scorerName = goal.details.scoringPlayer;
+        if (goal.details.scoringPlayerTotal) goalNumber = ` (${goal.details.scoringPlayerTotal})`;
+      }
+
+      const assists = [];
+      if (goal.details) {
+        const a1 = goal.details.assist1PlayerId;
+        if (a1 && playerMap.has(a1)) {
+          assists.push(`${playerMap.get(a1)}${goal.details.assist1PlayerTotal ? ` (${goal.details.assist1PlayerTotal})` : ''}`);
+        } else if (goal.details.assist1Player) {
+          assists.push(`${goal.details.assist1Player}${goal.details.assist1PlayerTotal ? ` (${goal.details.assist1PlayerTotal})` : ''}`);
+        }
+
+        const a2 = goal.details.assist2PlayerId;
+        if (a2 && playerMap.has(a2)) {
+          assists.push(`${playerMap.get(a2)}${goal.details.assist2PlayerTotal ? ` (${goal.details.assist2PlayerTotal})` : ''}`);
+        } else if (goal.details.assist2Player) {
+          assists.push(`${goal.details.assist2Player}${goal.details.assist2PlayerTotal ? ` (${goal.details.assist2PlayerTotal})` : ''}`);
+        }
+      }
+
+      const strength = goal.details?.strength || 'ev';
+      const situation = goal.details?.situationCode || '';
+
+      html += `
+        <div class="goal">
+          <div class="time">P${period}<br>${time}</div>
+          <div class="goal-details">
+            <div>
+              <span class="team-name">${tName}</span>
+              <span class="sep">—</span>
+              <span class="who">${scorerName}${goalNumber}</span>
+            </div>
+            <div class="strength">${String(strength).toUpperCase()}${situation ? ` (${situation})` : ''}</div>
+            ${assists.length ? `<div class="assist">Assists: ${assists.map(a => `<span class="assist-player">${a}</span>`).join('')}</div>` : ''}
+          </div>
+        </div>
+      `;
+    }
+
+    goalsEl.innerHTML = html;
+  }
+
+  function renderGameSummary(game, targetId) {
+    const el = document.getElementById(targetId);
+    if (!el) return;
+
+    if (!game) {
+      el.innerHTML = '<div class="loading">No game data</div>';
+      return;
+    }
+
+    const away = game.awayTeam;
+    const home = game.homeTeam;
+    const when = formatDate(game.startTimeUTC);
+
+    el.innerHTML = `
+      <div class="game-summary">
+        <div><strong>${teamLabel(away)}</strong> at <strong>${teamLabel(home)}</strong></div>
+        <div>${(game.gameState === 'OFF' || game.gameState === 'FINAL') ? `Final: ${away.score || 0} — ${home.score || 0}` : ''}</div>
+        <div>${when}</div>
+      </div>
+    `;
+  }
+
+  function setGoalsVisibility(show) {
+    const liveGoalsPanel = document.getElementById('liveGoalsPanel');
+    if (!liveGoalsPanel) return;
+    liveGoalsPanel.style.display = show ? '' : 'none';
+  }
+
+  function isSabresHome(game) {
+    return (game?.homeTeam?.abbrev === SABRES_ABBR);
+  }
+
+  function sabresResultLetter(game) {
+    if (!game) return null;
+    const away = game.awayTeam;
+    const home = game.homeTeam;
+    const sabresAreHome = isSabresHome(game);
+
+    const sabresScore = sabresAreHome ? (home?.score ?? 0) : (away?.score ?? 0);
+    const oppScore = sabresAreHome ? (away?.score ?? 0) : (home?.score ?? 0);
+
+    if (sabresScore > oppScore) return 'W';
+    if (sabresScore < oppScore) return 'L';
+    return 'T';
+  }
+
+  function computeLast5AndStreak(finalsSorted) {
+    // finalsSorted is newest->oldest
+    const finals = Array.isArray(finalsSorted) ? finalsSorted : [];
+    const last5Games = finals.slice(0, 5);
+    const last5 = last5Games.map(sabresResultLetter).filter(Boolean);
+
+    // streak from newest backward
+    let streakType = null; // 'W' or 'L' or 'T'
+    let streakCount = 0;
+    for (const g of finals) {
+      const r = sabresResultLetter(g);
+      if (!r) continue;
+      if (streakType === null) {
+        streakType = r;
+        streakCount = 1;
+      } else if (r === streakType) {
+        streakCount++;
+      } else {
+        break;
+      }
+    }
+
+    return {
+      last5: last5.length ? last5.join('-') : null,
+      streakType,
+      streakCount
+    };
+  }
+
+  // Main execution
+  try {
+    const schedule = await getSchedule();
+
+    // team header: record/points
+    const teamStats = await getTeamStats().catch(()=>null);
+    if (teamStats) {
+      setTxt('record', `${teamStats.wins}-${teamStats.losses}-${teamStats.otLosses}`);
+      setTxt('points', String(teamStats.points));
+    } else {
+      setTxt('record', '—');
+      setTxt('points', '—');
+    }
+
+    // last 5 + streak (below record/points, above standings)
+    const form = computeLast5AndStreak(schedule.finalsSorted);
+    if (form.last5) {
+      const streakWord = form.streakType === 'W' ? 'win' : form.streakType === 'L' ? 'loss' : 'tie';
+      const streakText = (form.streakType && form.streakCount)
+        ? `Streak: <strong>${form.streakCount}</strong> ${streakWord}${form.streakCount === 1 ? '' : 's'}`
+        : `Streak: —`;
+
+      setHTML('formStreakLine', `Last 5: <strong>${form.last5}</strong> &nbsp; <span style="opacity:.8">|</span> &nbsp; ${streakText}`);
+    } else {
+      setHTML('formStreakLine', 'Form unavailable');
+    }
+
+    // standings line
+    const pos = await getSabresStandingsPosition().catch(()=>null);
+    if (pos) {
+      setHTML(
+        'standingLine',
+        `Conference: <strong>${pos.conferenceRank}</strong> &nbsp; <span style="opacity:.8">|</span> &nbsp; Division: <strong>${pos.divisionRank}</strong> &nbsp; <span style="opacity:.8">|</span> &nbsp; League: <strong>${pos.leagueRank}</strong>`
+      );
+    } else {
+      setHTML('standingLine', 'Standings position unavailable');
+    }
+
+    // leaders
+    const leaders = await getLeaders().catch(()=>null);
+    if (leaders) {
+      setHTML('topGoals', `Leading goals: <strong>${leaders.goals.name}</strong>, ${leaders.goals.val}`);
+      setHTML('topPoints', `Leading points: <strong>${leaders.points.name}</strong>, ${leaders.points.val}`);
+    } else {
+      setHTML('topGoals', 'Leading goals unavailable');
+      setHTML('topPoints', 'Leading points unavailable');
+    }
+
+    // primary game: live > last
+    const primaryGame = schedule.liveGame || schedule.lastGame;
+    const isLive = !!schedule.liveGame;
+
+    // Next game summary (always)
+    renderGameSummary(schedule.nextGame, 'nextGameBox');
+
+    // "Most Recent Game" must be the game BEFORE the live/primary game
+    const mostRecentBoxGame = schedule.prevFinalBefore || schedule.lastGame || null;
+    renderGameSummary(mostRecentBoxGame, 'lastGameBox');
+
+    // If no primary, hide live goals panel and stop.
+    if (!primaryGame) {
+      setGoalsVisibility(false);
+      setTxt('state', 'No recent game');
+      setTxt('score', '— — —');
+      setTxt('when', '—');
+      setTxt('updated', '');
+      setHTML('goals', '<div class="info">No recent games found. Check back during the hockey season!</div>');
+      setHTML('lastGameGoals', '');
+      return;
+    }
+
+    setGoalsVisibility(true);
+
+    // Load details+boxscore for primary render
+    const [details, boxscore] = await Promise.all([
+      getGameDetails(primaryGame.id),
+      getGameBoxscore(primaryGame.id).catch(()=>null)
+    ]);
+
+    renderScorebar(primaryGame, details, boxscore);
+    renderGoals(details, 'goals', true); // newest-first
+    setUpdatedNow();
+
+    // Most Recent Game scoring details (game BEFORE live/primary)
+    if (mostRecentBoxGame?.id) {
+      try {
+        const lastDetails = await getGameDetails(mostRecentBoxGame.id);
+        renderGoals(lastDetails, 'lastGameGoals', true);
+      } catch {
+        setHTML('lastGameGoals', '');
+      }
+    } else {
+      setHTML('lastGameGoals', '');
+    }
+
+    // If live: auto-refresh
+    if (isLive) {
+      const gameId = primaryGame.id;
+      const refreshInterval = setInterval(async () => {
+        try {
+          const [updatedDetails, updatedBox] = await Promise.all([
+            getGameDetails(gameId),
+            getGameBoxscore(gameId).catch(()=>null)
+          ]);
+
+          const gameState = updatedDetails?.gameState;
+          renderScorebar(primaryGame, updatedDetails, updatedBox);
+          renderGoals(updatedDetails, 'goals', true);
+          setUpdatedNow();
+
+          if (['FINAL', 'OFF'].includes(gameState)) {
+            clearInterval(refreshInterval);
+            setTimeout(() => location.reload(), 2000);
+          }
+        } catch (e) {
+          console.error('Refresh error:', e);
+        }
+      }, 15000);
+    }
+
+  } catch (error) {
+    console.error('Error loading data:', error);
+    setTxt('state', 'Error loading data');
+    setTxt('when', '—');
+    setTxt('updated', '');
+    setHTML('goals', `<div class="error">Unable to load NHL data. This widget uses a CORS proxy which may be rate-limited.</div>`);
+    setHTML('lastGameBox', '<div class="error">—</div>');
+    setHTML('nextGameBox', '<div class="error">—</div>');
+    setHTML('lastGameGoals', '');
+    setHTML('standingLine', 'Standings position unavailable');
+    setHTML('formStreakLine', 'Form unavailable');
+  }
+})();
+</script>
+
 </body>
 </html>
