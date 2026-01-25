@@ -533,6 +533,24 @@
       box-shadow:0 0 10px var(--accent-bright);
     }
 
+    .section-sub{
+      font-size:13px;
+      color:var(--muted);
+      margin:0 0 8px 0;
+    }
+
+    .list-bullets{
+      margin:0;
+      padding-left:18px;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.6;
+    }
+
+    .list-bullets li{
+      margin-bottom:4px;
+    }
+
     .changelog{
       display:grid;
       gap:12px;
@@ -732,6 +750,18 @@
         <div class="section-title">Technologies</div>
         <div class="tech-stack" id="modalTech"></div>
 
+        <div class="section-title">Best for</div>
+        <p class="section-sub" id="modalBestFor"></p>
+
+        <div class="section-title">What I learned</div>
+        <ul class="list-bullets" id="modalLearned"></ul>
+
+        <div class="section-title">Future plans</div>
+        <ul class="list-bullets" id="modalFuture"></ul>
+
+        <div class="section-title">Status for contributors</div>
+        <p class="section-sub" id="modalContribStatus"></p>
+
         <div class="section-title">Links</div>
         <div class="links-row" id="modalLinks"></div>
 
@@ -779,6 +809,16 @@
         percentComplete: typeof p.percentComplete === 'number' ? p.percentComplete : 0,
         github: p.github ? String(p.github) : '',
         images: Array.isArray(p.images) ? p.images : [],
+        whatILearned: Array.isArray(p.whatILearned) ? p.whatILearned : [],
+        bestFor: p.bestFor ? String(p.bestFor) : '',
+        futurePlans: Array.isArray(p.futurePlans) ? p.futurePlans : [],
+        statusForContributors: p.statusForContributors ? String(p.statusForContributors) : '',
+        featureToggle: typeof p.featureToggle === 'object' && p.featureToggle !== null
+          ? {
+              featured: Boolean(p.featureToggle.featured),
+              reason: p.featureToggle.reason ? String(p.featureToggle.reason) : ''
+            }
+          : { featured:false, reason:'' },
         _search: (String(p.title) + ' ' + String(p.description) + ' ' + (Array.isArray(p.tags) ? p.tags.join(' ') : '')).toLowerCase()
       };
     }
@@ -926,6 +966,26 @@
       
       const techEl = document.getElementById('modalTech');
       techEl.innerHTML = p.tech.map(t=>`<span class="tech-badge">${esc(t)}</span>`).join('');
+
+      const bestForEl = document.getElementById('modalBestFor');
+      bestForEl.textContent = p.bestFor || 'Not specified yet.';
+
+      const learnedEl = document.getElementById('modalLearned');
+      if(p.whatILearned && p.whatILearned.length){
+        learnedEl.innerHTML = p.whatILearned.map(item => `<li>${esc(item)}</li>`).join('');
+      } else {
+        learnedEl.innerHTML = '<li>No notes added yet.</li>';
+      }
+
+      const futureEl = document.getElementById('modalFuture');
+      if(p.futurePlans && p.futurePlans.length){
+        futureEl.innerHTML = p.futurePlans.map(item => `<li>${esc(item)}</li>`).join('');
+      } else {
+        futureEl.innerHTML = '<li>No future roadmap documented yet.</li>';
+      }
+
+      const contribEl = document.getElementById('modalContribStatus');
+      contribEl.textContent = p.statusForContributors || 'No contributor status set yet.';
       
       const linksEl = document.getElementById('modalLinks');
       if(p.github){
