@@ -14,6 +14,22 @@
       "../images/projects/proj-001-1.png",
       "../images/projects/proj-001-2.png"
     ],
+    "whatILearned": [
+      "Designing robust, bi-directional message flows between cloud services and a local home automation stack.",
+      "Handling WhatsApp API quirks, retries, and error states in long-running automations.",
+      "Structuring n8n workflows so they stay maintainable as more devices and triggers are added."
+    ],
+    "bestFor": "Home Assistant users who want to trigger and control automations over WhatsApp from anywhere.",
+    "featureToggle": {
+      "featured": true,
+      "reason": "Core automation backbone and foundation for multiple other experiments."
+    },
+    "futurePlans": [
+      "Add templated flows for common Home Assistant routines (lights, climate, media).",
+      "Introduce a simple configuration UI so non-technical users can customize commands.",
+      "Experiment with multi-user support and basic access control per WhatsApp account."
+    ],
+    "statusForContributors": "Actively accepting PRs, especially around reliability, configuration UX, and new example flows.",
     "changelog": [
       { "date": "2026-01-05", "note": "Project completed - alpha" },
       { "date": "2025-11-20", "note": "Project started" }
@@ -33,6 +49,22 @@
     "images": [
       "../images/projects/proj-002-1.png"
     ],
+    "whatILearned": [
+      "Exploring the practical limits of Meta smart glasses integrations using indirect data channels.",
+      "Prototyping low-friction, heads-up notifications powered by existing automation pipelines.",
+      "Understanding where platform limitations block deeper system integration."
+    ],
+    "bestFor": "Early adopters with Meta smart glasses who want proof-of-concept HUD-style notifications powered by WhatsApp and Home Assistant.",
+    "featureToggle": {
+      "featured": false,
+      "reason": "Interesting concept, but currently blocked by platform support."
+    },
+    "futurePlans": [
+      "Revisit when Meta exposes better APIs or companion integrations for real-time overlays.",
+      "Extract any reusable patterns into the core WhatsApp → Home Assistant project.",
+      "Document current constraints so others can build on the idea if platform access improves."
+    ],
+    "statusForContributors": "Ideas welcome, stalled due to platform limits and missing Meta support.",
     "changelog": [
       { "date": "2026-01-05", "note": "Unable to proceed due to lack of Meta support" },
       { "date": "2025-11-20", "note": "Project started" }
@@ -52,6 +84,22 @@
     "images": [
       "../images/projects/proj-003-1.png"
     ],
+    "whatILearned": [
+      "Designing an offline-friendly media tracker with API-backed search and local caching.",
+      "Balancing flexible filtering and sorting with a simple Android-friendly UI.",
+      "Managing TMDb usage limits and data structures efficiently on mobile devices."
+    ],
+    "bestFor": "Android users who want a lightweight, customizable way to track movies and series using TMDb.",
+    "featureToggle": {
+      "featured": true,
+      "reason": "Polished mobile experience that pairs well with the Linux desktop version."
+    },
+    "futurePlans": [
+      "Add sync between Android and Linux versions using a simple export/import or cloud backend.",
+      "Introduce watchlists per profile and basic stats (time watched, genres, etc.).",
+      "Polish theming and consider Material You-style integration for modern Android devices."
+    ],
+    "statusForContributors": "Actively accepting PRs for UI/UX polish, sync options, and new filtering features.",
     "changelog": [
       { "date": "2026-01-05", "note": "Project near completion" },
       { "date": "2025-11-20", "note": "Project started" }
@@ -71,6 +119,22 @@
     "images": [
       "../images/projects/proj-004-1.png"
     ],
+    "whatILearned": [
+      "Building a cross-platform movie tracker UI with Qt and QML on desktop.",
+      "Structuring TMDb-backed search and caching for a keyboard-and-mouse workflow.",
+      "Keeping a codebase flexible enough to share concepts with the Android version."
+    ],
+    "bestFor": "Linux desktop users who want a Qt-based movie and series tracker integrated into their workflow.",
+    "featureToggle": {
+      "featured": true,
+      "reason": "Desktop companion to the Android tracker, good showcase of Qt/QML work."
+    },
+    "futurePlans": [
+      "Improve keyboard shortcuts and power-user features for fast library navigation.",
+      "Add optional integration with local media libraries or players.",
+      "Align UI patterns with the Android version for a cohesive cross-device experience."
+    ],
+    "statusForContributors": "Actively accepting PRs to refine the Qt UI, performance, and advanced power-user features.",
     "changelog": [
       { "date": "2025-06-06", "note": "Project completed - alpha" },
       { "date": "2025-01-20", "note": "Project started" }
@@ -90,6 +154,22 @@
     "images": [
       "../images/projects/proj-005-1.png"
     ],
+    "whatILearned": [
+      "Porting a nostalgic widget aesthetic into a modern KDE Plasma plasmoid.",
+      "Handling Plasma 6 changes, configuration persistence, and performance tuning.",
+      "Refining visuals like fonts, aspect ratio, and repaint timing for a smooth analog clock."
+    ],
+    "bestFor": "KDE Plasma users who love retro, lofi-style desktop widgets and want a lightweight analog clock.",
+    "featureToggle": {
+      "featured": true,
+      "reason": "Polished, shippable plasmoid that showcases Plasma 6 support."
+    },
+    "futurePlans": [
+      "Add optional themes (color variants, more nostalgic skins).",
+      "Expose more fine-grained configuration options without cluttering the default experience.",
+      "Package for easy installation from KDE’s widget ecosystem or store."
+    ],
+    "statusForContributors": "Looking for testers on Plasma 6 and PRs for themes, translations, and minor UI refinements.",
     "changelog": [
       {
         "date": "2026-01-20",
@@ -112,6 +192,22 @@
     "images": [
       "../images/projects/proj-006-1.png"
     ],
+    "whatILearned": [
+      "Building a content-driven plasmoid that fetches and displays web comic updates.",
+      "Dealing with remote content reliability and making the widget fail gracefully.",
+      "Optimizing layout for different panel sizes and Plasma configurations."
+    ],
+    "bestFor": "KDE Plasma users who want Penny Arcade comics integrated directly into their desktop.",
+    "featureToggle": {
+      "featured": false,
+      "reason": "Fun, niche plasmoid that’s stable enough for everyday use."
+    },
+    "futurePlans": [
+      "Support additional web comics via configuration or presets.",
+      "Add archive navigation and quick jump to the full website when desired.",
+      "Improve caching and network error messaging for unreliable connections."
+    ],
+    "statusForContributors": "Looking for testers on Plasma 6 and PRs to extend comic sources and improve UX.",
     "changelog": [
       { "date": "2026-01-20", "note": "Confirmed working with plasma 6" },
       { "date": "2025-01-20", "note": "Project started" }
@@ -131,6 +227,22 @@
     "images": [
       "../images/projects/proj-007-1.png"
     ],
+    "whatILearned": [
+      "Creating themed, seasonal desktop widgets using Conky on Linux.",
+      "Balancing visual flair with readability for a digital clock overlay.",
+      "Packaging and documenting a small cosmetic widget for other users."
+    ],
+    "bestFor": "Linux and Conky users who want a Halloween-themed, seasonal clock on their desktop.",
+    "featureToggle": {
+      "featured": false,
+      "reason": "Fun seasonal widget that’s easy for others to pick up and modify."
+    },
+    "futurePlans": [
+      "Add more seasonal variants (winter, spring, generic spooky themes).",
+      "Provide configuration snippets for popular desktop environments.",
+      "Publish a small gallery of themes so users can quickly swap looks."
+    ],
+    "statusForContributors": "Actively accepting PRs for new themes, configuration presets, and small quality-of-life tweaks.",
     "changelog": [
       { "date": "2025-06-05", "note": "Project completed - alpha" },
       { "date": "2025-01-20", "note": "Project started" }
