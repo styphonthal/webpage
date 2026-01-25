@@ -37,7 +37,7 @@
       -webkit-font-smoothing:antialiased;
     }
 
-    /* Sidebar */
+    /* Sidebar - UNCHANGED */
     .sidebar{
       position:fixed;
       inset:0 auto 0 0;
@@ -147,20 +147,45 @@
       max-width:1600px;
     }
 
-    /* Hero */
+    /* Hero - ENHANCED */
     .hero{
       position:relative;
       margin:0 0 48px 0;
-      padding:60px 40px 80px;
-      min-height:45vh;
+      padding:80px 40px 100px;
+      min-height:52vh;
       overflow:hidden;
       background:
-        radial-gradient(ellipse 1400px 800px at 15% -25%, rgba(59,130,246,.1), transparent 60%),
-        radial-gradient(ellipse 1200px 700px at 85% 5%, rgba(96,165,250,.08), transparent 65%),
+        radial-gradient(ellipse 1400px 800px at 15% -25%, rgba(59,130,246,.12), transparent 60%),
+        radial-gradient(ellipse 1200px 700px at 85% 5%, rgba(96,165,250,.10), transparent 65%),
         linear-gradient(165deg, #0a1120 0%, #060d1a 100%);
-      border:1px solid rgba(59,130,246,.2);
+      border:1px solid rgba(59,130,246,.25);
       border-radius:24px;
       box-shadow:var(--shadow), var(--glow-shadow);
+      animation:hero-float 20s ease-in-out infinite;
+    }
+
+    @keyframes hero-float{
+      0%, 100%{transform:translateY(0)}
+      50%{transform:translateY(-8px)}
+    }
+
+    /* Animated grid background */
+    .hero::after{
+      content:'';
+      position:absolute;
+      inset:0;
+      background-image:
+        linear-gradient(rgba(59,130,246,.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59,130,246,.03) 1px, transparent 1px);
+      background-size:50px 50px;
+      opacity:.4;
+      animation:grid-flow 30s linear infinite;
+      pointer-events:none;
+    }
+
+    @keyframes grid-flow{
+      0%{transform:translate(0, 0)}
+      100%{transform:translate(50px, 50px)}
     }
 
     .hero-bg{
@@ -168,11 +193,17 @@
       inset:0;
       width:100%;
       height:100%;
-      opacity:.55;
+      opacity:.6;
       pointer-events:none;
       -webkit-mask-image:linear-gradient(to bottom, rgba(0,0,0,.9), rgba(0,0,0,.7) 65%, rgba(0,0,0,0));
       mask-image:linear-gradient(to bottom, rgba(0,0,0,.9), rgba(0,0,0,.7) 65%, rgba(0,0,0,0));
       mix-blend-mode:screen;
+      animation:svg-pulse 8s ease-in-out infinite;
+    }
+
+    @keyframes svg-pulse{
+      0%, 100%{opacity:.6}
+      50%{opacity:.75}
     }
 
     .hero::before{
@@ -194,41 +225,102 @@
     }
 
     .hero-copy{
-      background:rgba(10,17,32,.6);
-      border:1px solid rgba(59,130,246,.25);
+      background:rgba(10,17,32,.7);
+      border:1px solid rgba(59,130,246,.3);
       border-radius:16px;
-      padding:32px 36px;
-      backdrop-filter:blur(12px);
-      -webkit-backdrop-filter:blur(12px);
-      box-shadow:0 20px 50px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.05);
+      padding:40px 40px;
+      backdrop-filter:blur(16px);
+      -webkit-backdrop-filter:blur(16px);
+      box-shadow:0 20px 50px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.08);
+      animation:fade-in-up 1s ease-out;
+    }
+
+    @keyframes fade-in-up{
+      from{opacity:0; transform:translateY(20px)}
+      to{opacity:1; transform:translateY(0)}
     }
 
     .hero h1{
-      margin:0 0 12px 0;
-      font-size:42px;
-      font-weight:800;
-      letter-spacing:-.5px;
-      background:linear-gradient(135deg, #f8fafc, #cbd5e1);
+      margin:0 0 16px 0;
+      font-size:48px;
+      font-weight:900;
+      letter-spacing:-.8px;
+      background:linear-gradient(135deg, #f8fafc 0%, #60a5fa 100%);
       -webkit-background-clip:text;
       -webkit-text-fill-color:transparent;
       background-clip:text;
       line-height:1.1;
+      animation:gradient-shift 3s ease infinite;
+      background-size:200% auto;
+    }
+
+    @keyframes gradient-shift{
+      0%, 100%{background-position:0% center}
+      50%{background-position:100% center}
     }
 
     .hero p.sub{
       margin:12px 0 0 0;
       color:#cbd5e1;
       font-size:17px;
-      line-height:1.7;
+      line-height:1.8;
     }
 
     .hero p.sub:first-of-type{
-      font-size:19px;
+      font-size:20px;
       color:#e2e8f0;
-      margin-bottom:8px;
+      margin-bottom:10px;
+      font-weight:500;
     }
 
-    /* Cards */
+    /* Section headers with accent line */
+    .section{
+      margin-top:56px;
+      animation:fade-in-up 1s ease-out;
+      animation-fill-mode:both;
+    }
+
+    .section:nth-child(2){animation-delay:.1s}
+    .section:nth-child(3){animation-delay:.2s}
+    .section:nth-child(4){animation-delay:.3s}
+
+    .section h4{
+      margin:0 0 24px 0;
+      font-size:13px;
+      color:var(--accent-bright);
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:2px;
+      position:relative;
+      padding-left:20px;
+    }
+
+    .section h4::before{
+      content:'';
+      position:absolute;
+      left:0;
+      top:50%;
+      transform:translateY(-50%);
+      width:8px;
+      height:8px;
+      background:var(--accent-bright);
+      border-radius:50%;
+      box-shadow:0 0 12px var(--accent-bright);
+      animation:pulse-dot 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot{
+      0%, 100%{transform:translateY(-50%) scale(1); opacity:1}
+      50%{transform:translateY(-50%) scale(1.3); opacity:.7}
+    }
+
+    .section > p{
+      color:var(--muted);
+      line-height:1.8;
+      margin-bottom:12px;
+    }
+
+    /* Cards - ENHANCED */
     .grid{
       display:grid;
       gap:24px;
@@ -236,16 +328,16 @@
     }
 
     .card{
-      background:linear-gradient(145deg, rgba(15,23,42,.7), rgba(10,17,32,.8));
-      border:1px solid rgba(59,130,246,.2);
+      background:linear-gradient(145deg, rgba(15,23,42,.8), rgba(10,17,32,.9));
+      border:1px solid rgba(59,130,246,.25);
       border-radius:var(--radius);
-      padding:28px;
+      padding:32px;
       box-shadow:0 10px 40px rgba(0,0,0,.3);
       display:flex;
       flex-direction:column;
-      gap:12px;
-      min-height:180px;
-      transition:all .3s cubic-bezier(.4,0,.2,1);
+      gap:14px;
+      min-height:200px;
+      transition:all .4s cubic-bezier(.4,0,.2,1);
       position:relative;
       overflow:hidden;
     }
@@ -254,33 +346,51 @@
       content:'';
       position:absolute;
       inset:0;
-      background:linear-gradient(135deg, rgba(59,130,246,.08), transparent);
+      background:linear-gradient(135deg, rgba(59,130,246,.12), transparent);
       opacity:0;
-      transition:opacity .3s;
+      transition:opacity .4s;
+    }
+
+    .card::after{
+      content:'';
+      position:absolute;
+      top:-50%;
+      right:-50%;
+      width:200%;
+      height:200%;
+      background:radial-gradient(circle, rgba(96,165,250,.15) 0%, transparent 70%);
+      opacity:0;
+      transition:opacity .4s;
     }
 
     .card:hover{
-      transform:translateY(-4px);
-      border-color:rgba(59,130,246,.4);
-      box-shadow:0 20px 60px rgba(0,0,0,.4), 0 0 40px rgba(59,130,246,.15);
+      transform:translateY(-8px);
+      border-color:rgba(59,130,246,.5);
+      box-shadow:0 25px 70px rgba(0,0,0,.5), 0 0 60px rgba(59,130,246,.2);
     }
 
     .card:hover::before{opacity:1}
+    .card:hover::after{opacity:1}
 
     .card h3{
       margin:0;
       font-size:22px;
-      font-weight:700;
+      font-weight:800;
       position:relative;
       z-index:1;
+      background:linear-gradient(135deg, #f8fafc, #cbd5e1);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      background-clip:text;
     }
 
     .card p{
       margin:0;
       color:var(--muted);
-      line-height:1.6;
+      line-height:1.7;
       position:relative;
       z-index:1;
+      font-size:15px;
     }
 
     .card .cta{
@@ -288,45 +398,120 @@
       display:inline-flex;
       align-items:center;
       gap:8px;
-      padding:10px 18px;
-      border:1px solid rgba(59,130,246,.3);
+      padding:12px 20px;
+      border:1px solid rgba(59,130,246,.4);
       border-radius:10px;
       color:var(--accent-bright);
       text-decoration:none;
-      font-weight:600;
-      transition:all .25s;
+      font-weight:700;
+      transition:all .3s;
       position:relative;
       z-index:1;
       width:fit-content;
+      font-size:14px;
+    }
+
+    .card .cta::before{
+      content:'';
+      position:absolute;
+      inset:0;
+      background:linear-gradient(135deg, rgba(59,130,246,.2), rgba(96,165,250,.15));
+      opacity:0;
+      border-radius:10px;
+      transition:opacity .3s;
     }
 
     .card .cta:hover{
-      background:rgba(59,130,246,.15);
       border-color:var(--accent-bright);
-      box-shadow:0 4px 16px rgba(59,130,246,.2);
-      transform:translateX(2px);
+      box-shadow:0 6px 20px rgba(59,130,246,.3);
+      transform:translateX(4px);
     }
 
-    /* Section */
-    .section{
-      margin-top:48px;
-    }
+    .card .cta:hover::before{opacity:1}
 
-    .section h4{
-      margin:0 0 20px 0;
-      font-size:14px;
-      color:var(--muted);
+    /* Status badges */
+    .status-badge{
+      display:inline-block;
+      padding:4px 12px;
+      border-radius:999px;
+      font-size:11px;
       font-weight:700;
       text-transform:uppercase;
-      letter-spacing:1.5px;
+      letter-spacing:.5px;
+      background:rgba(34,197,94,.15);
+      border:1px solid rgba(34,197,94,.3);
+      color:#22c55e;
+      margin-bottom:8px;
+    }
+
+    .status-badge.featured{
+      background:rgba(251,191,36,.15);
+      border-color:rgba(251,191,36,.3);
+      color:#fbbf24;
+    }
+
+    /* Activity list - ENHANCED */
+    .activity-list{
+      list-style:none;
+      padding:0;
+      margin:0;
+      display:grid;
+      gap:16px;
+    }
+
+    .activity-list li{
+      padding:16px 20px;
+      background:rgba(15,23,42,.5);
+      border:1px solid rgba(59,130,246,.15);
+      border-radius:12px;
+      color:var(--muted);
+      font-size:15px;
+      line-height:1.6;
+      transition:all .3s;
+      position:relative;
+      padding-left:60px;
+    }
+
+    .activity-list li::before{
+      content:'';
+      position:absolute;
+      left:20px;
+      top:50%;
+      transform:translateY(-50%);
+      width:24px;
+      height:24px;
+      background:linear-gradient(135deg, var(--accent), var(--accent-glow));
+      border-radius:6px;
+      box-shadow:0 4px 12px rgba(59,130,246,.3);
+    }
+
+    .activity-list li:hover{
+      border-color:rgba(59,130,246,.4);
+      background:rgba(15,23,42,.7);
+      transform:translateX(4px);
+    }
+
+    .activity-list strong{
+      color:var(--accent-bright);
+      font-weight:700;
+    }
+
+    /* Footer */
+    footer{
+      font-size:14px;
+      color:var(--muted);
+      border-top:1px solid var(--border);
+      padding-top:24px;
+      margin-top:60px;
+      line-height:1.8;
     }
 
     /* Responsive */
     @media (max-width:1024px){
       .sidebar{width:240px}
       .main{margin-left:240px; padding:32px 32px 60px}
-      .hero{padding:48px 32px 64px}
-      .hero h1{font-size:36px}
+      .hero{padding:60px 32px 80px}
+      .hero h1{font-size:40px}
     }
 
     @media (max-width:768px){
@@ -355,27 +540,27 @@
       }
       .main{margin-left:0; padding:20px 16px 48px}
       .hero{
-        padding:32px 20px 48px;
+        padding:40px 24px 56px;
         min-height:auto;
         border-radius:16px;
         margin-bottom:32px;
       }
-      .hero-copy{padding:24px 20px}
-      .hero h1{font-size:28px}
-      .hero p.sub{font-size:15px}
-      .hero p.sub:first-of-type{font-size:16px}
+      .hero-copy{padding:28px 24px}
+      .hero h1{font-size:32px}
+      .hero p.sub{font-size:16px}
+      .hero p.sub:first-of-type{font-size:18px}
       .grid{
         grid-template-columns:1fr;
-        gap:16px;
+        gap:20px;
       }
-      .card{padding:20px; min-height:auto}
+      .card{padding:24px; min-height:auto}
       .card h3{font-size:20px}
     }
 
     @media (max-width:480px){
-      .hero h1{font-size:24px}
-      .hero-copy{padding:20px 16px}
-      .card{padding:18px}
+      .hero h1{font-size:28px}
+      .hero-copy{padding:24px 20px}
+      .card{padding:20px}
     }
 
     /* iOS safe area support */
@@ -402,7 +587,7 @@
   </style>
 </head>
 <body>
-  <!-- Sidebar -->
+  <!-- Sidebar - UNCHANGED -->
   <aside class="sidebar">
     <div class="brand">
       <div class="badge" aria-hidden="true"></div>
@@ -424,7 +609,6 @@
   <!-- Main -->
   <main class="main">
     <header class="hero">
-      <!-- Starship bridge background -->
       <svg class="hero-bg" viewBox="0 0 1600 700" preserveAspectRatio="xMidYMid slice">
         <defs>
           <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
@@ -486,8 +670,7 @@
             and occasional sci-fi micro-fiction. Notes on what I design, break, and push further.
           </p>
 
-          <!-- Hero CTAs -->
-          <div style="margin-top:20px; display:flex; flex-wrap:wrap; gap:12px;">
+          <div style="margin-top:28px; display:flex; flex-wrap:wrap; gap:14px;">
             <a href="./projects/index.html" class="cta">Browse all projects →</a>
             <a href="./widgets/index.html" class="cta">Explore widgets →</a>
           </div>
@@ -495,7 +678,6 @@
       </div>
     </header>
 
-    <!-- What is CommandBridge -->
     <section class="section">
       <h4>What is CommandBridge?</h4>
       <p>
@@ -504,15 +686,15 @@
       </p>
       <p>
         The projects and widgets here are real tools I use: message-driven control paths, dashboard experiments, and
-        small surface UIs that feel like a ship’s bridge.
+        small surface UIs that feel like a ship's bridge.
       </p>
     </section>
 
-    <!-- Featured projects -->
     <section class="section">
       <h4>Featured projects</h4>
       <div class="grid">
         <article class="card">
+          <span class="status-badge featured">Featured</span>
           <h3>WhatsApp → n8n → Home Assistant</h3>
           <p>
             Bi-directional automation pipeline that parses messages and triggers Home Assistant services,
@@ -522,6 +704,7 @@
         </article>
 
         <article class="card">
+          <span class="status-badge featured">Featured</span>
           <h3>Meta Smart Glasses WhatsApp bot</h3>
           <p>
             Experimental overlays for Meta Display Glasses, using WhatsApp as a transport to push live status,
@@ -531,6 +714,7 @@
         </article>
 
         <article class="card">
+          <span class="status-badge">Active</span>
           <h3>Movie/Series Tracker</h3>
           <p>
             Android + Linux (Qt) movie database engine using TMDb, with caching and multi-page configuration
@@ -541,11 +725,11 @@
       </div>
     </section>
 
-    <!-- Bridge widgets -->
     <section class="section">
       <h4>Bridge widgets</h4>
       <div class="grid">
         <article class="card">
+          <span class="status-badge">Live</span>
           <h3>Buffalo Sabres — Scores &amp; Goals</h3>
           <p>
             Dashboard widget showing the latest Sabres score and next game time, updated automatically from an external API.
@@ -554,6 +738,7 @@
         </article>
 
         <article class="card">
+          <span class="status-badge">Active</span>
           <h3>System monitor</h3>
           <p>
             Compact readout for CPU, RAM, and temperature pulled from Home Assistant, designed to sit on a secondary display
@@ -564,18 +749,16 @@
       </div>
     </section>
 
-    <!-- Latest activity -->
     <section class="section">
       <h4>Latest activity</h4>
-      <ul style="list-style:none; padding:0; margin:0; color:var(--muted); font-size:14px;">
+      <ul class="activity-list">
         <li><strong>2025‑01‑06:</strong> Updated Movie/Series Tracker and Linux widgets (clock, Penny Arcade, Conky Halloween clock).</li>
         <li><strong>2025‑01‑05:</strong> Expanded WhatsApp → n8n → Home Assistant automation pipeline.</li>
         <li><strong>2025‑01‑03:</strong> Iterated on Meta Smart Glasses WhatsApp bot overlays.</li>
       </ul>
     </section>
 
-    <!-- Footer / design notes -->
-    <footer class="section" style="font-size:13px; color:var(--muted); border-top:1px solid var(--border); padding-top:16px; margin-top:40px;">
+    <footer class="section">
       <p>
         Built as an ongoing experiment in sci-fi-inspired interfaces and automation. Code and notes may move fast and break things.
       </p>
