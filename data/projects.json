@@ -2,12 +2,12 @@
   {
     "id": "proj-001",
     "title": "WhatsApp → n8n → Home Assistant",
-    "description": "Bi-directional automation pipeline, message parsing, and service execution. The Basis for the Metaglasses",
-    "tags": ["automation", "whatsapp", "n8n"],
-    "updated": "2025-12-25",
+    "description": "Bi-directional automation pipeline: command parsing, workflow routing, and Home Assistant service execution via WhatsApp messages.",
+    "tags": ["automation", "whatsapp", "n8n", "home-assistant"],
+    "updated": "2025-12-26",
     "started": "2025-11-20",
-    "status": "Near Complete",
-    "tech": ["Node.js", "n8n", "WhatsApp API", "Home Assistant"],
+    "status": "In Progress",
+    "tech": ["Node.js", "n8n", "WhatsApp Cloud API", "Home Assistant"],
     "percentComplete": 70,
     "github": "https://github.com/youruser/whatsapp-n8n-homeassistant",
     "images": [
@@ -15,287 +15,271 @@
       "../images/projects/proj-001-2.png"
     ],
     "whatILearned": [
-      "Designing robust, bi-directional message flows between cloud services and a local home automation stack.",
-      "Handling WhatsApp API quirks, retries, and error states in long-running automations.",
-      "Structuring n8n workflows so they stay maintainable as more devices and triggers are added."
+      "Designing robust bidirectional message flows between cloud messaging and a local automation stack.",
+      "Handling WhatsApp Cloud verification, retries, and webhook edge cases.",
+      "Structuring n8n workflows to stay maintainable as commands and integrations expand."
     ],
-    "bestFor": "Home Assistant users who want to trigger and control automations over WhatsApp from anywhere. (except metaglasses)",
+    "bestFor": "Home Assistant users who want remote command/control via WhatsApp without exposing HA directly to the internet.",
     "featureToggle": {
       "featured": false,
-      "reason": "Core automation backbone and foundation for multiple other experiments."
+      "reason": "Core automation backbone that other experiments can reuse."
     },
     "futurePlans": [
       "Add templated flows for common Home Assistant routines (lights, climate, media).",
-      "Introduce a simple configuration UI so non-technical users can customize commands.",
-      "Experiment with multi-user support and basic access control per WhatsApp account.",
-      "Interacting with a commercial weather API."
+      "Add basic per-user access control and command scoping.",
+      "Add a simple configuration layer for commands and aliases.",
+      "Optionally integrate a commercial weather API as a data source."
     ],
-    "statusForContributors": "Actively accepting PRs, especially around reliability, configuration UX, and new example flows.",
+    "statusForContributors": "Accepting PRs focused on reliability, config UX, and example flows.",
     "changelog": [
-      { "date": "2025-12-25", "note": "Project still being developed" },
-      { "date": "2025-11-20", "note": "Project started" }
+      { "date": "2025-12-26", "note": "Stability improvements; expanded logging around webhook/command parsing." },
+      { "date": "2025-11-20", "note": "Project started." }
     ]
   },
   {
     "id": "proj-002",
-    "title": "Meta Smart Glasses WhatsApp bot",
-    "description": "Experimental overlays for Meta Display Glasses using data relayed through WhatsApp API.",
-    "tags": ["meta", "smart glasses", "home assistant"],
-    "updated": "2025-01-03",
+    "title": "Meta Smart Glasses WhatsApp Relay (Blocked)",
+    "description": "Experiment to surface WhatsApp-driven notifications on Meta display glasses; stalled due to platform delivery/notification constraints for business/developer chats.",
+    "tags": ["meta", "smart-glasses", "whatsapp"],
+    "updated": "2026-01-05",
     "started": "2025-11-20",
     "status": "Stalled",
-    "tech": ["Node.js", "n8n", "WhatsApp API", "Home Assistant"],
+    "tech": ["WhatsApp Cloud API", "n8n"],
     "percentComplete": 30,
     "github": "https://github.com/youruser/meta-smart-glasses-bot",
     "images": [
       "../images/projects/proj-002-1.png"
     ],
     "whatILearned": [
-      "Exploring the practical limits of Meta smart glasses integrations using indirect data channels.",
-      "Prototyping low-friction, heads-up notifications powered by existing automation pipelines.",
-      "Understanding where platform limitations block deeper system integration."
+      "Mapping real-world platform constraints: which WhatsApp message types/accounts propagate to glasses vs phone only.",
+      "Designing low-friction notification relays using existing automation tooling.",
+      "Identifying the boundary where lack of official APIs prevents reliable HUD-style delivery."
     ],
-    "bestFor": "Early adopters with Meta smart glasses who want proof-of-concept HUD-style notifications powered by WhatsApp and Home Assistant.",
+    "bestFor": "Developers testing the limits of Meta glasses notification delivery using WhatsApp as a relay channel.",
     "featureToggle": {
       "featured": false,
-      "reason": "Interesting concept, but currently blocked by platform support."
+      "reason": "Interesting concept, currently blocked by platform behavior and lack of exposed APIs."
     },
     "futurePlans": [
-      "Revisit when Meta exposes better APIs or companion integrations for real-time overlays.",
-      "Extract any reusable patterns into the core WhatsApp → Home Assistant project.",
-      "Document current constraints so others can build on the idea if platform access improves."
+      "Revisit if Meta exposes better notification/companion APIs or changes delivery rules.",
+      "Extract reusable relay patterns back into the WhatsApp automation project.",
+      "Document constraints and reproducible tests so others can validate changes over time."
     ],
-    "statusForContributors": "Ideas welcome, stalled due to platform limits and missing Meta support.",
+    "statusForContributors": "Ideas welcome; work is blocked pending platform changes.",
     "changelog": [
-      { "date": "2026-01-05", "note": "Unable to proceed due to lack of Meta support" },
-      { "date": "2025-11-20", "note": "Project started" }
+      { "date": "2026-01-05", "note": "Paused: reliable delivery to glasses not achievable with current constraints." },
+      { "date": "2025-11-20", "note": "Project started." }
     ]
   },
   {
     "id": "proj-003",
-    "title": "Movie/Series Tracker - Android Version",
-    "description": "Android movie database engine using TMDb, caching, and multi-page settings.",
+    "title": "Movie/Series Tracker — Android",
+    "description": "Native Android movie/series tracker using TMDb search, local caching, and Room-backed multi-page settings.",
     "tags": ["android", "tmdb", "movietracker"],
-    "updated": "2026-01-06",
+    "updated": "2025-12-05",
     "started": "2025-06-20",
     "status": "Near Complete",
-    "tech": ["QML", "linux"],
+    "tech": ["Kotlin", "Android Studio", "Room", "Retrofit", "Glide", "Coroutines"],
     "percentComplete": 80,
     "github": "https://github.com/youruser/movie-tracker-android",
     "images": [
       "../images/projects/proj-003-1.png"
     ],
     "whatILearned": [
-      "Designing an offline-friendly media tracker with API-backed search and local caching.",
-      "Balancing flexible filtering and sorting with a simple Android-friendly UI.",
-      "Managing TMDb usage limits and data structures efficiently on mobile devices.",
-      "How to port from Qt to C++/Java based android studio"
+      "Designing an offline-friendly media tracker with API-backed search and local persistence.",
+      "Porting a Qt/C++ data model and workflows to Kotlin/Room cleanly (entities, relations, converters).",
+      "Managing TMDb limits and caching strategies to keep UI responsive."
     ],
-    "bestFor": "Android users who want a lightweight, customizable way to track movies and series using TMDb.",
+    "bestFor": "Android users who want a customizable, local-first way to track movies and series using TMDb.",
     "featureToggle": {
       "featured": true,
-      "reason": "Polished mobile experience that pairs well with the Linux desktop version."
+      "reason": "Polished mobile build; demonstrates Room + network + settings complexity."
     },
     "futurePlans": [
-      "Add sync between Android and Linux versions using a simple export/import or cloud backend.",
-      "Introduce watchlists per profile and basic stats (time watched, genres, etc.).",
-      "Polish theming and consider Material You-style integration for modern Android devices."
+      "Add sync between Android and Linux via export/import or optional cloud backend.",
+      "Add per-profile watchlists and simple stats (time watched, genres, trends).",
+      "Polish theming and optionally adopt Material You alignment."
     ],
-    "statusForContributors": "Actively accepting PRs for UI/UX polish, sync options, and new filtering features.",
+    "statusForContributors": "Accepting PRs for UI polish, sync options, and filtering features.",
     "changelog": [
-      { "date": "2026-01-05", "note": "Project near completion" },
-      { "date": "2025-11-20", "note": "Project started" }
+      { "date": "2025-12-05", "note": "Near completion: series support, settings persistence, performance tuning." },
+      { "date": "2025-06-20", "note": "Project started." }
     ]
   },
   {
     "id": "proj-004",
-    "title": "Movie/Series Tracker - Linux version",
-    "description": "Linux *via QT* movie database engine using TMDb, caching, and multi-page settings.",
-    "tags": ["Qt", "linux", "tmdb", "movietracker"],
+    "title": "Movie/Series Tracker — Linux (Qt)",
+    "description": "Qt/QML desktop movie+series tracker using TMDb search and a local SQLite-backed library.",
+    "tags": ["qt", "qml", "linux", "tmdb", "movietracker"],
     "updated": "2025-06-06",
     "started": "2025-01-20",
     "status": "Near Complete",
-    "tech": ["android studio", "QML", "Qt"],
+    "tech": ["C++", "Qt", "QML", "SQLite"],
     "percentComplete": 85,
     "github": "https://github.com/youruser/movie-tracker-linux",
     "images": [
       "../images/projects/proj-004-1.png"
     ],
     "whatILearned": [
-      "Building a cross-platform movie tracker UI with Qt and QML on desktop.",
-      "Structuring TMDb-backed search and caching for a keyboard-and-mouse workflow.",
-      "Keeping a codebase flexible enough to share concepts with the Android version."
+      "Building a desktop-first library workflow with Qt/QML and SQLite.",
+      "Structuring TMDb-backed search and caching for a keyboard-and-mouse power-user flow.",
+      "Keeping architecture concepts portable so Android could mirror the core model."
     ],
-    "bestFor": "Linux desktop users who want a Qt-based movie and series tracker integrated into their workflow.",
+    "bestFor": "Linux desktop users who want a Qt-based movie/series tracker integrated into a desktop workflow.",
     "featureToggle": {
       "featured": true,
-      "reason": "Desktop companion to the Android tracker, good showcase of Qt/QML work."
+      "reason": "Desktop companion showcasing Qt/QML and local DB design."
     },
     "futurePlans": [
-      "Improve power-user features for fast library navigation.",
-      "Add optional integration with local media libraries or players.",
-      "Align UI patterns with the Android version for a cohesive cross-device experience."
+      "Improve power-user features for fast navigation and bulk edits.",
+      "Optional integration with local media libraries/players.",
+      "Align UX patterns with Android for cross-device consistency."
     ],
-    "statusForContributors": "Actively accepting PRs to refine the Qt UI, performance, and advanced power-user features.",
+    "statusForContributors": "Accepting PRs for UI refinement, performance, and advanced features.",
     "changelog": [
-      { "date": "2025-06-06", "note": "Project completed - alpha" },
-      { "date": "2025-01-20", "note": "Project started" }
+      { "date": "2025-06-06", "note": "Alpha milestone; core features stable." },
+      { "date": "2025-01-20", "note": "Project started." }
     ]
   },
   {
     "id": "proj-005",
-    "title": "Analog Lofi Linux Clock plasmoid",
-    "description": "Linux analog clock widget based on windows ME widget for kde Plasma desktop",
+    "title": "Analog Lofi Linux Clock Plasmoid",
+    "description": "KDE Plasma analog clock plasmoid inspired by a Windows-era widget aesthetic.",
     "tags": ["linux", "clock", "plasmoid", "kde"],
     "updated": "2026-01-22",
     "started": "2025-01-20",
-    "status": "Complete - beta version",
-    "tech": ["linux", "plasma"],
+    "status": "Complete (beta)",
+    "tech": ["KDE Plasma", "QML", "JavaScript"],
     "percentComplete": 95,
     "github": "https://github.com/youruser/lofi-linux-clock-plasmoid",
     "images": [
       "../images/projects/proj-005-1.png"
     ],
     "whatILearned": [
-      "Porting a nostalgic widget aesthetic into a modern KDE Plasma plasmoid.",
-      "Handling Plasma 6 changes, configuration persistence, and performance tuning.",
-      "Refining visuals like fonts, aspect ratio, and repaint timing for a smooth analog clock."
+      "Porting a nostalgic widget aesthetic into a modern Plasma 6 plasmoid.",
+      "Handling config persistence, resizing/aspect behavior, and repaint timing.",
+      "Hardening QML UI against Plasma/Qt version differences."
     ],
-    "bestFor": "KDE Plasma users who love retro, lofi-style desktop widgets and want a lightweight analog clock.",
+    "bestFor": "KDE Plasma users who want retro-style desktop widgets with low overhead.",
     "featureToggle": {
       "featured": true,
-      "reason": "Polished, shippable plasmoid that showcases Plasma 6 support."
+      "reason": "Shippable plasmoid that demonstrates Plasma 6 support and polish."
     },
     "futurePlans": [
-      "Add optional themes (color variants, more nostalgic skins).",
-      "Expose more fine-grained configuration options without cluttering the default experience.",
-      "Package for easy installation from KDE’s widget ecosystem or store."
+      "Add optional theme variants (skins/colors).",
+      "Expose advanced config without cluttering defaults.",
+      "Package for easy installation via KDE ecosystem."
     ],
-    "statusForContributors": "Looking for testers on Plasma 6 and PRs for themes, translations, and minor UI refinements.",
+    "statusForContributors": "Looking for Plasma 6 testers; PRs for themes/translations welcome.",
     "changelog": [
       {
         "date": "2026-01-20",
-        "note": "Version 1.1, Plasma 6 update. Configuration handling corrected. Tooltip updates fixed. Adaptive repaint timing added. Performance improved. Font handling hardened. Aspect-ratio resizing stabilized. File structure cleaned up. Deprecated code removed."
+        "note": "v1.1: Plasma 6 update; config handling corrected; tooltip fixes; adaptive repaint timing; aspect-ratio resizing stabilized; deprecated code removed."
       },
-      { "date": "2025-01-20", "note": "Project started" }
+      { "date": "2025-01-20", "note": "Project started." }
     ]
   },
   {
     "id": "proj-006",
     "title": "Linux Penny Arcade Comic Displayer",
-    "description": "Linux widget that displays the latest penny arcade comics",
+    "description": "KDE Plasma widget that fetches and displays the latest Penny Arcade comic with graceful offline behavior.",
     "tags": ["linux", "comic", "plasmoid", "kde"],
     "updated": "2026-01-20",
     "started": "2025-01-20",
-    "status": "Complete - beta version",
-    "tech": ["linux", "plasma"],
+    "status": "Complete (beta)",
+    "tech": ["KDE Plasma", "QML", "JavaScript"],
     "percentComplete": 95,
     "github": "https://github.com/youruser/penny-arcade-plasmoid",
     "images": [
       "../images/projects/proj-006-1.png"
     ],
     "whatILearned": [
-      "Building a content-driven plasmoid that fetches and displays web comic updates.",
-      "Dealing with remote content reliability and making the widget fail gracefully.",
-      "Optimizing layout for different panel sizes and Plasma configurations."
+      "Building a network-fed plasmoid that fails gracefully under unreliable connectivity.",
+      "Optimizing layout for panel vs desktop widget sizes.",
+      "Adding caching and update pacing to avoid excessive fetches."
     ],
-    "bestFor": "KDE Plasma users who want Penny Arcade comics integrated directly into their desktop.",
+    "bestFor": "KDE Plasma users who want a webcomic widget integrated into their desktop.",
     "featureToggle": {
       "featured": false,
-      "reason": "Fun, niche plasmoid that’s stable enough for everyday use."
+      "reason": "Stable niche widget; good demonstration of content fetching patterns."
     },
     "futurePlans": [
-      "Support additional web comics via configuration or presets.",
-      "Add archive navigation and quick jump to the full website when desired.",
-      "Improve caching and network error messaging for unreliable connections."
+      "Support additional comics via presets/config.",
+      "Add archive navigation.",
+      "Improve caching controls and error UX."
     ],
-    "statusForContributors": "Looking for testers on Plasma 6 and PRs to extend comic sources and improve UX.",
+    "statusForContributors": "Looking for Plasma 6 testers; PRs for additional sources welcome.",
     "changelog": [
-      { "date": "2026-01-20", "note": "Confirmed working with plasma 6" },
-      { "date": "2025-01-20", "note": "Project started" }
+      { "date": "2026-01-20", "note": "Confirmed working with Plasma 6." },
+      { "date": "2025-01-20", "note": "Project started." }
     ]
   },
   {
     "id": "proj-007",
-    "title": "Conky haloween clock",
-    "description": "Conky digital clock for halloween",
+    "title": "Conky Halloween Clock",
+    "description": "Seasonal Conky digital clock theme for a Halloween desktop overlay.",
     "tags": ["linux", "clock", "conky"],
     "updated": "2025-06-05",
     "started": "2025-01-20",
-    "status": "Complete - beta version",
-    "tech": ["conky", "linux"],
+    "status": "Complete (beta)",
+    "tech": ["Conky", "Linux"],
     "percentComplete": 95,
     "github": "https://github.com/youruser/conky-halloween-clock",
     "images": [
       "../images/projects/proj-007-1.png"
     ],
     "whatILearned": [
-      "Creating themed, seasonal desktop widgets using Conky on Linux.",
-      "Balancing visual flair with readability for a digital clock overlay.",
-      "Packaging and documenting a small cosmetic widget for other users."
+      "Designing readable themed overlays with constrained layout tools.",
+      "Packaging/documenting a small cosmetic project for others to reuse."
     ],
-    "bestFor": "Linux and Conky users who want a Halloween-themed, seasonal clock on their desktop.",
+    "bestFor": "Linux users who want seasonal desktop flair via Conky.",
     "featureToggle": {
       "featured": false,
-      "reason": "Fun seasonal widget that’s easy for others to pick up and modify."
+      "reason": "Small, stable theme project."
     },
     "futurePlans": [
-      "Add more seasonal variants (winter, spring, generic spooky themes).",
-      "Provide configuration snippets for popular desktop environments.",
-      "Publish a small gallery of themes so users can quickly swap looks."
+      "Add more seasonal variants (winter/spring/neutral).",
+      "Provide presets for common desktop configs."
     ],
-    "statusForContributors": "Actively accepting PRs for new themes, configuration presets, and small quality-of-life tweaks.",
+    "statusForContributors": "PRs welcome for themes and presets.",
     "changelog": [
-      { "date": "2025-06-05", "note": "Project completed - alpha" },
-      { "date": "2025-01-20", "note": "Project started" }
+      { "date": "2025-06-05", "note": "Alpha milestone." },
+      { "date": "2025-01-20", "note": "Project started." }
     ]
   },
   {
-  "id": "proj-008",
-  "title": "Android Subscription Tracker",
-  "description": "A native Android app for tracking recurring subscriptions with category filtering, icon-based visual identification, and automated reminder scheduling that advances billing dates intelligently.",
-  "tags": ["android", "subscriptions", "reminders", "workmanager"],
-  "updated": "2025-11-26",
-  "started": "2025-07-10",
-  "status": "Stalled - not functioning",
-  "tech": [
-    "Kotlin",
-    "Android SDK",
-    "Room",
-    "WorkManager",
-    "RecyclerView",
-    "Material Components"
-  ],
-  "percentComplete": 40,
-  "github": null,
-  "images": [],
-  "whatILearned": [
-    "Designing a Room-backed data model that safely evolves with schema changes and type converters.",
-    "Correctly using WorkManager for one-shot and self-rescheduling background tasks without duplicate execution.",
-    "Managing reminder logic so notifications trigger exactly once while persisting state changes (next billing date).",
-    "Separating UI-triggered scheduling from worker-triggered rescheduling to avoid race conditions.",
-    "Implementing icon selection using resource-name persistence instead of fragile reflection at runtime."
-  ],
-  "bestFor": "Android users who want a lightweight, local-first way to track subscriptions and receive reliable billing reminders without cloud dependencies.",
-  "featureToggle": {
-    "featured": false,
-    "reason": "Demonstrates a full end-to-end Android architecture: Room, ViewModels, background work, and complex state handling."
-  },
-  "futurePlans": [
-    "Add analytics views (monthly cost totals, category breakdowns).",
-    "Support custom reminder offsets (e.g., 3 days before billing).",
-    "Optional export/import of subscriptions as JSON.",
-    "Polish UI animations and theming for larger and smaller screens."
-  ],
-  "statusForContributors": "Open to focused contributions around UI polish, test coverage, and edge-case handling for reminders.",
-  "changelog": [
-    { "date": "2025-11-26", "note": "Reminder rescheduling stabilized; duplicate notification bug resolved, recent updates broke reminders" },
-    { "date": "2025-10-18", "note": "Icon picker and category filtering implemented" },
-    { "date": "2025-07-10", "note": "Project started" }
-  ]
-}
-
+    "id": "proj-008",
+    "title": "Android Subscription Tracker",
+    "description": "Local-first Android app to track subscriptions with category filtering, icon selection, and WorkManager reminders that advance billing dates.",
+    "tags": ["android", "subscriptions", "reminders", "workmanager"],
+    "updated": "2025-11-26",
+    "started": "2025-07-10",
+    "status": "Stalled (broken reminders)",
+    "tech": ["Kotlin", "Room", "WorkManager", "RecyclerView", "Material Components"],
+    "percentComplete": 40,
+    "github": null,
+    "images": [],
+    "whatILearned": [
+      "Designing Room models with type converters and safe schema evolution.",
+      "Using WorkManager for one-shot work + explicit rescheduling without duplicate execution.",
+      "Separating UI-triggered scheduling from worker-triggered state updates to avoid race conditions."
+    ],
+    "bestFor": "Android users who want local subscription tracking without cloud dependencies (once reminder logic is restored).",
+    "featureToggle": {
+      "featured": false,
+      "reason": "Good architecture demo, but currently stalled due to reminder reliability regressions."
+    },
+    "futurePlans": [
+      "Restore reminder reliability (single notification + persisted next billing date update).",
+      "Add analytics views (monthly totals, category breakdown).",
+      "Support custom reminder offsets (e.g., 3 days before).",
+      "Add JSON export/import."
+    ],
+    "statusForContributors": "If a public repo is added, contributions would focus on reminders, tests, and edge-case handling.",
+    "changelog": [
+      { "date": "2025-11-26", "note": "Reminder behavior unstable again after changes; app marked stalled." },
+      { "date": "2025-10-18", "note": "Icon picker and category filtering implemented." },
+      { "date": "2025-07-10", "note": "Project started." }
+    ]
+  }
 ]
-
-
-
