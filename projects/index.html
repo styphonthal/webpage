@@ -37,6 +37,7 @@
       font:16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
       -webkit-font-smoothing:antialiased;
     }
+    
 
     .sidebar{
       position:fixed;
@@ -326,6 +327,60 @@
       background:currentColor;
       box-shadow:0 0 8px currentColor;
     }
+.featured-pill{
+  margin-top:4px;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:4px 10px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  color:#fbbf24;
+  background:rgba(251,191,36,.08);
+  border:1px solid rgba(251,191,36,.5);
+  position:relative;
+  overflow:hidden;
+}
+
+.featured-pill::before{
+  content:'';
+  position:absolute;
+  inset:-40%;
+  background:conic-gradient(
+    from 0deg,
+    rgba(251,191,36,.0),
+    rgba(251,191,36,.55),
+    rgba(251,191,36,.0),
+    rgba(96,165,250,.5),
+    rgba(251,191,36,.0)
+  );
+  opacity:.9;
+  animation:featured-spin 6s linear infinite;
+}
+
+.featured-pill-inner{
+  position:relative;
+  z-index:1;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+}
+
+.featured-dot{
+  width:7px;
+  height:7px;
+  border-radius:999px;
+  background:#fbbf24;
+  box-shadow:0 0 10px rgba(251,191,36,.9);
+}
+
+@keyframes featured-spin{
+  0%{transform:rotate(0deg);}
+  100%{transform:rotate(360deg);}
+}
 
     .card-desc{
       color:var(--muted);
@@ -904,50 +959,61 @@
     }
 
     function renderGrid(){
-      el.grid.innerHTML = '';
-      if(!state.filtered.length){
-        el.empty.style.display='block';
-        return;
-      }
-      el.empty.style.display='none';
+  el.grid.innerHTML = '';
+  if(!state.filtered.length){
+    el.empty.style.display='block';
+    return;
+  }
+  el.empty.style.display='none';
 
-      for(const p of state.filtered){
-        const card = document.createElement('article');
-        card.className = 'card';
-        card.onclick = ()=>showModal(p);
-        
-        const tags = p.tags.map(t=>`<span class="tag-pill">${esc(t)}</span>`).join('');
-        const thumb = p.images && p.images.length
-          ? `<div class="card-thumb"><img src="${esc(p.images[0])}" alt="${esc(p.title)} screenshot"></div>`
-          : '';
+  for(const p of state.filtered){
+    const card = document.createElement('article');
+    card.className = 'card';
+    card.onclick = ()=>showModal(p);
+    
+    const tags = p.tags.map(t=>`<span class="tag-pill">${esc(t)}</span>`).join('');
+    const thumb = p.images && p.images.length
+      ? `<div class="card-thumb"><img src="${esc(p.images[0])}" alt="${esc(p.title)} screenshot"></div>`
+      : '';
 
-        const status = statusStyles(p.status);
-        const percent = Math.max(0, Math.min(100, p.percentComplete || 0));
+    const status = statusStyles(p.status);
+    const percent = Math.max(0, Math.min(100, p.percentComplete || 0));
+    const isFeatured = p.featureToggle && p.featureToggle.featured;
 
-        card.innerHTML = `
-          ${thumb}
-          <div class="card-header-row">
-            <div class="card-title">${esc(p.title)}</div>
-            <div class="status-pill" style="color:${status.color}; border:1px solid ${status.color}33; background:rgba(15,23,42,.9);">
-              <span class="status-dot"></span>
-              <span>${esc(status.label)}</span>
+    card.innerHTML = `
+      ${thumb}
+      <div class="card-header-row">
+        <div>
+          <div class="card-title">${esc(p.title)}</div>
+          ${isFeatured ? `
+            <div class="featured-pill">
+              <div class="featured-pill-inner">
+                <span class="featured-dot"></span>
+                <span>Featured</span>
+              </div>
             </div>
-          </div>
-          <div class="card-desc">${esc(p.description)}</div>
-          <div class="card-progress">
-            <div class="card-progress-bar">
-              <div class="card-progress-fill" style="width:${percent}%;"></div>
-            </div>
-            <div class="card-progress-label">${percent}% complete</div>
-          </div>
-          <div class="card-meta">
-            <div class="card-tags">${tags}</div>
-            <div class="card-date">${fmtDate(p.updated)}</div>
-          </div>
-        `;
-        el.grid.appendChild(card);
-      }
-    }
+          ` : ''}
+        </div>
+        <div class="status-pill" style="color:${status.color}; border:1px solid ${status.color}33; background:rgba(15,23,42,.9);">
+          <span class="status-dot"></span>
+          <span>${esc(status.label)}</span>
+        </div>
+      </div>
+      <div class="card-desc">${esc(p.description)}</div>
+      <div class="card-progress">
+        <div class="card-progress-bar">
+          <div class="card-progress-fill" style="width:${percent}%;"></div>
+        </div>
+        <div class="card-progress-label">${percent}% complete</div>
+      </div>
+      <div class="card-meta">
+        <div class="card-tags">${tags}</div>
+        <div class="card-date">${fmtDate(p.updated)}</div>
+      </div>
+    `;
+    el.grid.appendChild(card);
+  }
+}
 
     function showModal(p){
       const status = statusStyles(p.status);
@@ -1058,3 +1124,4 @@
   </script>
 </body>
 </html>
+
