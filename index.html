@@ -60,7 +60,6 @@
       border-bottom:1px solid rgba(59,130,246,.15);
     }
 
-
     .badge {
       width: 42px;
       height: 42px;
@@ -486,9 +485,101 @@
             Personal builds spanning Qt→Android ports, Meta glasses integrations, Home Assistant + n8n workflows,
             and occasional sci-fi micro-fiction. Notes on what I design, break, and push further.
           </p>
+
+          <!-- Hero CTAs -->
+          <div style="margin-top:20px; display:flex; flex-wrap:wrap; gap:12px;">
+            <a href="./projects/index.html" class="cta">Browse all projects →</a>
+            <a href="./widgets/index.html" class="cta">Explore widgets →</a>
+          </div>
         </div>
       </div>
     </header>
+
+    <!-- What is CommandBridge -->
+    <section class="section">
+      <h4>What is CommandBridge?</h4>
+      <p>
+        CommandBridge is a personal lab for building sci-fi-inspired interfaces, automations, and widgets across Linux,
+        Android, Home Assistant, and Meta smart glasses.
+      </p>
+      <p>
+        The projects and widgets here are real tools I use: message-driven control paths, dashboard experiments, and
+        small surface UIs that feel like a ship’s bridge.
+      </p>
+    </section>
+
+    <!-- Featured projects -->
+    <section class="section">
+      <h4>Featured projects</h4>
+      <div class="grid">
+        <article class="card">
+          <h3>WhatsApp → n8n → Home Assistant</h3>
+          <p>
+            Bi-directional automation pipeline that parses messages and triggers Home Assistant services,
+            forming the basis for the Meta glasses setup.
+          </p>
+          <a href="./projects/index.html#proj-001" class="cta">Open project →</a>
+        </article>
+
+        <article class="card">
+          <h3>Meta Smart Glasses WhatsApp bot</h3>
+          <p>
+            Experimental overlays for Meta Display Glasses, using WhatsApp as a transport to push live status,
+            notifications, and controls.
+          </p>
+          <a href="./projects/index.html#proj-002" class="cta">Open project →</a>
+        </article>
+
+        <article class="card">
+          <h3>Movie/Series Tracker</h3>
+          <p>
+            Android + Linux (Qt) movie database engine using TMDb, with caching and multi-page configuration
+            for tracking what you watch across devices.
+          </p>
+          <a href="./projects/index.html#proj-003" class="cta">Open project →</a>
+        </article>
+      </div>
+    </section>
+
+    <!-- Bridge widgets -->
+    <section class="section">
+      <h4>Bridge widgets</h4>
+      <div class="grid">
+        <article class="card">
+          <h3>Buffalo Sabres — Scores &amp; Goals</h3>
+          <p>
+            Dashboard widget showing the latest Sabres score and next game time, updated automatically from an external API.
+          </p>
+          <a href="./widgets/sabres" class="cta">Open widget →</a>
+        </article>
+
+        <article class="card">
+          <h3>System monitor</h3>
+          <p>
+            Compact readout for CPU, RAM, and temperature pulled from Home Assistant, designed to sit on a secondary display
+            like a ship console.
+          </p>
+          <a href="./widgets/index.html" class="cta">View all widgets →</a>
+        </article>
+      </div>
+    </section>
+
+    <!-- Latest activity -->
+    <section class="section">
+      <h4>Latest activity</h4>
+      <ul style="list-style:none; padding:0; margin:0; color:var(--muted); font-size:14px;">
+        <li><strong>2025‑01‑06:</strong> Updated Movie/Series Tracker and Linux widgets (clock, Penny Arcade, Conky Halloween clock).</li>
+        <li><strong>2025‑01‑05:</strong> Expanded WhatsApp → n8n → Home Assistant automation pipeline.</li>
+        <li><strong>2025‑01‑03:</strong> Iterated on Meta Smart Glasses WhatsApp bot overlays.</li>
+      </ul>
+    </section>
+
+    <!-- Footer / design notes -->
+    <footer class="section" style="font-size:13px; color:var(--muted); border-top:1px solid var(--border); padding-top:16px; margin-top:40px;">
+      <p>
+        Built as an ongoing experiment in sci-fi-inspired interfaces and automation. Code and notes may move fast and break things.
+      </p>
+    </footer>
   </main>
 </body>
 </html>
