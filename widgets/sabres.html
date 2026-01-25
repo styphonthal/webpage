@@ -53,6 +53,7 @@
     opacity:.92;
     pointer-events:none;
 
+    /* "Pop" (1+2): drop shadow + subtle glow/emboss */
     filter:
       drop-shadow(0 12px 20px rgba(0,0,0,.45))
       drop-shadow(0 0 10px rgba(252,181,20,.18))
@@ -69,6 +70,7 @@
     padding:0 240px; /* prevent overlap with big slugs */
   }
 
+  /* Header image (sabres2.png) */
   .header-logo{
     display:block;
     margin:0 auto 12px;
@@ -230,19 +232,6 @@
     font-size:.85rem;
     opacity:.75;
   }
-
-  .chip{
-    display:inline-block;
-    padding:2px 10px;
-    border-radius:999px;
-    border:1px solid rgba(252,181,20,.25);
-    background: rgba(255,255,255,.05);
-    font-weight:900;
-    letter-spacing:.2px;
-    margin:0 3px 0 0;
-  }
-  .chip.w{ color:#bff7c0; border-color: rgba(191,247,192,.25); }
-  .chip.l{ color:#ffb3b3; border-color: rgba(255,179,179,.25); }
 
   /* Panels */
   .panel{
@@ -428,20 +417,19 @@
         </div>
 
         <!-- NEW: last 5 + streak (below record/points, above standings) -->
-        <div class="top-scorer" id="formLine" style="margin-top:10px; border-top:1px solid rgba(252,181,20,.2);">
-          Loading last 5…
-        </div>
-        <div class="top-scorer" id="streakLine" style="margin-top:8px; border-top:none; padding-top:0;">
-          Loading streak…
+        <div class="top-scorer" id="formStreakLine" style="margin-top:10px;">
+          Loading form…
         </div>
 
-        <!-- standings line -->
+        <!-- standings position line -->
         <div class="top-scorer" id="standingLine" style="margin-top:10px; border-top:1px solid rgba(252,181,20,.2);">
           Loading standings…
         </div>
 
         <!-- leaders -->
-        <div class="top-scorer" id="topGoals">Loading leading goals...</div>
+        <div class="top-scorer" id="topGoals">
+          Loading leading goals...
+        </div>
         <div class="top-scorer" id="topPoints" style="margin-top:8px; border-top:none; padding-top:0;">
           Loading leading points...
         </div>
@@ -458,6 +446,7 @@
             <div class="badge" id="awayBadge"></div>
           </div>
 
+          <!-- Metrics -->
           <div class="team-metrics" id="awayMetrics">
             <div class="metric"><b>SOG</b>: <span id="awaySog">—</span></div>
             <div class="metric"><b>Hits</b>: <span id="awayHits">—</span></div>
@@ -483,6 +472,7 @@
             <div class="name">Home</div>
           </div>
 
+          <!-- Metrics -->
           <div class="team-metrics" id="homeMetrics">
             <div class="metric"><b>SOG</b>: <span id="homeSog">—</span></div>
             <div class="metric"><b>Hits</b>: <span id="homeHits">—</span></div>
@@ -492,18 +482,21 @@
         </div>
       </div>
 
+      <!-- Live Goals attached to active game box -->
       <div class="panel" id="liveGoalsPanel" style="margin-top:0;">
         <h3>Goals</h3>
         <div class="goals" id="goals"><div class="loading">Loading goals…</div></div>
       </div>
     </div>
 
+    <!-- Most Recent Game (game BEFORE the live/primary game if primary is live) -->
     <div class="panel" id="lastGamePanel">
       <h3>Most Recent Game</h3>
       <div id="lastGameBox" class="loading">Loading…</div>
       <div class="goals" id="lastGameGoals"></div>
     </div>
 
+    <!-- Next Game -->
     <div class="panel" id="nextGamePanel">
       <h3>Next Game</h3>
       <div id="nextGameBox" class="loading">Loading…</div>
@@ -570,71 +563,6 @@
     const response = await fetch(proxiedUrl, { cache: 'no-store' });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     return await response.json();
-  }
-
-  // --- existing helpers (kept) ---
-  function deepGet(obj, path) {
-    try {
-      return path.split('.').reduce((acc, k) => (acc == null ? undefined : acc[k]), obj);
-    } catch {
-      return undefined;
-    }
-  }
-
-  function firstDefined(...vals) {
-    for (const v of vals) {
-      if (v !== undefined && v !== null) return v;
-    }
-    return undefined;
-  }
-  // -------------------------------
-
-  // NEW: recursive numeric search (handles wildly inconsistent boxscore shapes)
-  function scanForNumeric(obj, keys, maxDepth = 5, depth = 0, seen = new Set()) {
-    if (!obj || typeof obj !== 'object') return null;
-    if (seen.has(obj)) return null;
-    seen.add(obj);
-
-    // direct keys
-    for (const k of keys) {
-      if (obj[k] !== undefined && obj[k] !== null) {
-        const n = Number(obj[k]);
-        if (Number.isFinite(n)) return n;
-      }
-    }
-
-    if (depth >= maxDepth) return null;
-
-    // walk children
-    for (const v of Object.values(obj)) {
-      if (!v) continue;
-      if (typeof v === 'object') {
-        const found = scanForNumeric(v, keys, maxDepth, depth + 1, seen);
-        if (found !== null) return found;
-      }
-    }
-    return null;
-  }
-
-  // NEW: recursive string/number search for sv% (may be ".912", "0.912", "91.2", etc.)
-  function scanForValue(obj, keys, maxDepth = 5, depth = 0, seen = new Set()) {
-    if (!obj || typeof obj !== 'object') return null;
-    if (seen.has(obj)) return null;
-    seen.add(obj);
-
-    for (const k of keys) {
-      if (obj[k] !== undefined && obj[k] !== null) return obj[k];
-    }
-    if (depth >= maxDepth) return null;
-
-    for (const v of Object.values(obj)) {
-      if (!v) continue;
-      if (typeof v === 'object') {
-        const found = scanForValue(v, keys, maxDepth, depth + 1, seen);
-        if (found !== null) return found;
-      }
-    }
-    return null;
   }
 
   // Get team standings and stats (record + points)
@@ -725,30 +653,19 @@
     }
   }
 
-  // CHANGED: fetch multiple weeks back so "last 5" and streak are real (not limited to 2 weeks)
   async function getSchedule() {
     const now = new Date();
     const formatAPIDate = (d) => d.toISOString().split('T')[0];
 
-    const weeksBack = 8; // enough coverage for last 5 finals + streak reliably
-    const weekDates = [];
-    for (let i = 0; i <= weeksBack; i++) {
-      const d = new Date(now);
-      d.setDate(d.getDate() - (7 * i));
-      weekDates.push(d);
-    }
+    const url = `https://api-web.nhle.com/v1/club-schedule/${SABRES_ABBR}/week/${formatAPIDate(now)}`;
+    const data = await fetchJSON(url);
 
-    const urls = weekDates.map(d => `https://api-web.nhle.com/v1/club-schedule/${SABRES_ABBR}/week/${formatAPIDate(d)}`);
-    const results = await Promise.all(urls.map(u => fetchJSON(u).catch(() => ({ games: [] }))));
+    const prevWeek = new Date(now);
+    prevWeek.setDate(prevWeek.getDate() - 7);
+    const prevUrl = `https://api-web.nhle.com/v1/club-schedule/${SABRES_ABBR}/week/${formatAPIDate(prevWeek)}`;
+    const prevData = await fetchJSON(prevUrl);
 
-    // merge + de-dupe by game id
-    const gameMap = new Map();
-    for (const r of results) {
-      for (const g of (r.games || [])) {
-        if (g?.id != null) gameMap.set(g.id, g);
-      }
-    }
-    const allGames = Array.from(gameMap.values());
+    const allGames = [...(prevData.games || []), ...(data.games || [])];
 
     const liveGame = allGames.find(g =>
       g.gameState === 'LIVE' ||
@@ -790,223 +707,213 @@
   }
 
   // Save% formatting: .XXX (standard)
-  function formatSavePctDot(v) {
-    if (v == null) return '—';
-    const s = (typeof v === 'string') ? v.trim().replace('%','') : v;
-    let num = (typeof s === 'number') ? s : Number(s);
-    if (!Number.isFinite(num)) return '—';
-    if (num > 1.5) num = num / 100; // percent -> decimal
-    // if already like ".912" parse gives 0.912, good
-    return `.${String(Math.round(num * 1000)).padStart(3,'0')}`;
+  function formatSavePctDotFromSavesShots(saves, shots) {
+    const s = Number(saves);
+    const sh = Number(shots);
+    if (!Number.isFinite(s) || !Number.isFinite(sh) || sh <= 0) return '—';
+    const pct = s / sh; // 0.xxx
+    const thou = Math.round(pct * 1000);
+    return `.${String(thou).padStart(3,'0')}`;
   }
 
-  // More robust goalie label: try sv% keys; else compute from saves/shots keys (including deep scan)
-  function goalieLabel(g) {
-    if (!g) return '—';
+  // Parse strings like "16/20" (saves/shots) anywhere on goalie object
+  function parseSavesShotsFromGoalie(goalieObj) {
+    if (!goalieObj) return null;
 
-    const ln = g.lastName?.default || g.lastName || '';
-    const name = ln ? ln : (g.name?.default || g.name || 'Goalie');
+    // direct numeric-ish fields (varies)
+    const saves =
+      goalieObj.saves ?? goalieObj.saveCount ?? goalieObj.totalSaves ?? null;
+    const shots =
+      goalieObj.shotsAgainst ?? goalieObj.shots ?? goalieObj.totalShotsAgainst ?? goalieObj.sa ?? null;
+
+    if (saves != null && shots != null) {
+      const s = Number(String(saves).replace(/[^\d.]/g,''));
+      const sh = Number(String(shots).replace(/[^\d.]/g,''));
+      if (Number.isFinite(s) && Number.isFinite(sh)) return { saves:s, shots:sh };
+    }
+
+    // sum all "*ShotsAgainst" strings like "16/20"
+    let totalSaves = 0;
+    let totalShots = 0;
+    let foundAny = false;
+
+    for (const [k,v] of Object.entries(goalieObj)) {
+      if (!v) continue;
+      if (!/ShotsAgainst$/i.test(k)) continue;
+      const m = String(v).match(/(\d+)\s*\/\s*(\d+)/);
+      if (!m) continue;
+      const s = Number(m[1]);
+      const sh = Number(m[2]);
+      if (Number.isFinite(s) && Number.isFinite(sh)) {
+        totalSaves += s;
+        totalShots += sh;
+        foundAny = true;
+      }
+    }
+
+    return foundAny ? { saves: totalSaves, shots: totalShots } : null;
+  }
+
+  function goalieName(goalieObj) {
+    if (!goalieObj) return 'Goalie';
+    const ln = goalieObj.lastName?.default || goalieObj.lastName || goalieObj.name?.default || goalieObj.name || '';
+    if (typeof ln === 'string' && ln.trim()) return ln.trim();
+
+    // sometimes: name.default = "Lastname"
+    const nm = goalieObj.name?.default || goalieObj.name;
+    return (typeof nm === 'string' && nm.trim()) ? nm.trim() : 'Goalie';
+  }
+
+  function goalieLabel(goalieObj) {
+    if (!goalieObj) return '—';
+    const nm = goalieName(goalieObj);
+
+    // prefer computed from saves/shots; fallback to any raw savePct fields if present
+    const ss = parseSavesShotsFromGoalie(goalieObj);
+    if (ss && ss.shots > 0) {
+      return `${nm} (${formatSavePctDotFromSavesShots(ss.saves, ss.shots)})`;
+    }
 
     const svRaw =
-      g.savePctg ?? g.savePercentage ?? g.savePct ?? g.svPct ?? g.savePctgDecimal ??
-      g.savePctgValue ?? g.savePctValue ?? g.savePctgDisplay ?? g.svPctg ?? null;
+      goalieObj.savePctg ?? goalieObj.savePercentage ?? goalieObj.savePct ?? goalieObj.svPct ?? goalieObj.savePctgDecimal ??
+      goalieObj.savePctgValue ?? goalieObj.savePctValue ?? null;
 
-    if (svRaw != null) return `${name} (${formatSavePctDot(svRaw)})`;
-
-    // Deep scan for any sv% key the API might hide
-    const svDeep = scanForValue(g, ['savePctg','savePercentage','savePct','svPct','svPctg','savePctgDecimal','savePctValue','savePctgValue'], 4);
-    if (svDeep != null) return `${name} (${formatSavePctDot(svDeep)})`;
-
-    // Compute from saves/shots (deep scan)
-    const saves = firstDefined(
-      g.saves, g.save, g.totalSaves, g.savesAgainst, g.numSaves, g.sv, g.svTotal,
-      scanForNumeric(g, ['saves','totalSaves','savesAgainst','numSaves','sv'], 4)
-    );
-    const shotsAgainst = firstDefined(
-      g.shotsAgainst, g.shotsFaced, g.shots, g.sa, g.shotsOnGoalAgainst, g.totalShotsAgainst,
-      scanForNumeric(g, ['shotsAgainst','shotsFaced','shots','sa','shotsOnGoalAgainst','totalShotsAgainst'], 4)
-    );
-
-    const sNum = Number(saves);
-    const saNum = Number(shotsAgainst);
-    if (Number.isFinite(sNum) && Number.isFinite(saNum) && saNum > 0) {
-      return `${name} (${formatSavePctDot(sNum / saNum)})`;
+    if (svRaw != null) {
+      const s = (typeof svRaw === 'string') ? svRaw.trim().replace('%','') : svRaw;
+      let num = (typeof s === 'number') ? s : Number(s);
+      if (Number.isFinite(num)) {
+        if (num > 1.5) num = num / 100;
+        return `${nm} (.${String(Math.round(num * 1000)).padStart(3,'0')})`;
+      }
     }
 
-    return `${name} (—)`;
+    return `${nm} (—)`;
   }
 
-  // goalie selection prioritizes playerByGameStats
+  // Extract team totals:
+  // - First try top-level team totals
+  // - Then try playerByGameStats.team object
+  // - Then compute by summing player stats (hits/blockedShots) on skaters list
+  function getPGSTeam(side, box) {
+    const pgs = box?.playerByGameStats;
+    if (!pgs) return null;
+    return side === 'away' ? pgs.awayTeam : pgs.homeTeam;
+  }
+
+  function getTopTeam(side, box) {
+    return side === 'away' ? (box?.awayTeam || box?.away) : (box?.homeTeam || box?.home);
+  }
+
+  function pickFirstNonNull(...vals) {
+    for (const v of vals) {
+      if (v !== undefined && v !== null && v !== '') return v;
+    }
+    return null;
+  }
+
+  function sumSkaterStat(pgsTeam, keys) {
+    const skaters = pgsTeam?.skaters;
+    if (!Array.isArray(skaters) || !skaters.length) return null;
+
+    let sum = 0;
+    let found = false;
+
+    for (const s of skaters) {
+      for (const k of keys) {
+        const v = s?.[k];
+        if (v === undefined || v === null) continue;
+        const n = Number(String(v).replace(/[^\d.-]/g,''));
+        if (!Number.isFinite(n)) continue;
+        sum += n;
+        found = true;
+        break;
+      }
+    }
+    return found ? sum : null;
+  }
+
+  function extractTeamTotal(side, box, stat) {
+    const top = getTopTeam(side, box);
+    const pgsTeam = getPGSTeam(side, box);
+
+    // common direct keys
+    if (stat === 'sog') {
+      return pickFirstNonNull(
+        top?.shotsOnGoal, top?.sog, top?.shots,
+        top?.teamStats?.shotsOnGoal, top?.teamStats?.sog,
+        pgsTeam?.shotsOnGoal, pgsTeam?.sog, pgsTeam?.shots,
+        pgsTeam?.teamStats?.shotsOnGoal, pgsTeam?.teamStats?.sog
+      );
+    }
+
+    if (stat === 'hits') {
+      const direct = pickFirstNonNull(
+        top?.hits, top?.teamStats?.hits,
+        pgsTeam?.hits, pgsTeam?.teamStats?.hits
+      );
+      if (direct != null) return direct;
+
+      // compute from skaters
+      return sumSkaterStat(pgsTeam, ['hits', 'hitCount']);
+    }
+
+    if (stat === 'blockedShots') {
+      const direct = pickFirstNonNull(
+        top?.blockedShots, top?.blocks, top?.blocked,
+        top?.teamStats?.blockedShots, top?.teamStats?.blocks, top?.teamStats?.blocked,
+        pgsTeam?.blockedShots, pgsTeam?.blocks, pgsTeam?.blocked,
+        pgsTeam?.teamStats?.blockedShots, pgsTeam?.teamStats?.blocks, pgsTeam?.teamStats?.blocked
+      );
+      if (direct != null) return direct;
+
+      // compute from skaters
+      return sumSkaterStat(pgsTeam, ['blockedShots', 'blocks', 'blocked']);
+    }
+
+    return null;
+  }
+
+  // Pick goalie: choose the goalie who actually faced shots (max shots), not index 0
   function findLikelyGoalie(side, box) {
-    const pgStats = box?.playerByGameStats;
-    if (pgStats) {
-      const teamStats = (side === 'away') ? pgStats.awayTeam : pgStats.homeTeam;
-      const goalies = teamStats?.goalies;
-      if (Array.isArray(goalies) && goalies.length > 0) return goalies[0];
-    }
+    const pgsTeam = getPGSTeam(side, box);
+    const top = getTopTeam(side, box);
 
-    const t = (side === 'away') ? (box?.awayTeam || box?.away) : (box?.homeTeam || box?.home);
-    if (t?.goalies && Array.isArray(t.goalies) && t.goalies.length > 0) return t.goalies[0];
+    const candidates = [];
 
-    const allPlayers = t?.players || t?.roster || [];
-    if (Array.isArray(allPlayers) && allPlayers.length) {
-      const goalie = allPlayers.find(p => ((p.positionCode || p.position || '').toString().toUpperCase() === 'G'));
-      if (goalie) return goalie;
-    }
+    const pgsGoalies = pgsTeam?.goalies;
+    if (Array.isArray(pgsGoalies)) candidates.push(...pgsGoalies);
 
-    // Deep scan for a goalie-like object (rare, but some shapes bury it)
-    const subtree = (side === 'away') ? (pgStats?.awayTeam || t || null) : (pgStats?.homeTeam || t || null);
-    if (subtree) {
-      // try to find an object that has positionCode === 'G'
-      const found = (function scanForGoalie(obj, depth = 0, seen = new Set()) {
-        if (!obj || typeof obj !== 'object') return null;
-        if (seen.has(obj)) return null;
-        seen.add(obj);
-        if (String(obj.positionCode || obj.position || '').toUpperCase() === 'G') return obj;
-        if (depth > 5) return null;
-        for (const v of Object.values(obj)) {
-          if (typeof v === 'object' && v) {
-            const r = scanForGoalie(v, depth + 1, seen);
-            if (r) return r;
-          }
-        }
-        return null;
-      })(subtree);
-      if (found) return found;
-    }
+    const topGoalies = top?.goalies || top?.goalieStats;
+    if (Array.isArray(topGoalies)) candidates.push(...topGoalies);
 
-    return null;
-  }
+    if (!candidates.length) return null;
 
-  // Keep old extractor (not removed)
-  function extractTeamStatOld(side, box, statName) {
-    const sideKey = side === 'away' ? 'awayTeam' : 'homeTeam';
-    const t = (side === 'away') ? (box?.awayTeam || box?.away) : (box?.homeTeam || box?.home);
+    // choose by max total shots against (derived from saves/shots strings or shotsAgainst)
+    let best = null;
+    let bestShots = -1;
 
-    const keysByStat = {
-      sog:   ['shotsOnGoal', 'sog', 'shots', 'shotsOnNet'],
-      hits:  ['hits', 'hitCount'],
-      blocks:['blockedShots', 'blocks', 'blocked', 'shotsBlocked', 'blockedShotCount'],
-    };
-    const keys = keysByStat[statName] || [];
+    for (const g of candidates) {
+      const ss = parseSavesShotsFromGoalie(g);
+      const shots = ss?.shots ?? (() => {
+        const raw = g.shotsAgainst ?? g.shots ?? g.sa ?? null;
+        const n = Number(String(raw).replace(/[^\d.]/g,''));
+        return Number.isFinite(n) ? n : 0;
+      })();
 
-    const roots = [
-      t,
-      t?.teamStats,
-      t?.teamSkaterStats,
-      t?.statistics,
-      (side === 'away' ? box?.playerByGameStats?.awayTeam?.teamSkaterStats : box?.playerByGameStats?.homeTeam?.teamSkaterStats),
-      (side === 'away' ? box?.awayTeam?.teamStats : box?.homeTeam?.teamStats),
-      (side === 'away' ? box?.awayTeam?.teamSkaterStats : box?.homeTeam?.teamSkaterStats),
-    ];
-
-    for (const r of roots) {
-      if (!r) continue;
-      for (const k of keys) {
-        if (r[k] !== undefined && r[k] !== null) return r[k];
+      if (shots > bestShots) {
+        bestShots = shots;
+        best = g;
       }
     }
 
-    const deepPaths = {
-      sog: [
-        `${sideKey}.shotsOnGoal`,
-        `${sideKey}.teamStats.shotsOnGoal`,
-        `playerByGameStats.${sideKey}.teamSkaterStats.shotsOnGoal`,
-        `playerByGameStats.${sideKey}.teamSkaterStats.sog`,
-      ],
-      hits: [
-        `${sideKey}.hits`,
-        `${sideKey}.teamStats.hits`,
-        `playerByGameStats.${sideKey}.teamSkaterStats.hits`,
-      ],
-      blocks: [
-        `${sideKey}.blockedShots`,
-        `${sideKey}.teamStats.blockedShots`,
-        `playerByGameStats.${sideKey}.teamSkaterStats.blockedShots`,
-        `playerByGameStats.${sideKey}.teamSkaterStats.blocks`,
-      ]
-    };
-
-    for (const p of (deepPaths[statName] || [])) {
-      const v = deepGet(box, p);
-      if (v !== undefined && v !== null) return v;
-    }
-
-    return null;
-  }
-
-  // CHANGED: team stat extraction now tries multiple known containers + deep scan per-side
-  function extractTeamStat(side, box, statName) {
-    const pgStats = box?.playerByGameStats;
-    const teamStats = pgStats ? ((side === 'away') ? pgStats.awayTeam : pgStats.homeTeam) : null;
-    const directTeam = (side === 'away') ? (box?.awayTeam || box?.away) : (box?.homeTeam || box?.home);
-
-    const alias = {
-      sog: ['sog','shotsOnGoal','shots','shotsOnNet'],
-      hits: ['hits','hitCount'],
-      blockedShots: ['blockedShots','blocks','blocked','shotsBlocked','blockedShotCount'],
-    };
-    const keys = alias[statName] || [statName];
-
-    const candidates = [
-      teamStats,
-      teamStats?.teamStats,
-      teamStats?.teamSkaterStats,
-      teamStats?.statistics,
-      directTeam,
-      directTeam?.teamStats,
-      directTeam?.teamSkaterStats,
-      directTeam?.statistics,
-
-      // additional shapes seen in some boxscores
-      box?.teamGameStats,
-      box?.teamGameStats?.[side],
-      box?.teamGameStats?.[side === 'away' ? 'awayTeam' : 'homeTeam'],
-      box?.summary,
-      box?.summary?.teamGameStats,
-      box?.summary?.teamGameStats?.[side],
-      box?.summary?.teamGameStats?.[side === 'away' ? 'awayTeam' : 'homeTeam'],
-      box?.gameStats,
-      box?.gameStats?.[side],
-      box?.gameStats?.[side === 'away' ? 'awayTeam' : 'homeTeam'],
-    ];
-
-    // direct search in candidates
-    for (const obj of candidates) {
-      if (!obj) continue;
-      for (const k of keys) {
-        if (obj[k] !== undefined && obj[k] !== null) {
-          const n = Number(obj[k]);
-          if (Number.isFinite(n)) return n;
-          return obj[k];
-        }
-      }
-    }
-
-    // deep scan within side subtree first (prevents grabbing the other team's number)
-    const sideSubtree = teamStats || directTeam || null;
-    if (sideSubtree) {
-      const found = scanForNumeric(sideSubtree, keys, 6);
-      if (found !== null) return found;
-    }
-
-    // deep scan within likely per-side containers
-    for (const obj of candidates) {
-      if (!obj) continue;
-      const found = scanForNumeric(obj, keys, 5);
-      if (found !== null) return found;
-    }
-
-    // final fallback: old extractor
-    const fallbackStatName = (statName === 'blockedShots') ? 'blocks' : statName;
-    const vOld = extractTeamStatOld(side, box, fallbackStatName);
-    return (vOld !== undefined && vOld !== null) ? vOld : null;
+    // if everyone is 0 shots, fallback to first (still deterministic)
+    return best || candidates[0];
   }
 
   function applyTeamMetrics(side, box) {
-    const sog = extractTeamStat(side, box, 'sog');
-    const hits = extractTeamStat(side, box, 'hits');
-    const blocks = extractTeamStat(side, box, 'blockedShots');
+    const sog = extractTeamTotal(side, box, 'sog');
+    const hits = extractTeamTotal(side, box, 'hits');
+    const blocks = extractTeamTotal(side, box, 'blockedShots');
 
     const goalie = findLikelyGoalie(side, box);
 
@@ -1016,6 +923,7 @@
     setTxt(side + 'Goalie', goalieLabel(goalie));
   }
 
+  // Render the main scorebar
   function renderScorebar(game, details, boxscore) {
     if (!game) {
       setTxt('state', 'No game data');
@@ -1058,6 +966,7 @@
 
     setTxt('state', status);
 
+    // time/when (prefer intermission remaining if present)
     let when = '';
     if (isLive) {
       if (details?.clock?.inIntermission) {
@@ -1083,6 +992,7 @@
     }
     setTxt('when', when || '—');
 
+    // team metrics
     if (boxscore) {
       applyTeamMetrics('away', boxscore);
       applyTeamMetrics('home', boxscore);
@@ -1110,6 +1020,7 @@
     return (mm * 60) + ss;
   }
 
+  // Render goals into a specific container, newest-first by default
   function renderGoals(details, containerId, newestFirst = true) {
     const goalsEl = document.getElementById(containerId);
     if (!goalsEl) return;
@@ -1129,7 +1040,7 @@
 
     let goals = plays
       .filter(p => p.typeDescKey === 'goal' || p.typeCode === 'GOAL')
-      .filter(p => p.periodDescriptor?.periodType !== 'SO');
+      .filter(p => p.periodDescriptor?.periodType !== 'SO'); // exclude shootout
 
     if (!goals.length) {
       goalsEl.innerHTML = '<div class="loading">No goals scored yet</div>';
@@ -1229,60 +1140,58 @@
     liveGoalsPanel.style.display = show ? '' : 'none';
   }
 
-  // NEW: compute last 5 + streak from finalsSorted
-  function computeFormAndStreak(finalsSorted) {
-    const finals = (finalsSorted || []).slice(); // already newest-first
-    if (!finals.length) return { last5: null, streak: null };
+  function isSabresHome(game) {
+    return (game?.homeTeam?.abbrev === SABRES_ABBR);
+  }
 
+  function sabresResultLetter(game) {
+    if (!game) return null;
+    const away = game.awayTeam;
+    const home = game.homeTeam;
+    const sabresAreHome = isSabresHome(game);
+
+    const sabresScore = sabresAreHome ? (home?.score ?? 0) : (away?.score ?? 0);
+    const oppScore = sabresAreHome ? (away?.score ?? 0) : (home?.score ?? 0);
+
+    if (sabresScore > oppScore) return 'W';
+    if (sabresScore < oppScore) return 'L';
+    return 'T';
+  }
+
+  function computeLast5AndStreak(finalsSorted) {
+    // finalsSorted is newest->oldest
+    const finals = Array.isArray(finalsSorted) ? finalsSorted : [];
     const last5Games = finals.slice(0, 5);
-    const results = last5Games.map(g => {
-      const isHome = (g.homeTeam?.abbrev === SABRES_ABBR);
-      const bufScore = isHome ? (g.homeTeam?.score ?? 0) : (g.awayTeam?.score ?? 0);
-      const oppScore = isHome ? (g.awayTeam?.score ?? 0) : (g.homeTeam?.score ?? 0);
-      return (bufScore > oppScore) ? 'W' : 'L';
-    });
+    const last5 = last5Games.map(sabresResultLetter).filter(Boolean);
 
-    // streak from most recent final
-    const first = results[0];
+    // streak from newest backward
+    let streakType = null; // 'W' or 'L' or 'T'
     let streakCount = 0;
     for (const g of finals) {
-      const isHome = (g.homeTeam?.abbrev === SABRES_ABBR);
-      const bufScore = isHome ? (g.homeTeam?.score ?? 0) : (g.awayTeam?.score ?? 0);
-      const oppScore = isHome ? (g.awayTeam?.score ?? 0) : (g.homeTeam?.score ?? 0);
-      const r = (bufScore > oppScore) ? 'W' : 'L';
-      if (r !== first) break;
-      streakCount++;
+      const r = sabresResultLetter(g);
+      if (!r) continue;
+      if (streakType === null) {
+        streakType = r;
+        streakCount = 1;
+      } else if (r === streakType) {
+        streakCount++;
+      } else {
+        break;
+      }
     }
 
     return {
-      last5: results,
-      streak: { type: first, count: streakCount }
+      last5: last5.length ? last5.join('-') : null,
+      streakType,
+      streakCount
     };
-  }
-
-  function renderFormAndStreak(finalsSorted) {
-    const { last5, streak } = computeFormAndStreak(finalsSorted);
-
-    if (last5 && last5.length) {
-      const chips = last5.map(r => `<span class="chip ${r === 'W' ? 'w' : 'l'}">${r}</span>`).join('');
-      setHTML('formLine', `Last 5: ${chips}`);
-    } else {
-      setHTML('formLine', 'Last 5: —');
-    }
-
-    if (streak && streak.count) {
-      const label = streak.type === 'W' ? 'Win streak' : 'Losing streak';
-      const cls = streak.type === 'W' ? 'w' : 'l';
-      setHTML('streakLine', `Streak: <span class="chip ${cls}">${streak.type}${streak.count}</span> <span style="opacity:.85">(${label})</span>`);
-    } else {
-      setHTML('streakLine', 'Streak: —');
-    }
   }
 
   // Main execution
   try {
     const schedule = await getSchedule();
 
+    // team header: record/points
     const teamStats = await getTeamStats().catch(()=>null);
     if (teamStats) {
       setTxt('record', `${teamStats.wins}-${teamStats.losses}-${teamStats.otLosses}`);
@@ -1292,8 +1201,18 @@
       setTxt('points', '—');
     }
 
-    // last 5 + streak (from expanded schedule coverage)
-    renderFormAndStreak(schedule.finalsSorted || []);
+    // last 5 + streak (below record/points, above standings)
+    const form = computeLast5AndStreak(schedule.finalsSorted);
+    if (form.last5) {
+      const streakWord = form.streakType === 'W' ? 'win' : form.streakType === 'L' ? 'loss' : 'tie';
+      const streakText = (form.streakType && form.streakCount)
+        ? `Streak: <strong>${form.streakCount}</strong> ${streakWord}${form.streakCount === 1 ? '' : 's'}`
+        : `Streak: —`;
+
+      setHTML('formStreakLine', `Last 5: <strong>${form.last5}</strong> &nbsp; <span style="opacity:.8">|</span> &nbsp; ${streakText}`);
+    } else {
+      setHTML('formStreakLine', 'Form unavailable');
+    }
 
     // standings line
     const pos = await getSabresStandingsPosition().catch(()=>null);
@@ -1347,21 +1266,6 @@
       getGameBoxscore(primaryGame.id).catch(()=>null)
     ]);
 
-    // Debug block kept (you can comment out once verified)
-    console.log('=== BOXSCORE STRUCTURE ===');
-    console.log('Top keys:', Object.keys(boxscore || {}));
-    console.log('Away team:', boxscore?.awayTeam);
-    console.log('Home team:', boxscore?.homeTeam);
-    console.log('PlayerByGameStats:', boxscore?.playerByGameStats);
-    if (boxscore?.playerByGameStats?.awayTeam) {
-      console.log('PGS Away goalies:', boxscore.playerByGameStats.awayTeam.goalies);
-      console.log('PGS Away teamStats:', boxscore.playerByGameStats.awayTeam);
-    }
-    if (boxscore?.playerByGameStats?.homeTeam) {
-      console.log('PGS Home goalies:', boxscore.playerByGameStats.homeTeam.goalies);
-      console.log('PGS Home teamStats:', boxscore.playerByGameStats.homeTeam);
-    }
-
     renderScorebar(primaryGame, details, boxscore);
     renderGoals(details, 'goals', true); // newest-first
     setUpdatedNow();
@@ -1393,12 +1297,6 @@
           renderGoals(updatedDetails, 'goals', true);
           setUpdatedNow();
 
-          // keep last5/streak fresh in case a final just posted
-          try {
-            const sched2 = await getSchedule();
-            renderFormAndStreak(sched2.finalsSorted || []);
-          } catch {}
-
           if (['FINAL', 'OFF'].includes(gameState)) {
             clearInterval(refreshInterval);
             setTimeout(() => location.reload(), 2000);
@@ -1419,8 +1317,7 @@
     setHTML('nextGameBox', '<div class="error">—</div>');
     setHTML('lastGameGoals', '');
     setHTML('standingLine', 'Standings position unavailable');
-    setHTML('formLine', 'Last 5: —');
-    setHTML('streakLine', 'Streak: —');
+    setHTML('formStreakLine', 'Form unavailable');
   }
 })();
 </script>
