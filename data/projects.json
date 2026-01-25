@@ -249,7 +249,7 @@
       { "date": "2025-06-05", "note": "Project completed - alpha" },
       { "date": "2025-01-20", "note": "Project started" }
     ]
-  }
+  },
   {
   "id": "proj-008",
   "title": "Android Subscription Tracker",
@@ -296,5 +296,6 @@
 }
 
 ]
+
 
 
