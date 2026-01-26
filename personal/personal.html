@@ -15,6 +15,19 @@
       --accent-bright:#60a5fa;
       --border:#1e293b;
       --radius:16px;
+
+      /* status chips */
+      --status-active-bg: rgba(34,197,94,.14);
+      --status-active-bd: rgba(34,197,94,.28);
+      --status-active-tx: rgba(134,239,172,.95);
+
+      --status-paused-bg: rgba(148,163,184,.12);
+      --status-paused-bd: rgba(148,163,184,.22);
+      --status-paused-tx: rgba(203,213,225,.92);
+
+      --status-new-bg: rgba(245,158,11,.14);
+      --status-new-bd: rgba(245,158,11,.28);
+      --status-new-tx: rgba(253,230,138,.95);
     }
 
     *{box-sizing:border-box; margin:0; padding:0}
@@ -148,8 +161,29 @@
       color:var(--muted);
       font-size:15px;
       line-height:1.7;
-      max-width:860px;
+      max-width:900px;
       margin-bottom:8px;
+    }
+    .header-note strong{color:var(--accent-bright); font-weight:900;}
+
+    .active-filter{
+      margin-top:10px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .filter-pill{
+      font-size:11px;
+      font-weight:900;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      padding:8px 10px;
+      border-radius:999px;
+      color:rgba(248,250,252,.92);
+      background:rgba(59,130,246,.10);
+      border:1px solid rgba(59,130,246,.18);
+      white-space:nowrap;
     }
 
     .controls{
@@ -220,6 +254,7 @@
       border-color:rgba(59,130,246,.45);
       box-shadow:0 4px 12px rgba(59,130,246,.12);
     }
+
     .control button{
       border:1px solid rgba(59,130,246,.25);
       background:rgba(15,23,42,.55);
@@ -238,10 +273,7 @@
     }
 
     .section{margin-top:22px;}
-    .grid{
-      display:grid;
-      gap:20px;
-    }
+    .grid{display:grid; gap:20px;}
 
     .card{
       background:linear-gradient(145deg, rgba(15,23,42,.7), rgba(10,17,32,.8));
@@ -257,7 +289,7 @@
       cursor:pointer;
       user-select:none;
       display:flex;
-      align-items:center;
+      align-items:flex-start;
       justify-content:space-between;
       gap:12px;
       transition:all .2s;
@@ -270,6 +302,15 @@
       gap:6px;
       min-width:0;
     }
+
+    .title-row{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      min-width:0;
+    }
+
     .card-title{
       font-size:22px;
       font-weight:900;
@@ -282,6 +323,7 @@
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
+      max-width:100%;
     }
     .card-sub{
       font-size:13px;
@@ -295,6 +337,7 @@
       gap:8px;
       flex-wrap:wrap;
       margin-top:6px;
+      align-items:center;
     }
     .tag{
       font-size:11px;
@@ -309,11 +352,39 @@
       white-space:nowrap;
     }
 
+    /* status chips (per-card) */
+    .status{
+      font-size:10px;
+      font-weight:1000;
+      letter-spacing:.1em;
+      text-transform:uppercase;
+      padding:6px 10px;
+      border-radius:999px;
+      white-space:nowrap;
+      border:1px solid transparent;
+    }
+    .status-active{
+      background:var(--status-active-bg);
+      border-color:var(--status-active-bd);
+      color:var(--status-active-tx);
+    }
+    .status-paused{
+      background:var(--status-paused-bg);
+      border-color:var(--status-paused-bd);
+      color:var(--status-paused-tx);
+    }
+    .status-new{
+      background:var(--status-new-bg);
+      border-color:var(--status-new-bd);
+      color:var(--status-new-tx);
+    }
+
     .expand-icon{
       color:var(--accent-bright);
       font-size:20px;
       transition:transform .3s;
       flex:0 0 auto;
+      padding-top:2px;
     }
     .card.expanded .expand-icon{transform:rotate(180deg);}
 
@@ -323,7 +394,7 @@
       transition:max-height .45s ease-out;
       border-top:1px solid rgba(59,130,246,.12);
     }
-    .card.expanded .card-body{max-height:2000px;}
+    .card.expanded .card-body{max-height:2200px;}
 
     .content{
       padding:18px 24px 24px;
@@ -340,10 +411,7 @@
     }
     .block strong{color:var(--accent-bright); font-weight:900;}
 
-    .list{
-      display:grid;
-      gap:8px;
-    }
+    .list{display:grid; gap:8px;}
     .li{
       background:rgba(59,130,246,.08);
       border:1px solid rgba(59,130,246,.15);
@@ -351,9 +419,9 @@
       border-radius:12px;
       font-size:13px;
       color:rgba(248,250,252,.92);
-      font-weight:700;
+      font-weight:800;
     }
-    .li span{color:var(--muted); font-weight:800;}
+    .li span{color:var(--muted); font-weight:900;}
 
     .links{
       display:flex;
@@ -408,7 +476,7 @@
       color:var(--muted);
       font-size:12px;
       line-height:1.45;
-      font-weight:800;
+      font-weight:900;
     }
 
     /* modal */
@@ -497,6 +565,7 @@
       .header h2{font-size:28px}
       .control input{min-width:0; width:100%}
       .modal-media{height:320px}
+      .card-title{white-space:normal;}
     }
   </style>
 </head>
@@ -507,34 +576,62 @@
       <h1>CommandBridge</h1>
     </div>
     <nav>
-      <a href="../index.html"><span class="nav-dot"></span> Home</a>
-      <a href="../projects/index.html"><span class="nav-dot"></span> Projects</a>
-      <a href="./listening.html"><span class="nav-dot"></span> Listening</a>
-      <a href="./production.html"><span class="nav-dot"></span> Production</a>
-      <a href="./systems.html" class="active"><span class="nav-dot"></span> Systems</a>
+      <a href="/index.html">
+        <span class="nav-dot" aria-hidden="true"></span> Home
+      </a>
+      <a href="/projects/index.html">
+        <span class="nav-dot" aria-hidden="true"></span> Projects
+      </a>
+      <a href="/music/musicProduced.html">
+        <span class="nav-dot" aria-hidden="true"></span> Produced Music
+      </a>
+      <a href="/music/musicLikes.html">
+        <span class="nav-dot" aria-hidden="true"></span> Preferred Genres
+      </a>
+      <a href="/personal/personal.html" class="active">
+        <span class="nav-dot" aria-hidden="true"></span> Personal / Systems
+      </a>
     </nav>
   </aside>
 
   <main class="main">
     <div class="header">
       <h2>Systems</h2>
-      <p class="header-note">I don’t “collect” so much as configure. Most of my interests turn into repeatable systems: modifications, logs, maintenance, and constraints.</p>
+
+      <!-- meta-section: replaced -->
+      <p class="header-note">Default loop: observe → build a system → log outcomes → revise. <strong>If it isn’t trackable, I lose interest.</strong></p>
       <p class="header-note">This page is not exhaustive. It’s a snapshot of what I’m currently tuning.</p>
+
+      <!-- small UX improvement: active filter indicator -->
+      <div class="active-filter" aria-label="Active filter">
+        <div class="filter-pill" id="activeFilterNote">All categories</div>
+      </div>
 
       <div class="controls" aria-label="Systems filters">
         <div class="control">
           <label for="searchInput">Search</label>
-          <input id="searchInput" type="text" placeholder="Search: springs, Zigbee, crate, paint recipe, tire pressure…" />
+          <input id="searchInput" type="text" placeholder="Search: uptime, backups, metrics, decision memo, wear items…" />
         </div>
+
         <div class="chipbar" id="chipBar" aria-label="Category chips">
           <div class="chip active" data-filter="all">All</div>
+
+          <!-- existing -->
           <div class="chip" data-filter="firearms">Firearms</div>
           <div class="chip" data-filter="dogs">Dobermans</div>
           <div class="chip" data-filter="smarthome">Smart Home</div>
           <div class="chip" data-filter="vehicles">Vehicles</div>
           <div class="chip" data-filter="40k">Warhammer 40k</div>
           <div class="chip" data-filter="starwars">Star Wars</div>
+
+          <!-- new -->
+          <div class="chip" data-filter="medops">Medical Ops</div>
+          <div class="chip" data-filter="homelab">Home Lab</div>
+          <div class="chip" data-filter="sprints">Knowledge Sprints</div>
+          <div class="chip" data-filter="finance">Finance Modeling</div>
+          <div class="chip" data-filter="security">Security/Safety</div>
         </div>
+
         <div class="control">
           <button id="resetBtn" type="button">Reset</button>
         </div>
@@ -545,10 +642,14 @@
       <div class="grid" id="systemsGrid">
 
         <!-- Firearms -->
-        <article class="card" data-cat="firearms" data-keywords="range log round count zero malfunctions springs optic reliability maintenance ammo">
+        <article class="card" data-cat="firearms" data-status="paused"
+                 data-keywords="range log round count zero malfunctions springs optic reliability maintenance ammo">
           <div class="card-header" onclick="this.parentElement.classList.toggle('expanded')">
             <div class="card-left">
-              <div class="card-title">Firearms / Range</div>
+              <div class="title-row">
+                <div class="card-title">Firearms / Range</div>
+                <div class="status status-paused">Paused</div>
+              </div>
               <div class="card-sub">Reliability, documentation, repeatability.</div>
               <div class="tagrow">
                 <div class="tag">mods</div>
@@ -593,10 +694,14 @@
         </article>
 
         <!-- Dobermans -->
-        <article class="card" data-cat="dogs" data-keywords="dobermans training crate boundaries consistency plan triggers behavior">
+        <article class="card" data-cat="dogs" data-status="paused"
+                 data-keywords="dobermans training crate boundaries consistency plan triggers behavior">
           <div class="card-header" onclick="this.parentElement.classList.toggle('expanded')">
             <div class="card-left">
-              <div class="card-title">Dobermans</div>
+              <div class="title-row">
+                <div class="card-title">Dobermans</div>
+                <div class="status status-paused">Paused</div>
+              </div>
               <div class="card-sub">Structure, boundaries, consistency.</div>
               <div class="tagrow">
                 <div class="tag">protocols</div>
@@ -635,10 +740,14 @@
         </article>
 
         <!-- Smart Home -->
-        <article class="card" data-cat="smarthome" data-keywords="home assistant zigbee zha skyconnect local control automation dashboards firmware uptime">
+        <article class="card" data-cat="smarthome" data-status="paused"
+                 data-keywords="home assistant zigbee zha skyconnect local control automation dashboards firmware uptime">
           <div class="card-header" onclick="this.parentElement.classList.toggle('expanded')">
             <div class="card-left">
-              <div class="card-title">Smart Home</div>
+              <div class="title-row">
+                <div class="card-title">Smart Home</div>
+                <div class="status status-paused">Paused</div>
+              </div>
               <div class="card-sub">Local control, predictable failure modes.</div>
               <div class="tagrow">
                 <div class="tag">home assistant</div>
@@ -677,10 +786,14 @@
         </article>
 
         <!-- Vehicles -->
-        <article class="card" data-cat="vehicles" data-keywords="motorcycles corvette mods maintenance torque alignment tires oil service parts list">
+        <article class="card" data-cat="vehicles" data-status="paused"
+                 data-keywords="motorcycles corvette mods maintenance torque alignment tires oil service parts list">
           <div class="card-header" onclick="this.parentElement.classList.toggle('expanded')">
             <div class="card-left">
-              <div class="card-title">Vehicles</div>
+              <div class="title-row">
+                <div class="card-title">Vehicles</div>
+                <div class="status status-paused">Paused</div>
+              </div>
               <div class="card-sub">Modifications as configuration management.</div>
               <div class="tagrow">
                 <div class="tag">mods</div>
@@ -719,10 +832,14 @@
         </article>
 
         <!-- Warhammer -->
-        <article class="card" data-cat="40k" data-keywords="warhammer 40k minis painting recipe basing army list progress">
+        <article class="card" data-cat="40k" data-status="paused"
+                 data-keywords="warhammer 40k minis painting recipe basing army list progress">
           <div class="card-header" onclick="this.parentElement.classList.toggle('expanded')">
             <div class="card-left">
-              <div class="card-title">Warhammer 40k</div>
+              <div class="title-row">
+                <div class="card-title">Warhammer 40k</div>
+                <div class="status status-paused">Paused</div>
+              </div>
               <div class="card-sub">Painting pipelines, recipes, progress tracking.</div>
               <div class="tagrow">
                 <div class="tag">painting</div>
@@ -760,10 +877,14 @@
         </article>
 
         <!-- Star Wars -->
-        <article class="card" data-cat="starwars" data-keywords="star wars action figures collection catalog variants condition display storage">
+        <article class="card" data-cat="starwars" data-status="paused"
+                 data-keywords="star wars action figures collection catalog variants condition display storage">
           <div class="card-header" onclick="this.parentElement.classList.toggle('expanded')">
             <div class="card-left">
-              <div class="card-title">Star Wars Figures</div>
+              <div class="title-row">
+                <div class="card-title">Star Wars Figures</div>
+                <div class="status status-paused">Paused</div>
+              </div>
               <div class="card-sub">Cataloging and display systems.</div>
               <div class="tagrow">
                 <div class="tag">collection</div>
@@ -799,6 +920,252 @@
           </div>
         </article>
 
+        <!-- Medical Ops / Clinic Systems (non-PHI) -->
+        <article class="card" data-cat="medops" data-status="active"
+                 data-keywords="clinic systems medical ops policy workflows metrics dashboard standardization qa audit cadence">
+          <div class="card-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="card-left">
+              <div class="title-row">
+                <div class="card-title">Medical Ops / Clinic Systems</div>
+                <div class="status status-active">Active</div>
+              </div>
+              <div class="card-sub">Policies, workflows, metrics. No PHI, no stories.</div>
+              <div class="tagrow">
+                <div class="tag">policy</div>
+                <div class="tag">metrics</div>
+                <div class="tag">workflows</div>
+              </div>
+            </div>
+            <div class="expand-icon">▼</div>
+          </div>
+          <div class="card-body">
+            <div class="content">
+              <div class="block"><strong>Focus:</strong> Durable change. If it can’t be measured and repeated, it’s not a system.</div>
+
+              <div class="block"><strong>Artifacts (public-safe):</strong></div>
+              <div class="list">
+                <div class="li">Policy index <span>title + purpose + revision date</span></div>
+                <div class="li">Metric definitions <span>definition + cadence + target range</span></div>
+                <div class="li">Workflow maps <span>handoffs, roles, failure points</span></div>
+                <div class="li">Change log <span>what changed + why + expected impact</span></div>
+              </div>
+
+              <div class="block"><strong>Falsifier:</strong> If I can’t point to at least one policy/workflow/metric that persists without me.</div>
+
+              <div class="links">
+                <span>Links:</span>
+                <a href="#" onclick="return false;">Metrics Glossary (add)</a>
+                <a href="#" onclick="return false;">Workflow Map (add)</a>
+                <a href="#" onclick="return false;">Policy Index (add)</a>
+              </div>
+
+              <div class="gallery">
+                <div class="shot" data-full="../images/systems/medops-1.jpg" data-cap="Example: de-identified workflow diagram screenshot (no names, no dates, no patient details)">
+                  <img src="../images/systems/medops-1.jpg" alt="Medical ops diagram" />
+                  <div class="shot-cap">Workflow diagram (add)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Home Lab / Personal Infra -->
+        <article class="card" data-cat="homelab" data-status="paused"
+                 data-keywords="homelab infrastructure uptime backup restore dns monitoring update policy home assistant topology zigbee">
+          <div class="card-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="card-left">
+              <div class="title-row">
+                <div class="card-title">Home Lab / Personal Infrastructure</div>
+                <div class="status status-paused">Paused</div>
+              </div>
+              <div class="card-sub">Reliability, backups, and predictable failure modes.</div>
+              <div class="tagrow">
+                <div class="tag">uptime</div>
+                <div class="tag">backups</div>
+                <div class="tag">monitoring</div>
+              </div>
+            </div>
+            <div class="expand-icon">▼</div>
+          </div>
+          <div class="card-body">
+            <div class="content">
+              <div class="block"><strong>Focus:</strong> “Works when I’m busy” engineering: backups, restore tests, controlled updates.</div>
+
+              <div class="block"><strong>Artifacts:</strong></div>
+              <div class="list">
+                <div class="li">Topology map <span>LAN, host, key services</span></div>
+                <div class="li">Backup plan <span>what, where, frequency, retention</span></div>
+                <div class="li">Restore test log <span>date + outcome + notes</span></div>
+                <div class="li">Update policy <span>window, staging, rollback triggers</span></div>
+                <div class="li">Health checks <span>disk, CPU, automations, Zigbee link quality</span></div>
+              </div>
+
+              <div class="block"><strong>Alternative explanations if missing:</strong> device tinkering &gt; reliability engineering; visible dashboards &gt; invisible robustness.</div>
+
+              <div class="links">
+                <span>Links:</span>
+                <a href="#" onclick="return false;">Topology (add)</a>
+                <a href="#" onclick="return false;">Backup/Restore Notes (add)</a>
+                <a href="#" onclick="return false;">Update Policy (add)</a>
+              </div>
+
+              <div class="gallery">
+                <div class="shot" data-full="../images/systems/homelab-1.jpg" data-cap="Example: simple topology diagram screenshot">
+                  <img src="../images/systems/homelab-1.jpg" alt="Home lab topology" />
+                  <div class="shot-cap">Topology (add)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Knowledge Sprints -->
+        <article class="card" data-cat="sprints" data-status="paused"
+                 data-keywords="knowledge sprint reading list notes decision memo models retirement planning research checklist falsifiers">
+          <div class="card-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="card-left">
+              <div class="title-row">
+                <div class="card-title">Knowledge Sprints</div>
+                <div class="status status-paused">Paused</div>
+              </div>
+              <div class="card-sub">Obsessions turned into durable notes, tools, and decisions.</div>
+              <div class="tagrow">
+                <div class="tag">notes</div>
+                <div class="tag">models</div>
+                <div class="tag">memos</div>
+              </div>
+            </div>
+            <div class="expand-icon">▼</div>
+          </div>
+          <div class="card-body">
+            <div class="content">
+              <div class="block"><strong>Focus:</strong> Consume → synthesize → produce an artifact that survives the mood.</div>
+
+              <div class="block"><strong>Artifacts:</strong></div>
+              <div class="list">
+                <div class="li">Reading lists <span>scoped + finite</span></div>
+                <div class="li">Annotated notes <span>what was new, what was wrong, what’s uncertain</span></div>
+                <div class="li">Decision memos <span>belief → update → reasons</span></div>
+                <div class="li">Mini tools <span>tables, calculators, rubrics</span></div>
+              </div>
+
+              <div class="block"><strong>Falsifier:</strong> If there are no durable notes/tools and it’s only consumption.</div>
+
+              <div class="links">
+                <span>Links:</span>
+                <a href="#" onclick="return false;">Sprint Index (add)</a>
+                <a href="#" onclick="return false;">Decision Memos (add)</a>
+                <a href="#" onclick="return false;">Models/Sheets (add)</a>
+              </div>
+
+              <div class="gallery">
+                <div class="shot" data-full="../images/systems/sprint-1.jpg" data-cap="Example: a single-page decision memo screenshot">
+                  <img src="../images/systems/sprint-1.jpg" alt="Knowledge sprint memo" />
+                  <div class="shot-cap">Decision memo (add)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Personal Finance Modeling -->
+        <article class="card" data-cat="finance" data-status="paused"
+                 data-keywords="personal finance modeling retirement scenario assumptions monte carlo inputs outputs sensitivity social security tax roth 401k">
+          <div class="card-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="card-left">
+              <div class="title-row">
+                <div class="card-title">Personal Finance Modeling</div>
+                <div class="status status-paused">Paused</div>
+              </div>
+              <div class="card-sub">Assumptions, scenarios, sensitivity. No net worth.</div>
+              <div class="tagrow">
+                <div class="tag">models</div>
+                <div class="tag">assumptions</div>
+                <div class="tag">scenarios</div>
+              </div>
+            </div>
+            <div class="expand-icon">▼</div>
+          </div>
+          <div class="card-body">
+            <div class="content">
+              <div class="block"><strong>Focus:</strong> Model-building. Make assumptions explicit, then test which ones dominate outcomes.</div>
+
+              <div class="block"><strong>Artifacts:</strong></div>
+              <div class="list">
+                <div class="li">Assumptions table <span>returns, inflation, savings rate, retirement age</span></div>
+                <div class="li">Scenario set <span>baseline vs conservative vs upside</span></div>
+                <div class="li">Sensitivity notes <span>what moves the needle most</span></div>
+                <div class="li">Decision memo <span>what changed my mind + why</span></div>
+              </div>
+
+              <div class="block"><strong>Falsifier:</strong> If I can’t show how changing one assumption changes the conclusion, it’s narrative not modeling.</div>
+
+              <div class="links">
+                <span>Links:</span>
+                <a href="#" onclick="return false;">Assumptions Table (add)</a>
+                <a href="#" onclick="return false;">Scenarios (add)</a>
+                <a href="#" onclick="return false;">Sensitivity Notes (add)</a>
+              </div>
+
+              <div class="gallery">
+                <div class="shot" data-full="../images/systems/finance-1.jpg" data-cap="Example: assumptions table screenshot (no account balances)">
+                  <img src="../images/systems/finance-1.jpg" alt="Finance assumptions table" />
+                  <div class="shot-cap">Assumptions table (add)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Security / Safety Structure -->
+        <article class="card" data-cat="security" data-status="paused"
+                 data-keywords="security safety checklist redundancy fire co outage plan medical kit inventory hardening routines drills backups">
+          <div class="card-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="card-left">
+              <div class="title-row">
+                <div class="card-title">Security / Safety Structure</div>
+                <div class="status status-paused">Paused</div>
+              </div>
+              <div class="card-sub">Checklists, redundancy, routines. Not purchase-based.</div>
+              <div class="tagrow">
+                <div class="tag">checklists</div>
+                <div class="tag">redundancy</div>
+                <div class="tag">routines</div>
+              </div>
+            </div>
+            <div class="expand-icon">▼</div>
+          </div>
+          <div class="card-body">
+            <div class="content">
+              <div class="block"><strong>Focus:</strong> Reduce risk via routine, not gear. Plans that can be executed under stress.</div>
+
+              <div class="block"><strong>Artifacts:</strong></div>
+              <div class="list">
+                <div class="li">Home safety checklist <span>doors/windows, lighting, labeling, basics</span></div>
+                <div class="li">Fire/CO plan <span>detectors, drills, extinguisher map</span></div>
+                <div class="li">Power outage plan <span>failover, priorities, runbook</span></div>
+                <div class="li">Medical kit inventory <span>contents + restock cadence</span></div>
+              </div>
+
+              <div class="block"><strong>Falsifier:</strong> If it’s mostly purchases with no routines/checklists/drills, it’s consumption not safety engineering.</div>
+
+              <div class="links">
+                <span>Links:</span>
+                <a href="#" onclick="return false;">Safety Checklist (add)</a>
+                <a href="#" onclick="return false;">Outage Runbook (add)</a>
+                <a href="#" onclick="return false;">Kit Inventory (add)</a>
+              </div>
+
+              <div class="gallery">
+                <div class="shot" data-full="../images/systems/security-1.jpg" data-cap="Example: one-page checklist screenshot">
+                  <img src="../images/systems/security-1.jpg" alt="Security checklist" />
+                  <div class="shot-cap">Checklist (add)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
       </div>
     </section>
   </main>
@@ -821,25 +1188,52 @@
       const resetBtn = document.getElementById('resetBtn');
       const chips = Array.from(document.querySelectorAll('.chip'));
       const cards = Array.from(document.querySelectorAll('.card'));
+      const activeFilterNote = document.getElementById('activeFilterNote');
 
       let activeCat = 'all';
 
       function norm(s){ return (s || '').toString().toLowerCase().trim(); }
 
+      function labelForCat(cat){
+        const map = {
+          all: 'All categories',
+          firearms: 'Firearms',
+          dogs: 'Dobermans',
+          smarthome: 'Smart Home',
+          vehicles: 'Vehicles',
+          '40k': 'Warhammer 40k',
+          starwars: 'Star Wars',
+          medops: 'Medical Ops',
+          homelab: 'Home Lab',
+          sprints: 'Knowledge Sprints',
+          finance: 'Finance Modeling',
+          security: 'Security/Safety'
+        };
+        return map[cat] || cat;
+      }
+
+      function renderActiveFilter(){
+        const label = labelForCat(activeCat);
+        if (activeFilterNote) activeFilterNote.textContent = label;
+      }
+
       function setActiveChip(cat){
         activeCat = cat;
         chips.forEach(c => c.classList.toggle('active', c.dataset.filter === cat));
         applyFilters();
+        renderActiveFilter();
       }
 
       function applyFilters(){
         const q = norm(searchInput.value);
+
         for (const c of cards){
           const cat = c.dataset.cat || '';
+          const status = c.dataset.status || '';
           const keys = norm(c.dataset.keywords || '');
           const title = norm(c.querySelector('.card-title')?.textContent || '');
           const sub = norm(c.querySelector('.card-sub')?.textContent || '');
-          const blob = [cat, keys, title, sub].join(' ');
+          const blob = [cat, status, keys, title, sub].join(' ');
 
           const matchCat = (activeCat === 'all') || (cat === activeCat);
           const matchQ = !q || blob.includes(q);
@@ -886,7 +1280,9 @@
         s.addEventListener('click', () => openModal(s.dataset.full || '', s.dataset.cap || ''));
       });
 
+      // status chip styling is driven by classes on markup; keep exactly one "active" if desired.
       applyFilters();
+      renderActiveFilter();
     })();
   </script>
 </body>
