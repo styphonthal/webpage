@@ -1,0 +1,893 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Systems - CommandBridge</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0a1120" />
+  <style>
+    :root{
+      --bg:#050911;
+      --panel:#0a1120;
+      --text:#f8fafc;
+      --muted:#94a3b8;
+      --accent:#3b82f6;
+      --accent-bright:#60a5fa;
+      --border:#1e293b;
+      --radius:16px;
+    }
+
+    *{box-sizing:border-box; margin:0; padding:0}
+    html,body{height:100%; overflow-x:hidden}
+
+    body{
+      background:
+        radial-gradient(ellipse 1400px 800px at 20% -15%, rgba(59,130,246,.08), transparent 60%),
+        radial-gradient(ellipse 1200px 700px at 80% 25%, rgba(96,165,250,.06), transparent 65%),
+        var(--bg);
+      color:var(--text);
+      font:16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      -webkit-font-smoothing:antialiased;
+    }
+
+    .sidebar{
+      position:fixed;
+      inset:0 auto 0 0;
+      width:260px;
+      background:linear-gradient(180deg, rgba(10,17,32,.85), rgba(13,20,34,.90));
+      backdrop-filter:blur(20px);
+      border-right:1px solid var(--border);
+      padding:32px 24px;
+      z-index:100;
+      box-shadow:4px 0 24px rgba(0,0,0,.3);
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      margin-bottom:40px;
+      padding-bottom:24px;
+      border-bottom:1px solid rgba(59,130,246,.15);
+    }
+
+    .badge{
+      width:42px;
+      height:42px;
+      border-radius:10px;
+      background:url("../command.png") center/cover no-repeat,
+                 linear-gradient(135deg, var(--accent), #2563eb);
+      box-shadow:0 8px 24px rgba(59,130,246,.4), 0 0 60px rgba(59,130,246,.2);
+      animation:pulse-glow 4s ease-in-out infinite;
+    }
+
+    @keyframes pulse-glow{
+      0%, 100%{box-shadow:0 8px 24px rgba(59,130,246,.4), 0 0 60px rgba(59,130,246,.2)}
+      50%{box-shadow:0 8px 32px rgba(59,130,246,.5), 0 0 80px rgba(59,130,246,.3)}
+    }
+
+    .brand h1{
+      font-size:20px;
+      font-weight:700;
+      letter-spacing:.5px;
+      background:linear-gradient(135deg, #60a5fa, #3b82f6);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      background-clip:text;
+    }
+
+    nav a{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:12px 16px;
+      margin:8px 0;
+      text-decoration:none;
+      color:var(--muted);
+      border-radius:12px;
+      transition:all .25s cubic-bezier(.4,0,.2,1);
+      border:1px solid transparent;
+      font-weight:500;
+      position:relative;
+      overflow:hidden;
+    }
+
+    nav a::before{
+      content:'';
+      position:absolute;
+      inset:0;
+      background:linear-gradient(135deg, rgba(59,130,246,.1), rgba(96,165,250,.08));
+      opacity:0;
+      transition:opacity .25s;
+    }
+
+    nav a:hover{
+      color:var(--text);
+      border-color:rgba(59,130,246,.3);
+      transform:translateX(4px);
+    }
+    nav a:hover::before{opacity:1}
+
+    nav a.active{
+      color:var(--accent-bright);
+      background:linear-gradient(135deg, rgba(59,130,246,.15), rgba(96,165,250,.12));
+      border-color:rgba(59,130,246,.4);
+      box-shadow:0 4px 12px rgba(59,130,246,.15);
+    }
+
+    .nav-dot{
+      width:6px;
+      height:6px;
+      border-radius:50%;
+      background:currentColor;
+      transition:all .25s;
+    }
+    nav a.active .nav-dot{
+      width:8px;
+      height:8px;
+      box-shadow:0 0 12px currentColor;
+    }
+
+    .main{
+      margin-left:260px;
+      padding:40px 48px 80px;
+      max-width:1400px;
+    }
+
+    .header{margin-bottom:28px;}
+    .header h2{
+      font-size:36px;
+      font-weight:900;
+      margin:0 0 12px 0;
+      background:linear-gradient(135deg, #f8fafc, #cbd5e1);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      background-clip:text;
+    }
+    .header-note{
+      color:var(--muted);
+      font-size:15px;
+      line-height:1.7;
+      max-width:860px;
+      margin-bottom:8px;
+    }
+
+    .controls{
+      margin-top:16px;
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:center;
+      border:1px solid rgba(59,130,246,.18);
+      border-radius:14px;
+      background:linear-gradient(145deg, rgba(15,23,42,.55), rgba(10,17,32,.7));
+      padding:14px 14px;
+    }
+    .control{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .control label{
+      font-size:11px;
+      letter-spacing:1px;
+      text-transform:uppercase;
+      color:var(--muted);
+      font-weight:900;
+      padding-left:4px;
+    }
+    .control input{
+      appearance:none;
+      background:rgba(59,130,246,.08);
+      border:1px solid rgba(59,130,246,.22);
+      color:var(--text);
+      border-radius:10px;
+      padding:10px 12px;
+      font-weight:800;
+      outline:none;
+      min-width:280px;
+    }
+    .chipbar{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .chip{
+      font-size:11px;
+      font-weight:900;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      padding:8px 10px;
+      border-radius:999px;
+      color:rgba(248,250,252,.92);
+      background:rgba(59,130,246,.10);
+      border:1px solid rgba(59,130,246,.18);
+      cursor:pointer;
+      user-select:none;
+      transition:all .2s;
+      white-space:nowrap;
+    }
+    .chip:hover{
+      border-color:rgba(59,130,246,.35);
+      background:rgba(59,130,246,.14);
+      transform:translateY(-1px);
+    }
+    .chip.active{
+      color:var(--accent-bright);
+      background:linear-gradient(135deg, rgba(59,130,246,.18), rgba(96,165,250,.14));
+      border-color:rgba(59,130,246,.45);
+      box-shadow:0 4px 12px rgba(59,130,246,.12);
+    }
+    .control button{
+      border:1px solid rgba(59,130,246,.25);
+      background:rgba(15,23,42,.55);
+      color:var(--accent-bright);
+      padding:10px 12px;
+      border-radius:10px;
+      font-weight:900;
+      letter-spacing:.4px;
+      cursor:pointer;
+      transition:all .2s;
+    }
+    .control button:hover{
+      border-color:rgba(59,130,246,.45);
+      background:rgba(59,130,246,.15);
+      transform:translateY(-1px);
+    }
+
+    .section{margin-top:22px;}
+    .grid{
+      display:grid;
+      gap:20px;
+    }
+
+    .card{
+      background:linear-gradient(145deg, rgba(15,23,42,.7), rgba(10,17,32,.8));
+      border:1px solid rgba(59,130,246,.2);
+      border-radius:var(--radius);
+      overflow:hidden;
+      transition:all .3s;
+    }
+    .card:hover{border-color:rgba(59,130,246,.4);}
+
+    .card-header{
+      padding:20px 24px;
+      cursor:pointer;
+      user-select:none;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      transition:all .2s;
+    }
+    .card-header:hover{background:rgba(59,130,246,.05);}
+
+    .card-left{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      min-width:0;
+    }
+    .card-title{
+      font-size:22px;
+      font-weight:900;
+      background:linear-gradient(135deg, #f8fafc, #60a5fa);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      background-clip:text;
+      letter-spacing:-.3px;
+      line-height:1.15;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .card-sub{
+      font-size:13px;
+      color:var(--muted);
+      font-weight:800;
+      letter-spacing:.02em;
+    }
+
+    .tagrow{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:6px;
+    }
+    .tag{
+      font-size:11px;
+      font-weight:900;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      padding:6px 10px;
+      border-radius:999px;
+      color:rgba(248,250,252,.92);
+      background:rgba(59,130,246,.10);
+      border:1px solid rgba(59,130,246,.18);
+      white-space:nowrap;
+    }
+
+    .expand-icon{
+      color:var(--accent-bright);
+      font-size:20px;
+      transition:transform .3s;
+      flex:0 0 auto;
+    }
+    .card.expanded .expand-icon{transform:rotate(180deg);}
+
+    .card-body{
+      max-height:0;
+      overflow:hidden;
+      transition:max-height .45s ease-out;
+      border-top:1px solid rgba(59,130,246,.12);
+    }
+    .card.expanded .card-body{max-height:2000px;}
+
+    .content{
+      padding:18px 24px 24px;
+      display:grid;
+      gap:14px;
+    }
+
+    .block{
+      border-left:3px solid rgba(59,130,246,.35);
+      padding-left:14px;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.65;
+    }
+    .block strong{color:var(--accent-bright); font-weight:900;}
+
+    .list{
+      display:grid;
+      gap:8px;
+    }
+    .li{
+      background:rgba(59,130,246,.08);
+      border:1px solid rgba(59,130,246,.15);
+      padding:10px 12px;
+      border-radius:12px;
+      font-size:13px;
+      color:rgba(248,250,252,.92);
+      font-weight:700;
+    }
+    .li span{color:var(--muted); font-weight:800;}
+
+    .links{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+      font-size:13px;
+      color:var(--muted);
+    }
+    .links a{
+      color:var(--accent-bright);
+      text-decoration:none;
+      border:1px solid rgba(59,130,246,.25);
+      background:rgba(15,23,42,.55);
+      padding:6px 10px;
+      border-radius:999px;
+      transition:all .2s;
+      font-weight:900;
+    }
+    .links a:hover{
+      border-color:rgba(59,130,246,.45);
+      background:rgba(59,130,246,.15);
+      transform:translateY(-1px);
+    }
+
+    .gallery{
+      display:grid;
+      grid-template-columns:repeat(auto-fill, minmax(220px, 1fr));
+      gap:12px;
+      margin-top:4px;
+    }
+    .shot{
+      border-radius:14px;
+      border:1px solid rgba(59,130,246,.18);
+      overflow:hidden;
+      background:rgba(59,130,246,.05);
+      cursor:pointer;
+      transition:all .2s;
+    }
+    .shot:hover{
+      border-color:rgba(59,130,246,.35);
+      transform:translateY(-2px);
+    }
+    .shot img{
+      width:100%;
+      height:160px;
+      object-fit:cover;
+      display:block;
+    }
+    .shot-cap{
+      padding:10px 10px 12px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.45;
+      font-weight:800;
+    }
+
+    /* modal */
+    .modal{
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+      z-index:999;
+      background:rgba(2,6,23,.72);
+      backdrop-filter:blur(10px);
+    }
+    .modal.open{display:flex;}
+    .modal-card{
+      width:min(980px, 100%);
+      border-radius:18px;
+      overflow:hidden;
+      border:1px solid rgba(59,130,246,.22);
+      background:linear-gradient(145deg, rgba(15,23,42,.92), rgba(10,17,32,.92));
+      box-shadow:0 18px 60px rgba(0,0,0,.55);
+    }
+    .modal-top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:14px 16px;
+      border-bottom:1px solid rgba(59,130,246,.18);
+    }
+    .modal-title{
+      font-weight:900;
+      color:var(--text);
+      letter-spacing:.2px;
+    }
+    .modal-close{
+      border:1px solid rgba(59,130,246,.25);
+      background:rgba(15,23,42,.55);
+      color:var(--accent-bright);
+      padding:8px 10px;
+      border-radius:10px;
+      font-weight:900;
+      cursor:pointer;
+    }
+    .modal-close:hover{
+      border-color:rgba(59,130,246,.45);
+      background:rgba(59,130,246,.15);
+    }
+    .modal-media{
+      width:100%;
+      height:520px;
+      background:rgba(59,130,246,.05);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .modal-media img{
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      display:block;
+      background:#000;
+    }
+    .modal-cap{
+      padding:12px 16px 16px;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.6;
+      border-top:1px solid rgba(59,130,246,.16);
+    }
+
+    @media (max-width:1024px){
+      .sidebar{width:240px}
+      .main{margin-left:240px; padding:32px}
+    }
+    @media (max-width:768px){
+      .sidebar{
+        width:100%;
+        position:relative;
+        padding:20px;
+        border-right:none;
+        border-bottom:1px solid var(--border);
+      }
+      .main{margin-left:0; padding:20px 16px}
+      .header h2{font-size:28px}
+      .control input{min-width:0; width:100%}
+      .modal-media{height:320px}
+    }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="badge"></div>
+      <h1>CommandBridge</h1>
+    </div>
+    <nav>
+      <a href="../index.html"><span class="nav-dot"></span> Home</a>
+      <a href="../projects/index.html"><span class="nav-dot"></span> Projects</a>
+      <a href="./listening.html"><span class="nav-dot"></span> Listening</a>
+      <a href="./production.html"><span class="nav-dot"></span> Production</a>
+      <a href="./systems.html" class="active"><span class="nav-dot"></span> Systems</a>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <div class="header">
+      <h2>Systems</h2>
+      <p class="header-note">I don’t “collect” so much as configure. Most of my interests turn into repeatable systems: modifications, logs, maintenance, and constraints.</p>
+      <p class="header-note">This page is not exhaustive. It’s a snapshot of what I’m currently tuning.</p>
+
+      <div class="controls" aria-label="Systems filters">
+        <div class="control">
+          <label for="searchInput">Search</label>
+          <input id="searchInput" type="text" placeholder="Search: springs, Zigbee, crate, paint recipe, tire pressure…" />
+        </div>
+        <div class="chipbar" id="chipBar" aria-label="Category chips">
+          <div class="chip active" data-filter="all">All</div>
+          <div class="chip" data-filter="firearms">Firearms</div>
+          <div class="chip" data-filter="dogs">Dobermans</div>
+          <div class="chip" data-filter="smarthome">Smart Home</div>
+          <div class="chip" data-filter="vehicles">Vehicles</div>
+          <div class="chip" data-filter="40k">Warhammer 40k</div>
+          <div class="chip" data-filter="starwars">Star Wars</div>
+        </div>
+        <div class="control">
+          <button id="resetBtn" type="button">Reset</button>
+        </div>
+      </div>
+    </div>
+
+    <section class="section">
+      <div class="grid" id="systemsGrid">
+
+        <!-- Firearms -->
+        <article class="card" data-cat="firearms" data-keywords="range log round count zero malfunctions springs optic reliability maintenance ammo">
+          <div class="card-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="card-left">
+              <div class="card-title">Firearms / Range</div>
+              <div class="card-sub">Reliability, documentation, repeatability.</div>
+              <div class="tagrow">
+                <div class="tag">mods</div>
+                <div class="tag">maintenance</div>
+                <div class="tag">logs</div>
+              </div>
+            </div>
+            <div class="expand-icon">▼</div>
+          </div>
+          <div class="card-body">
+            <div class="content">
+              <div class="block"><strong>Focus:</strong> Configuration management. A build is a state; I track changes and outcomes.</div>
+
+              <div class="block"><strong>What I track:</strong></div>
+              <div class="list">
+                <div class="li">Round count <span>by firearm / by session</span></div>
+                <div class="li">Malfunctions <span>type + ammo + conditions</span></div>
+                <div class="li">Maintenance <span>springs, wear items, cleaning intervals</span></div>
+                <div class="li">Zero / holds <span>distance, ammo lot, optic settings</span></div>
+              </div>
+
+              <div class="block"><strong>Current system:</strong> Personal range log + per-build configuration notes (mods, optics, springs, ammo).</div>
+
+              <div class="links">
+                <span>Links:</span>
+                <a href="../projects/range-log.html">Range Log Project</a>
+                <a href="#" onclick="return false;">Build Sheets (add)</a>
+              </div>
+
+              <div class="gallery">
+                <div class="shot" data-full="../images/systems/firearms-1.jpg" data-cap="Example: build overview photo + short caption">
+                  <img src="../images/systems/firearms-1.jpg" alt="Firearms system photo 1" />
+                  <div class="shot-cap">Build overview (add caption)</div>
+                </div>
+                <div class="shot" data-full="../images/systems/firearms-2.jpg" data-cap="Example: target + notes">
+                  <img src="../images/systems/firearms-2.jpg" alt="Firearms system photo 2" />
+                  <div class="shot-cap">Targets / notes (add caption)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Dobermans -->
+        <article class="card" data-cat="dogs" data-keywords="dobermans training crate boundaries consistency plan triggers behavior">
+          <div class="card-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="card-left">
+              <div class="card-title">Dobermans</div>
+              <div class="card-sub">Structure, boundaries, consistency.</div>
+              <div class="tagrow">
+                <div class="tag">protocols</div>
+                <div class="tag">training</div>
+              </div>
+            </div>
+            <div class="expand-icon">▼</div>
+          </div>
+          <div class="card-body">
+            <div class="content">
+              <div class="block"><strong>Focus:</strong> Repeatable rules. The point is predictable behavior, not vibes.</div>
+
+              <div class="block"><strong>What I track:</strong></div>
+              <div class="list">
+                <div class="li">Training plan <span>what works / what doesn’t</span></div>
+                <div class="li">Triggers <span>contexts that cause conflict</span></div>
+                <div class="li">Consistency <span>rules everyone follows</span></div>
+                <div class="li">Outcomes <span>what changed after interventions</span></div>
+              </div>
+
+              <div class="block"><strong>Current system:</strong> Written plan + daily routines + adjustments based on observed outcomes.</div>
+
+              <div class="links">
+                <span>Links:</span>
+                <a href="#" onclick="return false;">Training Plan (add)</a>
+              </div>
+
+              <div class="gallery">
+                <div class="shot" data-full="../images/systems/dogs-1.jpg" data-cap="Example: crate setup / boundary zones">
+                  <img src="../images/systems/dogs-1.jpg" alt="Dobermans photo 1" />
+                  <div class="shot-cap">Setup / routines (add caption)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Smart Home -->
+        <article class="card" data-cat="smarthome" data-keywords="home assistant zigbee zha skyconnect local control automation dashboards firmware uptime">
+          <div class="card-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="card-left">
+              <div class="card-title">Smart Home</div>
+              <div class="card-sub">Local control, predictable failure modes.</div>
+              <div class="tagrow">
+                <div class="tag">home assistant</div>
+                <div class="tag">zigbee</div>
+                <div class="tag">automation</div>
+              </div>
+            </div>
+            <div class="expand-icon">▼</div>
+          </div>
+          <div class="card-body">
+            <div class="content">
+              <div class="block"><strong>Focus:</strong> Systems that degrade gracefully. Minimal cloud dependency.</div>
+
+              <div class="block"><strong>What I track:</strong></div>
+              <div class="list">
+                <div class="li">Automations inventory <span>what exists + what it depends on</span></div>
+                <div class="li">Device health <span>dropouts, LQI, batteries</span></div>
+                <div class="li">Firmware versions <span>stick + devices</span></div>
+                <div class="li">Failure analysis <span>why it broke + fix</span></div>
+              </div>
+
+              <div class="links">
+                <span>Links:</span>
+                <a href="#" onclick="return false;">Dashboards (add)</a>
+                <a href="#" onclick="return false;">Automation Notes (add)</a>
+              </div>
+
+              <div class="gallery">
+                <div class="shot" data-full="../images/systems/ha-1.jpg" data-cap="Example: HA dashboard screenshot">
+                  <img src="../images/systems/ha-1.jpg" alt="Home Assistant dashboard" />
+                  <div class="shot-cap">Dashboard (add caption)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Vehicles -->
+        <article class="card" data-cat="vehicles" data-keywords="motorcycles corvette mods maintenance torque alignment tires oil service parts list">
+          <div class="card-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="card-left">
+              <div class="card-title">Vehicles</div>
+              <div class="card-sub">Modifications as configuration management.</div>
+              <div class="tagrow">
+                <div class="tag">mods</div>
+                <div class="tag">maintenance</div>
+                <div class="tag">documentation</div>
+              </div>
+            </div>
+            <div class="expand-icon">▼</div>
+          </div>
+          <div class="card-body">
+            <div class="content">
+              <div class="block"><strong>Focus:</strong> Before/after and versioning. A change without measurement is just a story.</div>
+
+              <div class="block"><strong>What I track:</strong></div>
+              <div class="list">
+                <div class="li">Parts list <span>installed + removed + version</span></div>
+                <div class="li">Service intervals <span>oil, tires, brakes, fluids</span></div>
+                <div class="li">Torque/spec notes <span>so it’s repeatable</span></div>
+                <div class="li">Outcomes <span>ride feel, handling, performance notes</span></div>
+              </div>
+
+              <div class="links">
+                <span>Links:</span>
+                <a href="#" onclick="return false;">Build Sheets (add)</a>
+                <a href="#" onclick="return false;">Maintenance Log (add)</a>
+              </div>
+
+              <div class="gallery">
+                <div class="shot" data-full="../images/systems/vehicle-1.jpg" data-cap="Example: car photo + mod notes">
+                  <img src="../images/systems/vehicle-1.jpg" alt="Vehicle photo" />
+                  <div class="shot-cap">Mods snapshot (add caption)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Warhammer -->
+        <article class="card" data-cat="40k" data-keywords="warhammer 40k minis painting recipe basing army list progress">
+          <div class="card-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="card-left">
+              <div class="card-title">Warhammer 40k</div>
+              <div class="card-sub">Painting pipelines, recipes, progress tracking.</div>
+              <div class="tagrow">
+                <div class="tag">painting</div>
+                <div class="tag">recipes</div>
+                <div class="tag">photos</div>
+              </div>
+            </div>
+            <div class="expand-icon">▼</div>
+          </div>
+          <div class="card-body">
+            <div class="content">
+              <div class="block"><strong>Focus:</strong> A repeatable paint process: base → shade → highlight → details → basing.</div>
+
+              <div class="block"><strong>What I track:</strong></div>
+              <div class="list">
+                <div class="li">Paint recipes <span>exact colors + steps</span></div>
+                <div class="li">Completion % <span>per unit / per army</span></div>
+                <div class="li">Photo timeline <span>before/after progression</span></div>
+              </div>
+
+              <div class="links">
+                <span>Links:</span>
+                <a href="#" onclick="return false;">Army List (add)</a>
+                <a href="#" onclick="return false;">Paint Recipes (add)</a>
+              </div>
+
+              <div class="gallery">
+                <div class="shot" data-full="../images/systems/40k-1.jpg" data-cap="Example: finished squad">
+                  <img src="../images/systems/40k-1.jpg" alt="Warhammer miniatures" />
+                  <div class="shot-cap">Finished unit (add caption)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Star Wars -->
+        <article class="card" data-cat="starwars" data-keywords="star wars action figures collection catalog variants condition display storage">
+          <div class="card-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="card-left">
+              <div class="card-title">Star Wars Figures</div>
+              <div class="card-sub">Cataloging and display systems.</div>
+              <div class="tagrow">
+                <div class="tag">collection</div>
+                <div class="tag">catalog</div>
+                <div class="tag">display</div>
+              </div>
+            </div>
+            <div class="expand-icon">▼</div>
+          </div>
+          <div class="card-body">
+            <div class="content">
+              <div class="block"><strong>Focus:</strong> Organization and rotation. Not “owning,” but curating.</div>
+
+              <div class="block"><strong>What I track:</strong></div>
+              <div class="list">
+                <div class="li">Series / variant <span>edition, wave, version</span></div>
+                <div class="li">Condition <span>boxed / loose / accessories</span></div>
+                <div class="li">Display plan <span>rotation and storage</span></div>
+              </div>
+
+              <div class="links">
+                <span>Links:</span>
+                <a href="#" onclick="return false;">Catalog (add)</a>
+              </div>
+
+              <div class="gallery">
+                <div class="shot" data-full="../images/systems/sw-1.jpg" data-cap="Example: shelf photo">
+                  <img src="../images/systems/sw-1.jpg" alt="Star Wars collection" />
+                  <div class="shot-cap">Display (add caption)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- modal -->
+  <div class="modal" id="imgModal" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-label="Image preview">
+      <div class="modal-top">
+        <div class="modal-title" id="modalTitle">Preview</div>
+        <button class="modal-close" id="modalClose" type="button">Close</button>
+      </div>
+      <div class="modal-media" id="modalMedia"></div>
+      <div class="modal-cap" id="modalCap">—</div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const searchInput = document.getElementById('searchInput');
+      const resetBtn = document.getElementById('resetBtn');
+      const chips = Array.from(document.querySelectorAll('.chip'));
+      const cards = Array.from(document.querySelectorAll('.card'));
+
+      let activeCat = 'all';
+
+      function norm(s){ return (s || '').toString().toLowerCase().trim(); }
+
+      function setActiveChip(cat){
+        activeCat = cat;
+        chips.forEach(c => c.classList.toggle('active', c.dataset.filter === cat));
+        applyFilters();
+      }
+
+      function applyFilters(){
+        const q = norm(searchInput.value);
+        for (const c of cards){
+          const cat = c.dataset.cat || '';
+          const keys = norm(c.dataset.keywords || '');
+          const title = norm(c.querySelector('.card-title')?.textContent || '');
+          const sub = norm(c.querySelector('.card-sub')?.textContent || '');
+          const blob = [cat, keys, title, sub].join(' ');
+
+          const matchCat = (activeCat === 'all') || (cat === activeCat);
+          const matchQ = !q || blob.includes(q);
+
+          c.style.display = (matchCat && matchQ) ? '' : 'none';
+        }
+      }
+
+      chips.forEach(ch => ch.addEventListener('click', () => setActiveChip(ch.dataset.filter)));
+      searchInput.addEventListener('input', applyFilters);
+      resetBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        setActiveChip('all');
+      });
+
+      // Image modal
+      const modal = document.getElementById('imgModal');
+      const modalClose = document.getElementById('modalClose');
+      const modalMedia = document.getElementById('modalMedia');
+      const modalCap = document.getElementById('modalCap');
+
+      function openModal(src, cap){
+        modalMedia.innerHTML = '';
+        const img = document.createElement('img');
+        img.src = src;
+        img.alt = cap || 'Preview';
+        modalMedia.appendChild(img);
+        modalCap.textContent = cap || '—';
+        modal.classList.add('open');
+        modal.setAttribute('aria-hidden','false');
+      }
+      function closeModal(){
+        modal.classList.remove('open');
+        modal.setAttribute('aria-hidden','true');
+      }
+
+      modalClose.addEventListener('click', closeModal);
+      modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal.classList.contains('open')) closeModal(); });
+
+      // Bind shots
+      const shots = Array.from(document.querySelectorAll('.shot'));
+      shots.forEach(s => {
+        s.addEventListener('click', () => openModal(s.dataset.full || '', s.dataset.cap || ''));
+      });
+
+      applyFilters();
+    })();
+  </script>
+</body>
+</html>
