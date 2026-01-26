@@ -1,1 +1,1154 @@
-..
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Listening - CommandBridge</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0a1120" />
+  <style>
+    :root{
+      --bg:#050911;
+      --panel:#0a1120;
+      --text:#f8fafc;
+      --muted:#94a3b8;
+      --accent:#3b82f6;
+      --accent-bright:#60a5fa;
+      --border:#1e293b;
+      --radius:16px;
+    }
+
+    *{box-sizing:border-box; margin:0; padding:0}
+    html,body{height:100%; overflow-x:hidden}
+
+    body{
+      background:
+        radial-gradient(ellipse 1400px 800px at 20% -15%, rgba(59,130,246,.08), transparent 60%),
+        radial-gradient(ellipse 1200px 700px at 80% 25%, rgba(96,165,250,.06), transparent 65%),
+        var(--bg);
+      color:var(--text);
+      font:16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      -webkit-font-smoothing:antialiased;
+    }
+
+    .sidebar{
+      position:fixed;
+      inset:0 auto 0 0;
+      width:260px;
+      background:linear-gradient(180deg, rgba(10,17,32,.85), rgba(13,20,34,.90));
+      backdrop-filter:blur(20px);
+      border-right:1px solid var(--border);
+      padding:32px 24px;
+      z-index:100;
+      box-shadow:4px 0 24px rgba(0,0,0,.3);
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      margin-bottom:40px;
+      padding-bottom:24px;
+      border-bottom:1px solid rgba(59,130,246,.15);
+    }
+
+    .badge {
+      width:42px;
+      height:42px;
+      border-radius:10px;
+      background:url("../command.png") center/cover no-repeat,
+                 linear-gradient(135deg, var(--accent), #2563eb);
+      box-shadow:0 8px 24px rgba(59,130,246,.4), 0 0 60px rgba(59,130,246,.2);
+      animation:pulse-glow 4s ease-in-out infinite;
+    }
+
+    @keyframes pulse-glow{
+      0%, 100%{box-shadow:0 8px 24px rgba(59,130,246,.4), 0 0 60px rgba(59,130,246,.2)}
+      50%{box-shadow:0 8px 32px rgba(59,130,246,.5), 0 0 80px rgba(59,130,246,.3)}
+    }
+
+    .brand h1{
+      font-size:20px;
+      font-weight:700;
+      letter-spacing:.5px;
+      background:linear-gradient(135deg, #60a5fa, #3b82f6);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      background-clip:text;
+    }
+
+    nav a{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:12px 16px;
+      margin:8px 0;
+      text-decoration:none;
+      color:var(--muted);
+      border-radius:12px;
+      transition:all .25s cubic-bezier(.4,0,.2,1);
+      border:1px solid transparent;
+      font-weight:500;
+      position:relative;
+      overflow:hidden;
+    }
+
+    nav a::before{
+      content:'';
+      position:absolute;
+      inset:0;
+      background:linear-gradient(135deg, rgba(59,130,246,.1), rgba(96,165,250,.08));
+      opacity:0;
+      transition:opacity .25s;
+    }
+
+    nav a:hover{
+      color:var(--text);
+      border-color:rgba(59,130,246,.3);
+      transform:translateX(4px);
+    }
+
+    nav a:hover::before{opacity:1}
+
+    nav a.active{
+      color:var(--accent-bright);
+      background:linear-gradient(135deg, rgba(59,130,246,.15), rgba(96,165,250,.12));
+      border-color:rgba(59,130,246,.4);
+      box-shadow:0 4px 12px rgba(59,130,246,.15);
+    }
+
+    .nav-dot{
+      width:6px;
+      height:6px;
+      border-radius:50%;
+      background:currentColor;
+      transition:all .25s;
+    }
+
+    nav a.active .nav-dot{
+      width:8px;
+      height:8px;
+      box-shadow:0 0 12px currentColor;
+    }
+
+    .main{
+      margin-left:260px;
+      padding:40px 48px 80px;
+      max-width:1400px;
+    }
+
+    .header{
+      margin-bottom:36px;
+    }
+
+    .header h2{
+      font-size:36px;
+      font-weight:900;
+      margin:0 0 12px 0;
+      background:linear-gradient(135deg, #f8fafc, #cbd5e1);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      background-clip:text;
+    }
+
+    .header-note{
+      color:var(--muted);
+      font-size:15px;
+      line-height:1.7;
+      max-width:760px;
+    }
+
+    /* NEW: lens + global note */
+    .controls{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:16px;
+      margin-top:18px;
+      padding:16px 18px;
+      border:1px solid rgba(59,130,246,.18);
+      border-radius:14px;
+      background:linear-gradient(145deg, rgba(15,23,42,.55), rgba(10,17,32,.7));
+    }
+    .controls-left{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      min-width:0;
+    }
+    .controls-title{
+      font-size:12px;
+      letter-spacing:1.6px;
+      text-transform:uppercase;
+      font-weight:900;
+      color:var(--accent-bright);
+    }
+    .controls-sub{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.6;
+      max-width:760px;
+    }
+    .lens{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      white-space:nowrap;
+      flex-shrink:0;
+    }
+    .lens label{
+      font-size:12px;
+      color:var(--muted);
+      font-weight:800;
+      letter-spacing:.8px;
+      text-transform:uppercase;
+    }
+    .lens select{
+      appearance:none;
+      -webkit-appearance:none;
+      -moz-appearance:none;
+      background:rgba(59,130,246,.08);
+      border:1px solid rgba(59,130,246,.22);
+      color:var(--text);
+      border-radius:10px;
+      padding:10px 12px;
+      font-weight:700;
+      outline:none;
+      cursor:pointer;
+      min-width:180px;
+    }
+    .lens select:focus{
+      border-color:rgba(96,165,250,.5);
+      box-shadow:0 0 0 3px rgba(59,130,246,.15);
+    }
+
+    .section{
+      margin-bottom:64px;
+    }
+
+    .section-title{
+      font-size:13px;
+      color:var(--accent-bright);
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:2px;
+      margin:0 0 28px 0;
+      padding-left:20px;
+      position:relative;
+    }
+
+    .section-title::before{
+      content:'';
+      position:absolute;
+      left:0;
+      top:50%;
+      transform:translateY(-50%);
+      width:8px;
+      height:8px;
+      background:var(--accent-bright);
+      border-radius:50%;
+      box-shadow:0 0 12px var(--accent-bright);
+      animation:pulse-dot 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot{
+      0%, 100%{transform:translateY(-50%) scale(1); opacity:1}
+      50%{transform:translateY(-50%) scale(1.3); opacity:.7}
+    }
+
+    .style-grid{
+      display:grid;
+      gap:20px;
+    }
+
+    .style-card{
+      background:linear-gradient(145deg, rgba(15,23,42,.7), rgba(10,17,32,.8));
+      border:1px solid rgba(59,130,246,.2);
+      border-radius:var(--radius);
+      overflow:hidden;
+      transition:all .3s;
+    }
+
+    /* CHANGED: header is a button now */
+    .style-header{
+      width:100%;
+      text-align:left;
+      border:0;
+      background:transparent;
+      padding:20px 24px;
+      cursor:pointer;
+      user-select:none;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      transition:all .2s;
+      font:inherit;
+      color:inherit;
+    }
+
+    .style-header:hover{
+      background:rgba(59,130,246,.05);
+    }
+    .style-header:focus-visible{
+      outline:none;
+      box-shadow:inset 0 0 0 2px rgba(96,165,250,.45), 0 0 0 3px rgba(59,130,246,.12);
+    }
+
+    .style-name{
+      font-size:22px;
+      font-weight:900;
+      background:linear-gradient(135deg, #f8fafc, #60a5fa);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      background-clip:text;
+      letter-spacing:-.3px;
+    }
+
+    .expand-icon{
+      color:var(--accent-bright);
+      font-size:20px;
+      transition:transform .3s;
+    }
+
+    .style-card.expanded .expand-icon{
+      transform:rotate(180deg);
+    }
+
+    /* CHANGED: better open/close without max-height guessing */
+    .style-body{
+      display:grid;
+      grid-template-rows: 0fr;
+      overflow:hidden;
+      transition:grid-template-rows .35s ease;
+    }
+
+    .style-card.expanded .style-body{
+      grid-template-rows: 1fr;
+    }
+
+    .style-content{
+      min-height:0;
+      padding:0 24px 24px;
+    }
+
+    /* NEW: tag row */
+    .tag-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin:12px 0 14px;
+    }
+    .tag{
+      font-size:11px;
+      font-weight:800;
+      letter-spacing:.7px;
+      text-transform:uppercase;
+      padding:6px 10px;
+      border-radius:999px;
+      color:rgba(248,250,252,.92);
+      background:rgba(59,130,246,.10);
+      border:1px solid rgba(59,130,246,.18);
+    }
+
+    /* NEW: constraint + lens text */
+    .style-constraint{
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.7;
+      margin-bottom:14px;
+      font-style:italic;
+      border-left:3px solid rgba(59,130,246,.4);
+      padding-left:16px;
+    }
+
+    /* NEW: optimizes/avoids */
+    .pillbox{
+      display:grid;
+      gap:10px;
+      margin:12px 0 16px;
+    }
+    .pillrow{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .pillkey{
+      font-size:11px;
+      letter-spacing:1px;
+      text-transform:uppercase;
+      color:var(--muted);
+      font-weight:900;
+      padding:4px 0;
+      min-width:92px;
+    }
+    .pillval{
+      flex:1;
+      background:rgba(59,130,246,.07);
+      border:1px solid rgba(59,130,246,.14);
+      padding:10px 12px;
+      border-radius:10px;
+      font-size:13px;
+      color:var(--text);
+    }
+
+    /* NEW: what I track */
+    .track{
+      margin-top:10px;
+      border:1px solid rgba(59,130,246,.14);
+      background:rgba(59,130,246,.06);
+      border-radius:12px;
+      padding:14px 14px;
+    }
+    .track-title{
+      font-size:11px;
+      letter-spacing:1px;
+      text-transform:uppercase;
+      font-weight:900;
+      color:var(--accent-bright);
+      margin-bottom:10px;
+    }
+    .track-list{
+      display:grid;
+      gap:8px;
+      padding-left:18px;
+      color:rgba(248,250,252,.92);
+      font-size:13px;
+      line-height:1.55;
+    }
+    .track-list li{
+      color:rgba(248,250,252,.90);
+    }
+    .track-list li::marker{
+      color:rgba(96,165,250,.75);
+    }
+
+    /* NEW: artifacts */
+    .artifact{
+      margin-top:16px;
+      border-radius:14px;
+      overflow:hidden;
+      border:1px solid rgba(59,130,246,.18);
+      background:rgba(15,23,42,.55);
+    }
+    .artifact img{
+      width:100%;
+      height:auto;
+      display:block;
+    }
+    .artifact-cap{
+      padding:10px 12px;
+      color:var(--muted);
+      font-size:12px;
+      border-top:1px solid rgba(59,130,246,.14);
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      flex-wrap:wrap;
+    }
+    .artifact-cap strong{
+      color:rgba(248,250,252,.92);
+      font-weight:900;
+    }
+
+    .examples{
+      margin-top:16px;
+    }
+
+    .example-label{
+      font-size:11px;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:1px;
+      font-weight:700;
+      margin-bottom:10px;
+    }
+
+    .example-list{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+
+    .example-item{
+      background:rgba(59,130,246,.08);
+      border:1px solid rgba(59,130,246,.15);
+      padding:10px 14px;
+      border-radius:8px;
+      font-size:14px;
+      color:var(--text);
+      transition:all .2s;
+    }
+
+    .example-item:hover{
+      background:rgba(59,130,246,.12);
+      border-color:rgba(59,130,246,.3);
+    }
+
+    .example-artist{
+      font-weight:900;
+      color:var(--accent-bright);
+    }
+
+    .example-track{
+      color:var(--muted);
+      font-size:13px;
+      margin-left:6px;
+      font-weight:700;
+    }
+
+    /* Mobile */
+    @media (max-width:1024px){
+      .sidebar{width:240px}
+      .main{margin-left:240px; padding:32px}
+    }
+
+    @media (max-width:768px){
+      .sidebar{
+        width:100%;
+        position:relative;
+        padding:20px;
+        border-right:none;
+        border-bottom:1px solid var(--border);
+      }
+      .main{margin-left:0; padding:20px 16px}
+      .header h2{font-size:28px}
+      .style-name{font-size:20px}
+      .controls{flex-direction:column; align-items:stretch}
+      .lens{justify-content:space-between}
+      .lens select{min-width:0; width:100%}
+    }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="badge"></div>
+      <h1>CommandBridge</h1>
+    </div>
+    <nav>
+      <a href="../index.html"><span class="nav-dot"></span> Home</a>
+      <a href="../projects/index.html"><span class="nav-dot"></span> Projects</a>
+      <a href="./listening.html" class="active"><span class="nav-dot"></span> Listening</a>
+      <a href="./production.html"><span class="nav-dot"></span> Production</a>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <div class="header">
+      <h2>Listening</h2>
+      <p class="header-note">
+        Sounds I gravitate toward. Production structure and signal chains matter more than lyrics.
+      </p>
+
+      <!-- NEW: Lens control + “what I track globally” -->
+      <div class="controls">
+        <div class="controls-left">
+          <div class="controls-title">Lens</div>
+          <div class="controls-sub">
+            Change how each card describes the same genre: production, structure, texture, or mood.
+          </div>
+        </div>
+        <div class="lens">
+          <label for="lensSelect">View</label>
+          <select id="lensSelect" aria-label="Select lens">
+            <option value="production" selected>Production</option>
+            <option value="structure">Structure</option>
+            <option value="texture">Texture</option>
+            <option value="mood">Mood</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <section class="section">
+      <h3 class="section-title">Genres & Influences</h3>
+
+      <div class="style-grid">
+
+        <!-- UK Drill -->
+        <article class="style-card" data-accordion
+          data-lens-production="Production structure and rhythmic tension, not lyrics."
+          data-lens-structure="Sparse motifs, call-and-response phrasing, drops that hinge on space."
+          data-lens-texture="Dry percussion, heavy sub, controlled high-end, minimal reverb."
+          data-lens-mood="Tense, focused, forward—built to keep pressure on the grid.">
+
+          <button class="style-header" type="button" aria-expanded="false" aria-controls="ukdrill-body">
+            <div class="style-name">UK Drill</div>
+            <div class="expand-icon" aria-hidden="true">▼</div>
+          </button>
+
+          <div class="style-body" id="ukdrill-body" role="region" aria-label="UK Drill details">
+            <div class="style-content">
+
+              <div class="tag-row">
+                <span class="tag">rhythmic tension</span>
+                <span class="tag">negative space</span>
+                <span class="tag">sub weight</span>
+                <span class="tag">clean drums</span>
+                <span class="tag">arrangement-first</span>
+              </div>
+
+              <div class="style-constraint">
+                <span class="constraint-text">Production structure and rhythmic tension, not lyrics.</span>
+              </div>
+
+              <div class="pillbox">
+                <div class="pillrow">
+                  <div class="pillkey">Optimizes for</div>
+                  <div class="pillval">Swing, pocket, sub control, and tension-building with minimal elements.</div>
+                </div>
+                <div class="pillrow">
+                  <div class="pillkey">Avoids</div>
+                  <div class="pillval">Overcrowded arrangements, melodic clutter, and reverb-heavy smear.</div>
+                </div>
+              </div>
+
+              <div class="track">
+                <div class="track-title">What I track</div>
+                <ul class="track-list">
+                  <li>Kick/sub relationship (translation at low volume)</li>
+                  <li>Hi-hat phrasing and swing (micro-timing feel)</li>
+                  <li>Arrangement tension: how long they can hold space before the drop</li>
+                  <li>Headroom and transient control (clean loudness)</li>
+                </ul>
+              </div>
+
+              <div class="artifact">
+                <img src="./artifacts/ukdrill.png" alt="UK Drill artifact (e.g., drum grid or low-end analysis)">
+                <div class="artifact-cap">
+                  <div><strong>Artifact</strong> — drum grid / low-end behavior</div>
+                  <div>Optional visual proof, not decoration</div>
+                </div>
+              </div>
+
+              <div class="examples">
+                <div class="example-label">Examples</div>
+                <div class="example-list">
+                  <div class="example-item">
+                    <span class="example-artist">808Melo</span>
+                    <span class="example-track">— “Only You Freestyle”, “Body”</span>
+                  </div>
+                  <div class="example-item">
+                    <span class="example-artist">AXL Beats</span>
+                    <span class="example-track">— “Loading”, “Doja”</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </article>
+
+        <!-- Industrial / EBM -->
+        <article class="style-card" data-accordion
+          data-lens-production="Mechanical repetition, texture, and control."
+          data-lens-structure="Loop discipline: motifs evolve by subtraction and pressure, not chord changes."
+          data-lens-texture="Rigid transients, gated spaces, abrasive midrange, intentional distortion."
+          data-lens-mood="Cold, driving, engineered—like motion under constraint.">
+
+          <button class="style-header" type="button" aria-expanded="false" aria-controls="ebm-body">
+            <div class="style-name">Industrial / EBM</div>
+            <div class="expand-icon" aria-hidden="true">▼</div>
+          </button>
+
+          <div class="style-body" id="ebm-body" role="region" aria-label="Industrial / EBM details">
+            <div class="style-content">
+
+              <div class="tag-row">
+                <span class="tag">mechanical repetition</span>
+                <span class="tag">gated space</span>
+                <span class="tag">texture-first</span>
+                <span class="tag">control</span>
+                <span class="tag">distortion as design</span>
+              </div>
+
+              <div class="style-constraint">
+                <span class="constraint-text">Mechanical repetition, texture, and control.</span>
+              </div>
+
+              <div class="pillbox">
+                <div class="pillrow">
+                  <div class="pillkey">Optimizes for</div>
+                  <div class="pillval">Relentless groove, rigid timing, and texture that reads as “machinery.”</div>
+                </div>
+                <div class="pillrow">
+                  <div class="pillkey">Avoids</div>
+                  <div class="pillval">Overly-polished softness, wandering arrangements, and sentimental dynamics.</div>
+                </div>
+              </div>
+
+              <div class="track">
+                <div class="track-title">What I track</div>
+                <ul class="track-list">
+                  <li>Kick articulation and consistency (machine feel)</li>
+                  <li>Distortion staging (where the grit lives: bass vs bus)</li>
+                  <li>Repetition discipline (variation without “drifting”)</li>
+                  <li>Midrange texture that stays intelligible at volume</li>
+                </ul>
+              </div>
+
+              <div class="artifact">
+                <img src="./artifacts/ebm.png" alt="Industrial / EBM artifact (e.g., distortion staging or gate envelope)">
+                <div class="artifact-cap">
+                  <div><strong>Artifact</strong> — distortion/gate envelope</div>
+                  <div>Show the system, not the vibe</div>
+                </div>
+              </div>
+
+              <div class="examples">
+                <div class="example-label">Examples</div>
+                <div class="example-list">
+                  <div class="example-item">
+                    <span class="example-artist">Front 242</span>
+                    <span class="example-track">— “Headhunter”, “Rhythm of Time”</span>
+                  </div>
+                  <div class="example-item">
+                    <span class="example-artist">Nitzer Ebb</span>
+                    <span class="example-track">— “Join in the Chant”, “Control I’m Here”</span>
+                  </div>
+                  <div class="example-item">
+                    <span class="example-artist">KMFDM</span>
+                    <span class="example-track">— “A Drug Against War”, “Juke Joint Jezebel”</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </article>
+
+        <!-- Black Metal (2nd Wave) -->
+        <article class="style-card" data-accordion
+          data-lens-production="Atmosphere, texture, and production harshness over technicality."
+          data-lens-structure="Long-form pacing: riffs as weather, not hooks; repetition builds immersion."
+          data-lens-texture="Lo-fi edges, hiss/air, narrow band aggression, raw transient smear."
+          data-lens-mood="Cold, distant, vast—more environment than performance.">
+
+          <button class="style-header" type="button" aria-expanded="false" aria-controls="bm-body">
+            <div class="style-name">Black Metal (2nd Wave)</div>
+            <div class="expand-icon" aria-hidden="true">▼</div>
+          </button>
+
+          <div class="style-body" id="bm-body" role="region" aria-label="Black Metal (2nd Wave) details">
+            <div class="style-content">
+
+              <div class="tag-row">
+                <span class="tag">atmosphere</span>
+                <span class="tag">lo-fi harshness</span>
+                <span class="tag">long-form pacing</span>
+                <span class="tag">texture</span>
+                <span class="tag">distance</span>
+              </div>
+
+              <div class="style-constraint">
+                <span class="constraint-text">Atmosphere, texture, and production harshness over technicality.</span>
+              </div>
+
+              <div class="pillbox">
+                <div class="pillrow">
+                  <div class="pillkey">Optimizes for</div>
+                  <div class="pillval">Immersion, tonal fog, and emotional temperature through soundscape.</div>
+                </div>
+                <div class="pillrow">
+                  <div class="pillkey">Avoids</div>
+                  <div class="pillval">Over-clean modern sheen, tight quantized polish, and “showy” precision.</div>
+                </div>
+              </div>
+
+              <div class="track">
+                <div class="track-title">What I track</div>
+                <ul class="track-list">
+                  <li>How “air” is created (hiss vs room vs cymbal wash)</li>
+                  <li>Guitar texture vs intelligibility (blur that still reads)</li>
+                  <li>Dynamic monotony control (flat without being dead)</li>
+                  <li>Vocal placement (in the storm, not on top)</li>
+                </ul>
+              </div>
+
+              <div class="artifact">
+                <img src="./artifacts/blackmetal.png" alt="Black Metal artifact (e.g., ambience/air spectrum snapshot)">
+                <div class="artifact-cap">
+                  <div><strong>Artifact</strong> — ambience / air snapshot</div>
+                  <div>Texture documentation</div>
+                </div>
+              </div>
+
+              <div class="examples">
+                <div class="example-label">Examples</div>
+                <div class="example-list">
+                  <div class="example-item">
+                    <span class="example-artist">Darkthrone</span>
+                    <span class="example-track">— “Transilvanian Hunger”, “Under a Funeral Moon”</span>
+                  </div>
+                  <div class="example-item">
+                    <span class="example-artist">Burzum</span>
+                    <span class="example-track">— “Hvis Lyset Tar Oss”, “Filosofem”</span>
+                  </div>
+                  <div class="example-item">
+                    <span class="example-artist">Mayhem</span>
+                    <span class="example-track">— “De Mysteriis Dom Sathanas”, “Freezing Moon”</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </article>
+
+        <!-- Goth -->
+        <article class="style-card" data-accordion
+          data-lens-production="Bass-driven, minimal guitar effects, vocal delivery over production."
+          data-lens-structure="Groove + vocal phrasing; songs lean on bass movement more than harmonic shifts."
+          data-lens-texture="Dry drums, chorus-y bass, restrained reverb, controlled brightness."
+          data-lens-mood="Detached, romantic, nocturnal—cool delivery with steady pulse.">
+
+          <button class="style-header" type="button" aria-expanded="false" aria-controls="goth-body">
+            <div class="style-name">Goth</div>
+            <div class="expand-icon" aria-hidden="true">▼</div>
+          </button>
+
+          <div class="style-body" id="goth-body" role="region" aria-label="Goth details">
+            <div class="style-content">
+
+              <div class="tag-row">
+                <span class="tag">bass-led</span>
+                <span class="tag">minimal effects</span>
+                <span class="tag">vocal delivery</span>
+                <span class="tag">steady pulse</span>
+                <span class="tag">restraint</span>
+              </div>
+
+              <div class="style-constraint">
+                <span class="constraint-text">Bass-driven, minimal guitar effects, vocal delivery over production.</span>
+              </div>
+
+              <div class="pillbox">
+                <div class="pillrow">
+                  <div class="pillkey">Optimizes for</div>
+                  <div class="pillval">Bass movement, hypnotic repetition, and vocal character that cuts cleanly.</div>
+                </div>
+                <div class="pillrow">
+                  <div class="pillkey">Avoids</div>
+                  <div class="pillval">Over-layered guitars, excessive ambience, and “modern loudness” smear.</div>
+                </div>
+              </div>
+
+              <div class="track">
+                <div class="track-title">What I track</div>
+                <ul class="track-list">
+                  <li>Bass tone and chorus modulation (movement without mud)</li>
+                  <li>Vocal placement and intelligibility</li>
+                  <li>Drum dryness vs room (how “close” the kit is)</li>
+                  <li>Minimal arrangement that still feels full</li>
+                </ul>
+              </div>
+
+              <div class="artifact">
+                <img src="./artifacts/goth.png" alt="Goth artifact (e.g., bass modulation chain snapshot)">
+                <div class="artifact-cap">
+                  <div><strong>Artifact</strong> — bass modulation chain</div>
+                  <div>One screenshot beats paragraphs</div>
+                </div>
+              </div>
+
+              <div class="examples">
+                <div class="example-label">Examples</div>
+                <div class="example-list">
+                  <div class="example-item">
+                    <span class="example-artist">Bauhaus</span>
+                    <span class="example-track">— “Bela Lugosi’s Dead”, “Dark Entries”</span>
+                  </div>
+                  <div class="example-item">
+                    <span class="example-artist">Sisters of Mercy</span>
+                    <span class="example-track">— “Marian”, “Temple of Love”</span>
+                  </div>
+                  <div class="example-item">
+                    <span class="example-artist">Christian Death</span>
+                    <span class="example-track">— “Catastrophe Ballet”, “Romeo’s Distress”</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </article>
+
+        <!-- Doom / Sludge -->
+        <article class="style-card" data-accordion
+          data-lens-production="Weight, pacing, and tonal density."
+          data-lens-structure="Riffs as blocks; tempo is the hook; songs breathe in slow cycles."
+          data-lens-texture="Thick midrange, saturated lows, controlled fizz, room-heavy drums."
+          data-lens-mood="Oppressive, gravitational, slow violence—momentum over speed.">
+
+          <button class="style-header" type="button" aria-expanded="false" aria-controls="doom-body">
+            <div class="style-name">Doom / Sludge</div>
+            <div class="expand-icon" aria-hidden="true">▼</div>
+          </button>
+
+          <div class="style-body" id="doom-body" role="region" aria-label="Doom / Sludge details">
+            <div class="style-content">
+
+              <div class="tag-row">
+                <span class="tag">weight</span>
+                <span class="tag">slow pacing</span>
+                <span class="tag">tonal density</span>
+                <span class="tag">saturation</span>
+                <span class="tag">room drums</span>
+              </div>
+
+              <div class="style-constraint">
+                <span class="constraint-text">Weight, pacing, and tonal density.</span>
+              </div>
+
+              <div class="pillbox">
+                <div class="pillrow">
+                  <div class="pillkey">Optimizes for</div>
+                  <div class="pillval">Mass, sustain, and arrangement patience—making “slow” feel inevitable.</div>
+                </div>
+                <div class="pillrow">
+                  <div class="pillkey">Avoids</div>
+                  <div class="pillval">Thin guitars, clicky drums, and over-edited cleanliness.</div>
+                </div>
+              </div>
+
+              <div class="track">
+                <div class="track-title">What I track</div>
+                <ul class="track-list">
+                  <li>Low-end stability (no flub, no uncontrolled bloom)</li>
+                  <li>Saturation stages (where the density accumulates)</li>
+                  <li>Drum room vs direct balance (size without wash)</li>
+                  <li>Tempo patience (how long a riff can hold)</li>
+                </ul>
+              </div>
+
+              <div class="artifact">
+                <img src="./artifacts/doom.png" alt="Doom/Sludge artifact (e.g., guitar bus chain or saturation staging)">
+                <div class="artifact-cap">
+                  <div><strong>Artifact</strong> — guitar bus / saturation staging</div>
+                  <div>Density is engineered</div>
+                </div>
+              </div>
+
+              <div class="examples">
+                <div class="example-label">Examples</div>
+                <div class="example-list">
+                  <div class="example-item">
+                    <span class="example-artist">Electric Wizard</span>
+                    <span class="example-track">— “Funeralopolis”, “Dopethrone”</span>
+                  </div>
+                  <div class="example-item">
+                    <span class="example-artist">Sleep</span>
+                    <span class="example-track">— “Dopesmoker”, “Dragonaut”</span>
+                  </div>
+                  <div class="example-item">
+                    <span class="example-artist">Eyehategod</span>
+                    <span class="example-track">— “Take as Needed for Pain”, “Sister Fucker (Pt. I)”</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </article>
+
+        <!-- Early Dubstep -->
+        <article class="style-card" data-accordion
+          data-lens-production="Mechanical bass design and negative space."
+          data-lens-structure="Drop logic: minimal elements arranged for impact; space is part of the rhythm."
+          data-lens-texture="Wobble/variants, gritty subs, sampled air, distant percussion."
+          data-lens-mood="Urban, nocturnal, submerged—pressure from below with restraint up top.">
+
+          <button class="style-header" type="button" aria-expanded="false" aria-controls="dub-body">
+            <div class="style-name">Early Dubstep</div>
+            <div class="expand-icon" aria-hidden="true">▼</div>
+          </button>
+
+          <div class="style-body" id="dub-body" role="region" aria-label="Early Dubstep details">
+            <div class="style-content">
+
+              <div class="tag-row">
+                <span class="tag">bass design</span>
+                <span class="tag">negative space</span>
+                <span class="tag">sub pressure</span>
+                <span class="tag">restraint</span>
+                <span class="tag">impact</span>
+              </div>
+
+              <div class="style-constraint">
+                <span class="constraint-text">Mechanical bass design and negative space.</span>
+              </div>
+
+              <div class="pillbox">
+                <div class="pillrow">
+                  <div class="pillkey">Optimizes for</div>
+                  <div class="pillval">Sub movement, drop impact, and arrangement that respects space.</div>
+                </div>
+                <div class="pillrow">
+                  <div class="pillkey">Avoids</div>
+                  <div class="pillval">Constant “full spectrum” noise and too many competing bass layers.</div>
+                </div>
+              </div>
+
+              <div class="track">
+                <div class="track-title">What I track</div>
+                <ul class="track-list">
+                  <li>Sub behavior (steady vs modulated; translation on small speakers)</li>
+                  <li>Where the “air” lives (vinyl noise, ambience, sampled space)</li>
+                  <li>Drop contrast (how different the drop feels vs intro)</li>
+                  <li>Kick/bass phase and punch without clipping mush</li>
+                </ul>
+              </div>
+
+              <div class="artifact">
+                <img src="./artifacts/dubstep.png" alt="Dubstep artifact (e.g., sub modulation or spectrum snapshot)">
+                <div class="artifact-cap">
+                  <div><strong>Artifact</strong> — sub modulation / spectrum</div>
+                  <div>Impact is measurable</div>
+                </div>
+              </div>
+
+              <div class="examples">
+                <div class="example-label">Examples</div>
+                <div class="example-list">
+                  <div class="example-item">
+                    <span class="example-artist">Burial</span>
+                    <span class="example-track">— “Archangel”, “Ghost Hardware”</span>
+                  </div>
+                  <div class="example-item">
+                    <span class="example-artist">Skream</span>
+                    <span class="example-track">— “Midnight Request Line”, “Rutten”</span>
+                  </div>
+                  <div class="example-item">
+                    <span class="example-artist">Benga</span>
+                    <span class="example-track">— “Night”, “26 Basslines”</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </article>
+
+        <!-- Synthwave -->
+        <article class="style-card" data-accordion
+          data-lens-production="When it emphasizes structure over nostalgia."
+          data-lens-structure="Clear motifs and section logic; energy rises through arrangement, not just sound."
+          data-lens-texture="Analog-ish timbres, controlled brightness, punchy drums, wide but stable stereo."
+          data-lens-mood="Cinematic momentum—forward motion more than retro sentimentality.">
+
+          <button class="style-header" type="button" aria-expanded="false" aria-controls="sw-body">
+            <div class="style-name">Synthwave (selectively)</div>
+            <div class="expand-icon" aria-hidden="true">▼</div>
+          </button>
+
+          <div class="style-body" id="sw-body" role="region" aria-label="Synthwave (selectively) details">
+            <div class="style-content">
+
+              <div class="tag-row">
+                <span class="tag">structure</span>
+                <span class="tag">cinematic</span>
+                <span class="tag">controlled brightness</span>
+                <span class="tag">stable stereo</span>
+                <span class="tag">motif-driven</span>
+              </div>
+
+              <div class="style-constraint">
+                <span class="constraint-text">When it emphasizes structure over nostalgia.</span>
+              </div>
+
+              <div class="pillbox">
+                <div class="pillrow">
+                  <div class="pillkey">Optimizes for</div>
+                  <div class="pillval">Motif clarity, arrangement lift, and “big” sound that stays disciplined.</div>
+                </div>
+                <div class="pillrow">
+                  <div class="pillkey">Avoids</div>
+                  <div class="pillval">Cheesy retro pastiche and overly glossy top-end that fatigues fast.</div>
+                </div>
+              </div>
+
+              <div class="track">
+                <div class="track-title">What I track</div>
+                <ul class="track-list">
+                  <li>Motif strength (simple idea that carries)</li>
+                  <li>Drum punch vs brightness (impact without glare)</li>
+                  <li>Stereo width stability (wide without phase collapse)</li>
+                  <li>Arrangement lift (energy increases via parts, not volume)</li>
+                </ul>
+              </div>
+
+              <div class="artifact">
+                <img src="./artifacts/synthwave.png" alt="Synthwave artifact (e.g., stereo image / arrangement map)">
+                <div class="artifact-cap">
+                  <div><strong>Artifact</strong> — stereo image / arrangement map</div>
+                  <div>Big but controlled</div>
+                </div>
+              </div>
+
+              <div class="examples">
+                <div class="example-label">Examples</div>
+                <div class="example-list">
+                  <div class="example-item">
+                    <span class="example-artist">Perturbator</span>
+                    <span class="example-track">— “Future Club”, “Humans Are Such Easy Prey”</span>
+                  </div>
+                  <div class="example-item">
+                    <span class="example-artist">Carpenter Brut</span>
+                    <span class="example-track">— “Turbo Killer”, “Leather Teeth”</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (function(){
+      // Accordion: accessible buttons, optional single-open
+      const cards = Array.from(document.querySelectorAll('.style-card[data-accordion]'));
+      const singleOpen = false;
+
+      function setExpanded(card, expanded){
+        const btn = card.querySelector('.style-header');
+        if (!btn) return;
+        btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+        card.classList.toggle('expanded', expanded);
+      }
+
+      cards.forEach(card => {
+        const btn = card.querySelector('.style-header');
+        if (!btn) return;
+
+        btn.addEventListener('click', () => {
+          const isOpen = card.classList.contains('expanded');
+          if (singleOpen && !isOpen) cards.forEach(c => setExpanded(c, false));
+          setExpanded(card, !isOpen);
+        });
+      });
+
+      // Lens: swaps the constraint line per card without duplicating content blocks
+      const lensSelect = document.getElementById('lensSelect');
+      function applyLens(lens){
+        for (const card of cards){
+          const el = card.querySelector('.constraint-text');
+          if (!el) continue;
+          const key = 'lens' + lens.charAt(0).toUpperCase() + lens.slice(1);
+          // data attributes are kebab-case -> dataset.lensProduction etc.
+          const val = card.dataset[key] || card.dataset.lensProduction || '';
+          if (val) el.textContent = val;
+        }
+      }
+      if (lensSelect){
+        lensSelect.addEventListener('change', () => applyLens(lensSelect.value));
+        applyLens(lensSelect.value || 'production');
+      }
+    })();
+  </script>
+</body>
+</html>
