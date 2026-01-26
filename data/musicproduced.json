@@ -1,4 +1,5 @@
-{
+[
+  {
   "id": "trk-like-a-lost-star",
   "type": "track",
   "title": "Like A Lost Star",
@@ -14,6 +15,7 @@
   "bpm": null,
   "key": null,
   "featured": true,
+  "changelog": "changes here", 
 
   "gear": {
     "daw": { "name": "Cubase 11", "ref": "cubase" },
@@ -36,8 +38,7 @@
   "details": {
     "signalChain": "UVI Cameo → DAW FX (minimal) → mix bus",
     "notes": "Add what you learned / what broke / what you fixed.",
-    "tracking": "Gain staging, transient discipline, low-end translation.",
-    "Last update": "Update here"
+    "tracking": "Gain staging, transient discipline, low-end translation."    
   },
 
   "embed": {
@@ -46,3 +47,4 @@
     "height": 166
   }
 }
+]
