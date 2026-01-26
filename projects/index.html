@@ -17,13 +17,13 @@
       --radius:16px;
       --shadow:0 20px 60px rgba(0,0,0,.4);
 
-      /* status colors */
-      --status-active:#22c55e;      
-      --status-paused:#f97316;
-      --status-new:#22c55e;
-      --status-default:#64748b;
-    
-      /* stage colors */
+      /* SYSTEM STATUS (tri-state) colors */
+      --sys-active:#22c55e;
+      --sys-paused:#94a3b8;
+      --sys-new:#fbbf24;
+      --sys-default:#64748b;
+
+      /* STAGE colors (your former "status" semantics) */
       --stage-active:#22c55e;
       --stage-near:#eab308;
       --stage-stalled:#f97316;
@@ -32,7 +32,7 @@
     }
     *{box-sizing:border-box; margin:0; padding:0}
     html,body{height:100%; overflow-x:hidden}
-    
+
     body{
       background:
         radial-gradient(ellipse 1400px 800px at 20% -15%, rgba(59,130,246,.08), transparent 60%),
@@ -42,7 +42,6 @@
       font:16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
       -webkit-font-smoothing:antialiased;
     }
-    
 
     .sidebar{
       position:fixed;
@@ -56,7 +55,7 @@
       z-index:100;
       box-shadow:4px 0 24px rgba(0,0,0,.3);
     }
-    
+
     .brand{
       display:flex;
       align-items:center;
@@ -75,12 +74,12 @@
       box-shadow:0 8px 24px rgba(59,130,246,.4), 0 0 60px rgba(59,130,246,.2);
       animation:pulse-glow 4s ease-in-out infinite;
     }
-    
+
     @keyframes pulse-glow{
       0%, 100%{box-shadow:0 8px 24px rgba(59,130,246,.4), 0 0 60px rgba(59,130,246,.2)}
       50%{box-shadow:0 8px 32px rgba(59,130,246,.5), 0 0 80px rgba(59,130,246,.3)}
     }
-    
+
     .brand h1{
       font-size:20px;
       font-weight:700;
@@ -90,7 +89,7 @@
       -webkit-text-fill-color:transparent;
       background-clip:text;
     }
-    
+
     nav a{
       display:flex;
       align-items:center;
@@ -106,7 +105,7 @@
       position:relative;
       overflow:hidden;
     }
-    
+
     nav a::before{
       content:'';
       position:absolute;
@@ -115,22 +114,22 @@
       opacity:0;
       transition:opacity .25s;
     }
-    
+
     nav a:hover{
       color:var(--text);
       border-color:rgba(59,130,246,.3);
       transform:translateX(4px);
     }
-    
+
     nav a:hover::before{opacity:1}
-    
+
     nav a.active{
       color:var(--accent-bright);
       background:linear-gradient(135deg, rgba(59,130,246,.15), rgba(96,165,250,.12));
       border-color:rgba(59,130,246,.4);
       box-shadow:0 4px 12px rgba(59,130,246,.15);
     }
-    
+
     .nav-dot{
       width:6px;
       height:6px;
@@ -138,7 +137,7 @@
       background:currentColor;
       transition:all .25s;
     }
-    
+
     nav a.active .nav-dot{
       width:8px;
       height:8px;
@@ -293,6 +292,95 @@
       object-fit:cover;
     }
 
+    /* Badge row (NEW): shows SYSTEM STATUS + STAGE side-by-side */
+    .badge-row{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      align-items:center;
+      margin-bottom:2px;
+      position:relative;
+      z-index:2;
+    }
+
+    .pill{
+      padding:4px 10px;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:700;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      white-space:nowrap;
+      background:rgba(15,23,42,.9);
+    }
+
+    .pill-dot{
+      width:7px;
+      height:7px;
+      border-radius:999px;
+      background:currentColor;
+      box-shadow:0 0 8px currentColor;
+    }
+
+    /* Featured pill (unchanged) */
+    .featured-pill{
+      margin-top:4px;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:4px 10px;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:700;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      color:#fbbf24;
+      background:rgba(251,191,36,.08);
+      border:1px solid rgba(251,191,36,.5);
+      position:relative;
+      overflow:hidden;
+    }
+
+    .featured-pill::before{
+      content:'';
+      position:absolute;
+      inset:-40%;
+      background:conic-gradient(
+        from 0deg,
+        rgba(251,191,36,.0),
+        rgba(251,191,36,.55),
+        rgba(251,191,36,.0),
+        rgba(96,165,250,.5),
+        rgba(251,191,36,.0)
+      );
+      opacity:.9;
+      animation:featured-spin 6s linear infinite;
+    }
+
+    .featured-pill-inner{
+      position:relative;
+      z-index:1;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+    }
+
+    .featured-dot{
+      width:7px;
+      height:7px;
+      border-radius:999px;
+      background:#fbbf24;
+      box-shadow:0 0 10px rgba(251,191,36,.9);
+    }
+
+    @keyframes featured-spin{
+      0%{transform:rotate(0deg);}
+      100%{transform:rotate(360deg);}
+    }
+
     .card-header-row{
       display:flex;
       align-items:flex-start;
@@ -311,81 +399,6 @@
       background-clip:text;
       line-height:1.3;
     }
-
-    .status-pill{
-      padding:4px 10px;
-      border-radius:999px;
-      font-size:11px;
-      font-weight:700;
-      text-transform:uppercase;
-      letter-spacing:.08em;
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      white-space:nowrap;
-    }
-
-    .status-dot{
-      width:7px;
-      height:7px;
-      border-radius:999px;
-      background:currentColor;
-      box-shadow:0 0 8px currentColor;
-    }
-.featured-pill{
-  margin-top:4px;
-  display:inline-flex;
-  align-items:center;
-  gap:6px;
-  padding:4px 10px;
-  border-radius:999px;
-  font-size:11px;
-  font-weight:700;
-  text-transform:uppercase;
-  letter-spacing:.08em;
-  color:#fbbf24;
-  background:rgba(251,191,36,.08);
-  border:1px solid rgba(251,191,36,.5);
-  position:relative;
-  overflow:hidden;
-}
-
-.featured-pill::before{
-  content:'';
-  position:absolute;
-  inset:-40%;
-  background:conic-gradient(
-    from 0deg,
-    rgba(251,191,36,.0),
-    rgba(251,191,36,.55),
-    rgba(251,191,36,.0),
-    rgba(96,165,250,.5),
-    rgba(251,191,36,.0)
-  );
-  opacity:.9;
-  animation:featured-spin 6s linear infinite;
-}
-
-.featured-pill-inner{
-  position:relative;
-  z-index:1;
-  display:inline-flex;
-  align-items:center;
-  gap:6px;
-}
-
-.featured-dot{
-  width:7px;
-  height:7px;
-  border-radius:999px;
-  background:#fbbf24;
-  box-shadow:0 0 10px rgba(251,191,36,.9);
-}
-
-@keyframes featured-spin{
-  0%{transform:rotate(0deg);}
-  100%{transform:rotate(360deg);}
-}
 
     .card-desc{
       color:var(--muted);
@@ -797,9 +810,14 @@
       <div class="modal-body">
         <div class="info-grid">
           <div class="info-item">
-            <div class="info-label">Status</div>
-            <div class="info-value" id="modalStatus"></div>
-            <div class="info-value-small" id="modalStatusHint"></div>
+            <div class="info-label">System Status</div>
+            <div class="info-value" id="modalSysStatus"></div>
+            <div class="info-value-small" id="modalSysStatusHint"></div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Stage</div>
+            <div class="info-value" id="modalStage"></div>
+            <div class="info-value-small" id="modalStageHint"></div>
           </div>
           <div class="info-item">
             <div class="info-label">Started</div>
@@ -865,16 +883,25 @@
     };
 
     function normalize(p){
+      const title = String(p.title || 'Untitled');
+      const description = String(p.description || '');
+      const tags = Array.isArray(p.tags) ? p.tags.map(String) : [];
+      const tech = Array.isArray(p.tech) ? p.tech : (tags || []);
+
+      const sysStatus = normalizeSysStatus(p.status);
+      const stage = String(p.stage || p.status || 'In Progress'); // backward-compatible
+
       return {
         id: String(p.id || Math.random().toString(36).slice(2,10)),
-        title: String(p.title || 'Untitled'),
-        description: String(p.description || ''),
-        tags: Array.isArray(p.tags) ? p.tags.map(String) : [],
+        title,
+        description,
+        tags,
         updated: parseDate(p.updated),
         started: parseDate(p.started || p.updated),
-        status: String(p.status || 'Active'),
+        status: sysStatus,                 // tri-state: active|paused|new
+        stage: stage,                      // former human status, now stage
         changelog: Array.isArray(p.changelog) ? p.changelog : [],
-        tech: Array.isArray(p.tech) ? p.tech : p.tags || [],
+        tech,
         percentComplete: typeof p.percentComplete === 'number' ? p.percentComplete : 0,
         github: p.github ? String(p.github) : '',
         images: Array.isArray(p.images) ? p.images : [],
@@ -888,7 +915,7 @@
               reason: p.featureToggle.reason ? String(p.featureToggle.reason) : ''
             }
           : { featured:false, reason:'' },
-        _search: (String(p.title) + ' ' + String(p.description) + ' ' + (Array.isArray(p.tags) ? p.tags.join(' ') : '')).toLowerCase()
+        _search: (title + ' ' + description + ' ' + tags.join(' ') + ' ' + String(p.stage || '') + ' ' + String(p.status || '')).toLowerCase()
       };
     }
 
@@ -908,7 +935,7 @@
       el.tagRow.innerHTML = '';
       const allTags = Array.from(state.tags).sort();
       if(!allTags.length) return;
-      
+
       const allChip = chip('All', !state.activeTags.size);
       allChip.onclick = ()=>{ state.activeTags.clear(); renderTags(); applyFilters(); };
       el.tagRow.appendChild(allChip);
@@ -954,14 +981,40 @@
       return d.toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
     }
 
-    function statusStyles(status){
-      const s = status.toLowerCase();
-      if(s.includes('complete') && s.includes('beta')) return {label: 'Complete (Beta)', color:'var(--status-complete)'};
-      if(s.includes('near')) return {label: 'Near Complete', color:'var(--status-near)'};
-      if(s.includes('stall')) return {label: 'Stalled', color:'var(--status-stalled)'};
-      if(s.includes('complete')) return {label: 'Complete', color:'var(--status-complete)'};
-      if(s.includes('active')) return {label: 'Active', color:'var(--status-active)'};
-      return {label: status, color:'var(--status-default)'};
+    // tri-state system status: active | paused | new
+    function normalizeSysStatus(s){
+      const v = String(s || '').trim().toLowerCase();
+      if(v === 'active' || v === 'paused' || v === 'new') return v;
+
+      // backward compatibility: old statuses like "In Progress"
+      if(v.includes('active') || v.includes('progress')) return 'active';
+      if(v.includes('pause') || v.includes('stalled') || v.includes('backlog')) return 'paused';
+      if(v.includes('new')) return 'new';
+
+      return 'active';
+    }
+
+    function sysStatusStyles(sys){
+      const s = normalizeSysStatus(sys);
+      if(s === 'active') return {label:'Active', color:'var(--sys-active)'};
+      if(s === 'paused') return {label:'Paused', color:'var(--sys-paused)'};
+      if(s === 'new') return {label:'New', color:'var(--sys-new)'};
+      return {label:String(sys||'Active'), color:'var(--sys-default)'};
+    }
+
+    // stage mapping (former "status" semantics)
+    function stageStyles(stage){
+      const s = String(stage || '').toLowerCase();
+
+      // keep your existing semantics
+      if(s.includes('complete') && s.includes('beta')) return {label:'Complete (Beta)', color:'var(--stage-complete)'};
+      if(s.includes('near')) return {label:'Near Complete', color:'var(--stage-near)'};
+      if(s.includes('stall')) return {label:'Stalled', color:'var(--stage-stalled)'};
+      if(s.includes('complete')) return {label:'Complete', color:'var(--stage-complete)'};
+      if(s.includes('active')) return {label:'Active', color:'var(--stage-active)'};
+
+      // default: show raw stage string
+      return {label:String(stage || 'In Progress'), color:'var(--stage-default)'};
     }
 
     function percentHint(p){
@@ -973,77 +1026,101 @@
     }
 
     function renderGrid(){
-  el.grid.innerHTML = '';
-  if(!state.filtered.length){
-    el.empty.style.display='block';
-    return;
-  }
-  el.empty.style.display='none';
+      el.grid.innerHTML = '';
+      if(!state.filtered.length){
+        el.empty.style.display='block';
+        return;
+      }
+      el.empty.style.display='none';
 
-  for(const p of state.filtered){
-    const card = document.createElement('article');
-    card.className = 'card';
-    card.onclick = ()=>showModal(p);
-    
-    const tags = p.tags.map(t=>`<span class="tag-pill">${esc(t)}</span>`).join('');
-    const thumb = p.images && p.images.length
-      ? `<div class="card-thumb"><img src="${esc(p.images[0])}" alt="${esc(p.title)} screenshot"></div>`
-      : '';
+      for(const p of state.filtered){
+        const card = document.createElement('article');
+        card.className = 'card';
+        card.onclick = ()=>showModal(p);
 
-    const status = statusStyles(p.status);
-    const percent = Math.max(0, Math.min(100, p.percentComplete || 0));
-    const isFeatured = p.featureToggle && p.featureToggle.featured;
+        const tags = p.tags.map(t=>`<span class="tag-pill">${esc(t)}</span>`).join('');
+        const thumb = p.images && p.images.length
+          ? `<div class="card-thumb"><img src="${esc(p.images[0])}" alt="${esc(p.title)} screenshot"></div>`
+          : '';
 
-    card.innerHTML = `
-      ${thumb}
-      <div class="card-header-row">
-        <div>
-          <div class="card-title">${esc(p.title)}</div>
-          ${isFeatured ? `
-            <div class="featured-pill">
-              <div class="featured-pill-inner">
-                <span class="featured-dot"></span>
-                <span>Featured</span>
-              </div>
+        const sys = sysStatusStyles(p.status);
+        const stage = stageStyles(p.stage);
+
+        const percent = Math.max(0, Math.min(100, p.percentComplete || 0));
+        const isFeatured = p.featureToggle && p.featureToggle.featured;
+
+        card.innerHTML = `
+          ${thumb}
+
+          <div class="badge-row">
+            <div class="pill" style="color:${sys.color}; border:1px solid ${sys.color}33;">
+              <span class="pill-dot"></span>
+              <span>${esc(sys.label)}</span>
             </div>
-          ` : ''}
-        </div>
-        <div class="status-pill" style="color:${status.color}; border:1px solid ${status.color}33; background:rgba(15,23,42,.9);">
-          <span class="status-dot"></span>
-          <span>${esc(status.label)}</span>
-        </div>
-      </div>
-      <div class="card-desc">${esc(p.description)}</div>
-      <div class="card-progress">
-        <div class="card-progress-bar">
-          <div class="card-progress-fill" style="width:${percent}%;"></div>
-        </div>
-        <div class="card-progress-label">${percent}% complete</div>
-      </div>
-      <div class="card-meta">
-        <div class="card-tags">${tags}</div>
-        <div class="card-date">${fmtDate(p.updated)}</div>
-      </div>
-    `;
-    el.grid.appendChild(card);
-  }
-}
+            <div class="pill" style="color:${stage.color}; border:1px solid ${stage.color}33;">
+              <span class="pill-dot"></span>
+              <span>${esc(stage.label)}</span>
+            </div>
+          </div>
+
+          <div class="card-header-row">
+            <div>
+              <div class="card-title">${esc(p.title)}</div>
+              ${isFeatured ? `
+                <div class="featured-pill">
+                  <div class="featured-pill-inner">
+                    <span class="featured-dot"></span>
+                    <span>Featured</span>
+                  </div>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+
+          <div class="card-desc">${esc(p.description)}</div>
+
+          <div class="card-progress">
+            <div class="card-progress-bar">
+              <div class="card-progress-fill" style="width:${percent}%;"></div>
+            </div>
+            <div class="card-progress-label">${percent}% complete</div>
+          </div>
+
+          <div class="card-meta">
+            <div class="card-tags">${tags}</div>
+            <div class="card-date">${fmtDate(p.updated)}</div>
+          </div>
+        `;
+        el.grid.appendChild(card);
+      }
+    }
 
     function showModal(p){
-      const status = statusStyles(p.status);
+      const sys = sysStatusStyles(p.status);
+      const stage = stageStyles(p.stage);
       const percent = Math.max(0, Math.min(100, p.percentComplete || 0));
 
       document.getElementById('modalTitle').textContent = p.title;
       document.getElementById('modalDesc').textContent = p.description;
-      document.getElementById('modalStatus').textContent = status.label;
-      document.getElementById('modalStatus').style.color = status.color;
+
+      const sysEl = document.getElementById('modalSysStatus');
+      sysEl.textContent = sys.label;
+      sysEl.style.color = sys.color;
+      document.getElementById('modalSysStatusHint').textContent = String(p.status || '');
+
+      const stageEl = document.getElementById('modalStage');
+      stageEl.textContent = stage.label;
+      stageEl.style.color = stage.color;
+      document.getElementById('modalStageHint').textContent = String(p.stage || '');
+
       document.getElementById('modalStarted').textContent = fmtDate(p.started);
       document.getElementById('modalUpdated').textContent = fmtDate(p.updated);
-      document.getElementById('modalPercent').textContent = percent + '%';
-      document.getElementById('modalPercent').style.color = percent >= 80 ? 'var(--status-active)' : 'var(--accent-bright)';
-      document.getElementById('modalStatusHint').textContent = p.status;
+
+      const pctEl = document.getElementById('modalPercent');
+      pctEl.textContent = percent + '%';
+      pctEl.style.color = percent >= 80 ? 'var(--sys-active)' : 'var(--accent-bright)';
       document.getElementById('modalPercentHint').textContent = percentHint(percent);
-      
+
       const techEl = document.getElementById('modalTech');
       techEl.innerHTML = p.tech.map(t=>`<span class="tech-badge">${esc(t)}</span>`).join('');
 
@@ -1066,7 +1143,7 @@
 
       const contribEl = document.getElementById('modalContribStatus');
       contribEl.textContent = p.statusForContributors || 'No contributor status set yet.';
-      
+
       const linksEl = document.getElementById('modalLinks');
       if(p.github){
         linksEl.innerHTML = `
@@ -1086,7 +1163,7 @@
       }else{
         galleryEl.innerHTML = '<div class="gallery-empty">No screenshots added yet.</div>';
       }
-      
+
       const changelogEl = document.getElementById('modalChangelog');
       if(p.changelog.length){
         changelogEl.innerHTML = p.changelog.map(c=>`
@@ -1098,7 +1175,7 @@
       } else {
         changelogEl.innerHTML = '<div class="changelog-item">No changelog available yet.</div>';
       }
-      
+
       el.modal.classList.add('active');
     }
 
@@ -1138,7 +1215,3 @@
   </script>
 </body>
 </html>
-
-
-
-
