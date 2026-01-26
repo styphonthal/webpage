@@ -388,17 +388,26 @@
       gap:10px;
     }
 
-    .card-title{
-      font-size:18px;
-      font-weight:800;
-      position:relative;
-      z-index:1;
-      background:linear-gradient(135deg, #f8fafc, #cbd5e1);
-      -webkit-background-clip:text;
-      -webkit-text-fill-color:transparent;
-      background-clip:text;
-      line-height:1.3;
-    }
+.card-title{
+  font-size:18px;
+  font-weight:800;
+  position:relative;
+  z-index:1;
+  line-height:1.3;
+
+  /* keep it mostly white, but bias slightly blue */
+  background:linear-gradient(135deg, #f8fafc 0%, #dbeafe 55%, #bfdbfe 100%);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+
+  /* blue shade / glow */
+  text-shadow:
+    0 1px 0 rgba(2,6,23,.55),
+    0 8px 22px rgba(59,130,246,.22),
+    0 0 26px rgba(96,165,250,.18);
+}
+
 
     .card-desc{
       color:var(--muted);
@@ -408,6 +417,13 @@
       font-size:14px;
       flex:1;
     }
+    .card:hover .card-title{
+  text-shadow:
+    0 1px 0 rgba(2,6,23,.55),
+    0 10px 26px rgba(59,130,246,.30),
+    0 0 34px rgba(96,165,250,.24);
+}
+
 
     .card-progress{
       margin-top:4px;
@@ -1215,3 +1231,4 @@
   </script>
 </body>
 </html>
+
