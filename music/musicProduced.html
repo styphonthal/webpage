@@ -1,1 +1,701 @@
-..
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Production - CommandBridge</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0a1120" />
+  <style>
+    :root{
+      --bg:#050911;
+      --panel:#0a1120;
+      --text:#f8fafc;
+      --muted:#94a3b8;
+      --accent:#3b82f6;
+      --accent-bright:#60a5fa;
+      --border:#1e293b;
+      --radius:16px;
+    }
+    
+    *{box-sizing:border-box; margin:0; padding:0}
+    html,body{height:100%; overflow-x:hidden}
+    
+    body{
+      background:
+        radial-gradient(ellipse 1400px 800px at 20% -15%, rgba(59,130,246,.08), transparent 60%),
+        radial-gradient(ellipse 1200px 700px at 80% 25%, rgba(96,165,250,.06), transparent 65%),
+        var(--bg);
+      color:var(--text);
+      font:16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      -webkit-font-smoothing:antialiased;
+    }
+
+    .sidebar{
+      position:fixed;
+      inset:0 auto 0 0;
+      width:260px;
+      background:linear-gradient(180deg, rgba(10,17,32,.85), rgba(13,20,34,.90));
+      backdrop-filter:blur(20px);
+      border-right:1px solid var(--border);
+      padding:32px 24px;
+      z-index:100;
+      box-shadow:4px 0 24px rgba(0,0,0,.3);
+    }
+    
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      margin-bottom:40px;
+      padding-bottom:24px;
+      border-bottom:1px solid rgba(59,130,246,.15);
+    }
+
+    .badge {
+      width:42px;
+      height:42px;
+      border-radius:10px;
+      background:url("../command.png") center/cover no-repeat,
+                 linear-gradient(135deg, var(--accent), #2563eb);
+      box-shadow:0 8px 24px rgba(59,130,246,.4), 0 0 60px rgba(59,130,246,.2);
+      animation:pulse-glow 4s ease-in-out infinite;
+    }
+    
+    @keyframes pulse-glow{
+      0%, 100%{box-shadow:0 8px 24px rgba(59,130,246,.4), 0 0 60px rgba(59,130,246,.2)}
+      50%{box-shadow:0 8px 32px rgba(59,130,246,.5), 0 0 80px rgba(59,130,246,.3)}
+    }
+    
+    .brand h1{
+      font-size:20px;
+      font-weight:700;
+      letter-spacing:.5px;
+      background:linear-gradient(135deg, #60a5fa, #3b82f6);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      background-clip:text;
+    }
+    
+    nav a{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:12px 16px;
+      margin:8px 0;
+      text-decoration:none;
+      color:var(--muted);
+      border-radius:12px;
+      transition:all .25s cubic-bezier(.4,0,.2,1);
+      border:1px solid transparent;
+      font-weight:500;
+      position:relative;
+      overflow:hidden;
+    }
+    
+    nav a::before{
+      content:'';
+      position:absolute;
+      inset:0;
+      background:linear-gradient(135deg, rgba(59,130,246,.1), rgba(96,165,250,.08));
+      opacity:0;
+      transition:opacity .25s;
+    }
+    
+    nav a:hover{
+      color:var(--text);
+      border-color:rgba(59,130,246,.3);
+      transform:translateX(4px);
+    }
+    
+    nav a:hover::before{opacity:1}
+    
+    nav a.active{
+      color:var(--accent-bright);
+      background:linear-gradient(135deg, rgba(59,130,246,.15), rgba(96,165,250,.12));
+      border-color:rgba(59,130,246,.4);
+      box-shadow:0 4px 12px rgba(59,130,246,.15);
+    }
+    
+    .nav-dot{
+      width:6px;
+      height:6px;
+      border-radius:50%;
+      background:currentColor;
+      transition:all .25s;
+    }
+    
+    nav a.active .nav-dot{
+      width:8px;
+      height:8px;
+      box-shadow:0 0 12px currentColor;
+    }
+
+    .main{
+      margin-left:260px;
+      padding:40px 48px 80px;
+      max-width:1400px;
+    }
+
+    .header{
+      margin-bottom:48px;
+    }
+
+    .header h2{
+      font-size:36px;
+      font-weight:900;
+      margin:0 0 12px 0;
+      background:linear-gradient(135deg, #f8fafc, #cbd5e1);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      background-clip:text;
+    }
+
+    .header-note{
+      color:var(--muted);
+      font-size:15px;
+      line-height:1.7;
+      max-width:760px;
+      margin-bottom:10px;
+    }
+
+    .section{
+      margin-bottom:64px;
+    }
+
+    .section-title{
+      font-size:13px;
+      color:var(--accent-bright);
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:2px;
+      margin:0 0 28px 0;
+      padding-left:20px;
+      position:relative;
+    }
+
+    .section-title::before{
+      content:'';
+      position:absolute;
+      left:0;
+      top:50%;
+      transform:translateY(-50%);
+      width:8px;
+      height:8px;
+      background:var(--accent-bright);
+      border-radius:50%;
+      box-shadow:0 0 12px var(--accent-bright);
+      animation:pulse-dot 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot{
+      0%, 100%{transform:translateY(-50%) scale(1); opacity:1}
+      50%{transform:translateY(-50%) scale(1.3); opacity:.7}
+    }
+
+    .production-note{
+      background:rgba(15,23,42,.6);
+      border:1px solid rgba(59,130,246,.2);
+      border-radius:var(--radius);
+      padding:20px 24px;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.7;
+      margin-bottom:32px;
+      max-width:900px;
+    }
+
+    .production-grid{
+      display:grid;
+      gap:24px;
+    }
+
+    .track-card{
+      background:linear-gradient(145deg, rgba(15,23,42,.7), rgba(10,17,32,.8));
+      border:1px solid rgba(59,130,246,.2);
+      border-radius:var(--radius);
+      padding:24px;
+      transition:all .3s;
+    }
+
+    .track-card:hover{
+      border-color:rgba(59,130,246,.4);
+      transform:translateY(-2px);
+    }
+
+    .track-header{
+      margin-bottom:14px;
+    }
+
+    .track-title-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .track-title{
+      font-size:20px;
+      font-weight:800;
+      color:var(--text);
+      margin-bottom:4px;
+      line-height:1.2;
+    }
+
+    .track-genre{
+      font-size:13px;
+      color:var(--accent-bright);
+      font-weight:600;
+    }
+
+    .track-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:4px 10px;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:700;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      color:#fbbf24;
+      background:rgba(251,191,36,.08);
+      border:1px solid rgba(251,191,36,.5);
+      position:relative;
+      overflow:hidden;
+      white-space:nowrap;
+    }
+
+    .track-pill::before{
+      content:'';
+      position:absolute;
+      inset:-40%;
+      background:conic-gradient(
+        from 0deg,
+        rgba(251,191,36,.0),
+        rgba(251,191,36,.55),
+        rgba(251,191,36,.0),
+        rgba(96,165,250,.45),
+        rgba(251,191,36,.0)
+      );
+      opacity:.85;
+      animation:featured-spin 6s linear infinite;
+    }
+
+    .track-pill-inner{
+      position:relative;
+      z-index:1;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+    }
+
+    .track-pill-dot{
+      width:7px;
+      height:7px;
+      border-radius:999px;
+      background:#fbbf24;
+      box-shadow:0 0 10px rgba(251,191,36,.9);
+    }
+
+    @keyframes featured-spin{
+      0%{transform:rotate(0deg);}
+      100%{transform:rotate(360deg);}
+    }
+
+    .track-process{
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.6;
+      margin-top:12px;
+      padding-left:12px;
+      border-left:2px solid rgba(59,130,246,.2);
+    }
+
+    .track-process strong{
+      color:var(--accent-bright);
+      font-weight:700;
+    }
+
+    .track-links{
+      margin-top:12px;
+      font-size:13px;
+      color:var(--muted);
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+    }
+
+    .track-links a{
+      color:var(--accent-bright);
+      text-decoration:none;
+      border:1px solid rgba(59,130,246,.25);
+      background:rgba(15,23,42,.55);
+      padding:6px 10px;
+      border-radius:999px;
+      transition:all .2s;
+    }
+
+    .track-links a:hover{
+      border-color:rgba(59,130,246,.45);
+      background:rgba(59,130,246,.15);
+      transform:translateY(-1px);
+    }
+
+    .track-embed{
+      margin-top:14px;
+    }
+
+    .track-embed iframe{
+      width:100%;
+      border-radius:8px;
+    }
+
+    .gear-grid{
+      display:grid;
+      gap:24px;
+      grid-template-columns:repeat(auto-fill, minmax(320px, 1fr));
+    }
+
+    .gear-card{
+      background:linear-gradient(145deg, rgba(15,23,42,.7), rgba(10,17,32,.8));
+      border:1px solid rgba(59,130,246,.15);
+      border-radius:var(--radius);
+      overflow:hidden;
+      transition:all .3s;
+    }
+
+    .gear-card:hover{
+      border-color:rgba(59,130,246,.3);
+      transform:translateY(-4px);
+    }
+
+    .gear-image{
+      width:100%;
+      height:220px;
+      background:rgba(59,130,246,.05);
+      border-bottom:1px solid rgba(59,130,246,.15);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:var(--muted);
+      font-size:13px;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .gear-image img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+
+    .gear-placeholder{
+      text-align:center;
+      padding:20px;
+    }
+
+    .gear-info{
+      padding:18px 20px;
+    }
+
+    .gear-name{
+      font-size:16px;
+      font-weight:700;
+      color:var(--text);
+      margin-bottom:6px;
+    }
+
+    .gear-note{
+      font-size:13px;
+      color:var(--muted);
+      line-height:1.5;
+    }
+
+    @media (max-width:1024px){
+      .sidebar{width:240px}
+      .main{margin-left:240px; padding:32px}
+      .gear-grid{grid-template-columns:1fr}
+    }
+
+    @media (max-width:768px){
+      .sidebar{
+        width:100%;
+        position:relative;
+        padding:20px;
+        border-right:none;
+        border-bottom:1px solid var(--border);
+      }
+      .main{margin-left:0; padding:20px 16px}
+      .header h2{font-size:28px}
+    }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="badge"></div>
+      <h1>CommandBridge</h1>
+    </div>
+    <nav>
+      <a href="../index.html"><span class="nav-dot"></span> Home</a>
+      <a href="../projects/index.html"><span class="nav-dot"></span> Projects</a>
+      <a href="./listening.html"><span class="nav-dot"></span> Listening</a>
+      <a href="./production.html" class="active"><span class="nav-dot"></span> Production</a>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <div class="header">
+      <h2>Production</h2>
+      <p class="header-note">
+        Industrial, EBM, and synth-driven music. Building signal chains is as important as writing songs.
+      </p>
+      <p class="header-note">
+        Most tracks start as hardware jams; I keep software minimal and focus on routing, texture, and arrangement.
+      </p>
+    </div>
+
+    <section class="section">
+      <h3 class="section-title">Tracks</h3>
+      
+      <div class="production-note">
+        Hardware-first workflow (when possible). Modular synthesis, Elektron-style sequencing, and intentional constraints.
+      </div>
+
+      <div class="production-grid">
+
+        <!-- NEW: Like A Lost Star -->
+        <article class="track-card">
+          <div class="track-header">
+            <div class="track-title-row">
+              <div>
+                <div class="track-title">Like A Lost Star</div>
+                <div class="track-genre">Synth / Electronic</div>
+              </div>
+              <div class="track-pill" title="Good starting point">
+                <div class="track-pill-inner">
+                  <span class="track-pill-dot"></span>
+                  <span>Featured</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="track-process">
+              <strong>About:</strong> A focused “single-plugin” production built around phase distortion textures.
+            </div>
+            <div class="track-process">
+              <strong>Gear / process:</strong> Cubase 11 + UVI Cameo only (no other instruments).
+            </div>
+
+            <div class="track-links">
+              <span>Listen on:</span>
+              <a href="https://soundcloud.com/user-886953764/like-a-lost-star" target="_blank" rel="noopener noreferrer">SoundCloud</a>
+              <!-- Optional: add more platforms later -->
+              <!-- <a href="https://bandcamp.com/..." target="_blank" rel="noopener noreferrer">Bandcamp</a> -->
+              <!-- <a href="https://open.spotify.com/track/..." target="_blank" rel="noopener noreferrer">Spotify</a> -->
+            </div>
+          </div>
+
+          <div class="track-embed">
+            <!-- If you want the embed to be dynamic, you can replace this with the track ID-based embed later. -->
+            <iframe
+              width="100%"
+              height="166"
+              scrolling="no"
+              frameborder="no"
+              allow="autoplay"
+              src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/user-886953764/like-a-lost-star&color=%233b82f6&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false">
+            </iframe>
+          </div>
+        </article>
+
+        <!-- Existing tracks (kept, but enhanced with About/Gear/Links) -->
+        <article class="track-card">
+          <div class="track-header">
+            <div class="track-title-row">
+              <div>
+                <div class="track-title">Polis Syndicate</div>
+                <div class="track-genre">Industrial / EBM</div>
+              </div>
+            </div>
+            <div class="track-process">
+              <strong>About:</strong> Punchy industrial rhythm with a militant pulse and tight transitions.
+            </div>
+            <div class="track-process">
+              <strong>Gear / process:</strong> Hardware-first sequencing and sound design, then arrangement cleanup in the DAW.
+            </div>
+            <div class="track-links">
+              <span>Listen on:</span>
+              <a href="#" onclick="return false;">SoundCloud (add link)</a>
+            </div>
+          </div>
+          <div class="track-embed">
+            <iframe width="100%" height="166" scrolling="no" frameborder="no" allow="autoplay"
+              src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/1986798838&color=%233b82f6&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false">
+            </iframe>
+          </div>
+        </article>
+
+        <article class="track-card">
+          <div class="track-header">
+            <div class="track-title-row">
+              <div>
+                <div class="track-title">PortalFalling</div>
+                <div class="track-genre">Dark Synth</div>
+              </div>
+            </div>
+            <div class="track-process">
+              <strong>About:</strong> Dark, drifting synth lines with tension builds and wide atmosphere.
+            </div>
+            <div class="track-process">
+              <strong>Gear / process:</strong> Layered synth voices, subtle distortion, and controlled space (delay/reverb).
+            </div>
+            <div class="track-links">
+              <span>Listen on:</span>
+              <a href="#" onclick="return false;">SoundCloud (add link)</a>
+            </div>
+          </div>
+          <div class="track-embed">
+            <iframe width="100%" height="166" scrolling="no" frameborder="no" allow="autoplay"
+              src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/1986802002&color=%233b82f6&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false">
+            </iframe>
+          </div>
+        </article>
+
+        <article class="track-card">
+          <div class="track-header">
+            <div class="track-title-row">
+              <div>
+                <div class="track-title">Tannhauser</div>
+                <div class="track-genre">Synthwave / Industrial</div>
+              </div>
+            </div>
+            <div class="track-process">
+              <strong>About:</strong> Synthwave color with industrial edges—clean hooks, dirty textures.
+            </div>
+            <div class="track-process">
+              <strong>Gear / process:</strong> Contrast-driven production: bright leads against gritty percussion and bass.
+            </div>
+            <div class="track-links">
+              <span>Listen on:</span>
+              <a href="#" onclick="return false;">SoundCloud (add link)</a>
+            </div>
+          </div>
+          <div class="track-embed">
+            <iframe width="100%" height="166" scrolling="no" frameborder="no" allow="autoplay"
+              src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/1986803377&color=%233b82f6&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false">
+            </iframe>
+          </div>
+        </article>
+
+        <article class="track-card">
+          <div class="track-header">
+            <div class="track-title-row">
+              <div>
+                <div class="track-title">Solarius</div>
+                <div class="track-genre">Ambient / Drone</div>
+              </div>
+            </div>
+            <div class="track-process">
+              <strong>About:</strong> Slow-bloom ambient layers built for texture and space.
+            </div>
+            <div class="track-process">
+              <strong>Gear / process:</strong> Long envelopes, evolving modulation, and minimal percussion.
+            </div>
+            <div class="track-links">
+              <span>Listen on:</span>
+              <a href="#" onclick="return false;">SoundCloud (add link)</a>
+            </div>
+          </div>
+          <div class="track-embed">
+            <iframe width="100%" height="166" scrolling="no" frameborder="no" allow="autoplay"
+              src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/1986804866&color=%233b82f6&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false">
+            </iframe>
+          </div>
+        </article>
+
+        <article class="track-card">
+          <div class="track-header">
+            <div class="track-title-row">
+              <div>
+                <div class="track-title">Shatterpoint</div>
+                <div class="track-genre">Industrial</div>
+              </div>
+            </div>
+            <div class="track-process">
+              <strong>About:</strong> Direct, heavy industrial track centered on impact and rhythm design.
+            </div>
+            <div class="track-process">
+              <strong>Gear / process:</strong> Aggressive transient shaping, distortion stages, and tight mix control.
+            </div>
+            <div class="track-links">
+              <span>Listen on:</span>
+              <a href="#" onclick="return false;">SoundCloud (add link)</a>
+            </div>
+          </div>
+          <div class="track-embed">
+            <iframe width="100%" height="166" scrolling="no" frameborder="no" allow="autoplay"
+              src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/1986805988&color=%233b82f6&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false">
+            </iframe>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <section class="section">
+      <h3 class="section-title">Hardware & Workspace</h3>
+      
+      <div class="gear-grid">
+        <article class="gear-card">
+          <div class="gear-image">
+            <!-- Replace with a real image when ready -->
+            <!-- <img src="../images/gear/modular-rig.jpg" alt="Modular synth rig" /> -->
+            <div class="gear-placeholder">Modular Synth Workbox<br><small>(Add photo)</small></div>
+          </div>
+          <div class="gear-info">
+            <div class="gear-name">Modular Rig</div>
+            <div class="gear-note">Architecture matters more to me than presets. Used for bass, texture, and motion.</div>
+          </div>
+        </article>
+
+        <article class="gear-card">
+          <div class="gear-image">
+            <!-- <img src="../images/gear/studio.jpg" alt="Studio setup" /> -->
+            <div class="gear-placeholder">Production Workspace<br><small>(Add photo)</small></div>
+          </div>
+          <div class="gear-info">
+            <div class="gear-name">Studio Setup</div>
+            <div class="gear-note">Routing, gain staging, and repeatable signal chains. Minimal software distractions.</div>
+          </div>
+        </article>
+
+        <article class="gear-card">
+          <div class="gear-image">
+            <!-- <img src="../images/gear/synths.jpg" alt="Hardware synths" /> -->
+            <div class="gear-placeholder">Synthesizers<br><small>(Add photo)</small></div>
+          </div>
+          <div class="gear-info">
+            <div class="gear-name">Hardware Synths</div>
+            <div class="gear-note">Hardware-first: tactile control and intentional limitations to shape the sound.</div>
+          </div>
+        </article>
+
+        <article class="gear-card">
+          <div class="gear-image">
+            <!-- <img src="../images/gear/guitars.jpg" alt="Guitars" /> -->
+            <div class="gear-placeholder">Guitars<br><small>(Add photo)</small></div>
+          </div>
+          <div class="gear-info">
+            <div class="gear-name">Guitars</div>
+            <div class="gear-note">Feel, tuning stability, and tone shaping over collecting.</div>
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
