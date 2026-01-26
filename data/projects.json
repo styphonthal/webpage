@@ -6,7 +6,8 @@
     "tags": ["automation", "whatsapp", "n8n", "home-assistant"],
     "updated": "2025-12-26",
     "started": "2025-11-20",
-    "status": "In Progress",
+    "status": "Paused",
+    "stage": "In Progress",
     "tech": ["Node.js", "n8n", "WhatsApp Cloud API", "Home Assistant"],
     "percentComplete": 70,
     "github": "https://github.com/youruser/whatsapp-n8n-homeassistant",
@@ -43,7 +44,10 @@
     "tags": ["meta", "smart-glasses", "whatsapp"],
     "updated": "2026-01-05",
     "started": "2025-11-20",
-    "status": "Stalled",
+    
+    "status": "Paused",
+    "stage": "Stalled",
+
     "tech": ["WhatsApp Cloud API", "n8n"],
     "percentComplete": 30,
     "github": "https://github.com/youruser/meta-smart-glasses-bot",
@@ -78,7 +82,10 @@
     "tags": ["android", "tmdb", "movietracker"],
     "updated": "2025-12-05",
     "started": "2025-06-20",
-    "status": "Near Complete",
+    
+    "status": "Paused",
+    "stage": "Near Complete",
+
     "tech": ["Kotlin", "Android Studio", "Room", "Retrofit", "Glide", "Coroutines"],
     "percentComplete": 80,
     "github": "https://github.com/youruser/movie-tracker-android",
@@ -112,8 +119,10 @@
     "description": "Qt/QML desktop movie+series tracker using TMDb search and a local SQLite-backed library.",
     "tags": ["qt", "qml", "linux", "tmdb", "movietracker"],
     "updated": "2025-06-06",
-    "started": "2025-01-20",
-    "status": "Near Complete",
+    "started": "2025-01-20",    
+    "status": "Paused",
+    "stage": "Near Complete",
+
     "tech": ["C++", "Qt", "QML", "SQLite"],
     "percentComplete": 85,
     "github": "https://github.com/youruser/movie-tracker-linux",
@@ -148,7 +157,11 @@
     "tags": ["linux", "clock", "plasmoid", "kde"],
     "updated": "2026-01-22",
     "started": "2025-01-20",
-    "status": "Complete (beta)",
+    
+    "stage": "Complete (beta)",
+    "status": "Paused",
+    
+
     "tech": ["KDE Plasma", "QML", "JavaScript"],
     "percentComplete": 95,
     "github": "https://github.com/youruser/lofi-linux-clock-plasmoid",
@@ -186,7 +199,10 @@
     "tags": ["linux", "comic", "plasmoid", "kde"],
     "updated": "2026-01-20",
     "started": "2025-01-20",
-    "status": "Complete (beta)",
+    
+    "stage": "Complete (beta)",
+    "status": "Paused",
+
     "tech": ["KDE Plasma", "QML", "JavaScript"],
     "percentComplete": 95,
     "github": "https://github.com/youruser/penny-arcade-plasmoid",
@@ -221,7 +237,9 @@
     "tags": ["linux", "clock", "conky"],
     "updated": "2025-06-05",
     "started": "2025-01-20",
-    "status": "Complete (beta)",
+    "stage": "Complete (beta)",
+    "status": "Paused",
+
     "tech": ["Conky", "Linux"],
     "percentComplete": 95,
     "github": "https://github.com/youruser/conky-halloween-clock",
@@ -254,7 +272,9 @@
     "tags": ["android", "subscriptions", "reminders", "workmanager"],
     "updated": "2025-11-26",
     "started": "2025-07-10",
-    "status": "Stalled (broken reminders)",
+    "stage": "Stalled (broken reminders)",
+    "status": "Paused",
+
     "tech": ["Kotlin", "Room", "WorkManager", "RecyclerView", "Material Components"],
     "percentComplete": 40,
     "github": null,
@@ -283,3 +303,4 @@
     ]
   }
 ]
+
