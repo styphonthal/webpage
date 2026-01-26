@@ -16,10 +16,10 @@
       --border:#1e293b;
       --radius:16px;
     }
-    
+
     *{box-sizing:border-box; margin:0; padding:0}
     html,body{height:100%; overflow-x:hidden}
-    
+
     body{
       background:
         radial-gradient(ellipse 1400px 800px at 20% -15%, rgba(59,130,246,.08), transparent 60%),
@@ -41,7 +41,7 @@
       z-index:100;
       box-shadow:4px 0 24px rgba(0,0,0,.3);
     }
-    
+
     .brand{
       display:flex;
       align-items:center;
@@ -60,12 +60,12 @@
       box-shadow:0 8px 24px rgba(59,130,246,.4), 0 0 60px rgba(59,130,246,.2);
       animation:pulse-glow 4s ease-in-out infinite;
     }
-    
+
     @keyframes pulse-glow{
       0%, 100%{box-shadow:0 8px 24px rgba(59,130,246,.4), 0 0 60px rgba(59,130,246,.2)}
       50%{box-shadow:0 8px 32px rgba(59,130,246,.5), 0 0 80px rgba(59,130,246,.3)}
     }
-    
+
     .brand h1{
       font-size:20px;
       font-weight:700;
@@ -75,7 +75,7 @@
       -webkit-text-fill-color:transparent;
       background-clip:text;
     }
-    
+
     nav a{
       display:flex;
       align-items:center;
@@ -91,7 +91,7 @@
       position:relative;
       overflow:hidden;
     }
-    
+
     nav a::before{
       content:'';
       position:absolute;
@@ -100,22 +100,21 @@
       opacity:0;
       transition:opacity .25s;
     }
-    
+
     nav a:hover{
       color:var(--text);
       border-color:rgba(59,130,246,.3);
       transform:translateX(4px);
     }
-    
     nav a:hover::before{opacity:1}
-    
+
     nav a.active{
       color:var(--accent-bright);
       background:linear-gradient(135deg, rgba(59,130,246,.15), rgba(96,165,250,.12));
       border-color:rgba(59,130,246,.4);
       box-shadow:0 4px 12px rgba(59,130,246,.15);
     }
-    
+
     .nav-dot{
       width:6px;
       height:6px;
@@ -123,7 +122,7 @@
       background:currentColor;
       transition:all .25s;
     }
-    
+
     nav a.active .nav-dot{
       width:8px;
       height:8px;
@@ -136,10 +135,7 @@
       max-width:1400px;
     }
 
-    .header{
-      margin-bottom:48px;
-    }
-
+    .header{margin-bottom:34px;}
     .header h2{
       font-size:36px;
       font-weight:900;
@@ -158,9 +154,7 @@
       margin-bottom:10px;
     }
 
-    .section{
-      margin-bottom:64px;
-    }
+    .section{margin-bottom:64px;}
 
     .section-title{
       font-size:13px;
@@ -200,13 +194,79 @@
       color:var(--muted);
       font-size:14px;
       line-height:1.7;
-      margin-bottom:32px;
-      max-width:900px;
+      margin-bottom:18px;
+      max-width:980px;
+    }
+
+    /* NEW: controls */
+    .controls{
+      margin-top:18px;
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:center;
+      border:1px solid rgba(59,130,246,.18);
+      border-radius:14px;
+      background:linear-gradient(145deg, rgba(15,23,42,.55), rgba(10,17,32,.7));
+      padding:14px 14px;
+    }
+    .control{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .control label{
+      font-size:11px;
+      letter-spacing:1px;
+      text-transform:uppercase;
+      color:var(--muted);
+      font-weight:900;
+      padding-left:4px;
+    }
+    .control input, .control select{
+      appearance:none;
+      -webkit-appearance:none;
+      -moz-appearance:none;
+      background:rgba(59,130,246,.08);
+      border:1px solid rgba(59,130,246,.22);
+      color:var(--text);
+      border-radius:10px;
+      padding:10px 12px;
+      font-weight:700;
+      outline:none;
+      cursor:pointer;
+      min-width:180px;
+    }
+    .control input{
+      cursor:text;
+      min-width:260px;
+    }
+    .control input:focus, .control select:focus{
+      border-color:rgba(96,165,250,.5);
+      box-shadow:0 0 0 3px rgba(59,130,246,.15);
+    }
+    .control button{
+      border:1px solid rgba(59,130,246,.25);
+      background:rgba(15,23,42,.55);
+      color:var(--accent-bright);
+      padding:10px 12px;
+      border-radius:10px;
+      font-weight:900;
+      letter-spacing:.4px;
+      cursor:pointer;
+      transition:all .2s;
+    }
+    .control button:hover{
+      border-color:rgba(59,130,246,.45);
+      background:rgba(59,130,246,.15);
+      transform:translateY(-1px);
     }
 
     .production-grid{
       display:grid;
       gap:24px;
+      margin-top:18px;
     }
 
     .track-card{
@@ -222,13 +282,11 @@
       transform:translateY(-2px);
     }
 
-    .track-header{
-      margin-bottom:14px;
-    }
+    .track-header{margin-bottom:12px;}
 
     .track-title-row{
       display:flex;
-      align-items:center;
+      align-items:flex-start;
       justify-content:space-between;
       gap:12px;
       flex-wrap:wrap;
@@ -236,7 +294,7 @@
 
     .track-title{
       font-size:20px;
-      font-weight:800;
+      font-weight:900;
       color:var(--text);
       margin-bottom:4px;
       line-height:1.2;
@@ -245,7 +303,36 @@
     .track-genre{
       font-size:13px;
       color:var(--accent-bright);
-      font-weight:600;
+      font-weight:800;
+    }
+
+    .track-meta{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:10px;
+    }
+
+    .meta-chip{
+      font-size:11px;
+      font-weight:900;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      padding:6px 10px;
+      border-radius:999px;
+      color:rgba(248,250,252,.92);
+      background:rgba(59,130,246,.10);
+      border:1px solid rgba(59,130,246,.18);
+      white-space:nowrap;
+    }
+
+    .gear-chip{
+      cursor:pointer;
+      user-select:none;
+    }
+    .gear-chip:hover{
+      border-color:rgba(59,130,246,.35);
+      background:rgba(59,130,246,.14);
     }
 
     .track-pill{
@@ -255,7 +342,7 @@
       padding:4px 10px;
       border-radius:999px;
       font-size:11px;
-      font-weight:700;
+      font-weight:900;
       text-transform:uppercase;
       letter-spacing:.08em;
       color:#fbbf24;
@@ -307,14 +394,14 @@
       color:var(--muted);
       font-size:14px;
       line-height:1.6;
-      margin-top:12px;
+      margin-top:10px;
       padding-left:12px;
       border-left:2px solid rgba(59,130,246,.2);
     }
 
     .track-process strong{
       color:var(--accent-bright);
-      font-weight:700;
+      font-weight:900;
     }
 
     .track-links{
@@ -343,15 +430,84 @@
       transform:translateY(-1px);
     }
 
-    .track-embed{
+    /* NEW: collapsible details */
+    .details{
       margin-top:14px;
+      border:1px solid rgba(59,130,246,.18);
+      border-radius:14px;
+      overflow:hidden;
+      background:rgba(15,23,42,.45);
+    }
+    .details-btn{
+      width:100%;
+      text-align:left;
+      border:0;
+      background:transparent;
+      padding:14px 16px;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      color:var(--text);
+      font-weight:900;
+      letter-spacing:.2px;
+    }
+    .details-btn:hover{background:rgba(59,130,246,.05);}
+    .details-btn:focus-visible{
+      outline:none;
+      box-shadow:inset 0 0 0 2px rgba(96,165,250,.45), 0 0 0 3px rgba(59,130,246,.12);
+    }
+    .details-caret{
+      color:var(--accent-bright);
+      transition:transform .25s;
+    }
+    .details.open .details-caret{transform:rotate(180deg);}
+    .details-body{
+      display:grid;
+      grid-template-rows:0fr;
+      transition:grid-template-rows .28s ease;
+      overflow:hidden;
+    }
+    .details.open .details-body{grid-template-rows:1fr;}
+    .details-content{
+      min-height:0;
+      padding:0 16px 16px;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.6;
+      display:grid;
+      gap:10px;
+    }
+    .kv{
+      display:grid;
+      grid-template-columns:120px 1fr;
+      gap:10px;
+      align-items:start;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid rgba(59,130,246,.14);
+      background:rgba(59,130,246,.06);
+    }
+    .k{
+      font-size:11px;
+      letter-spacing:1px;
+      text-transform:uppercase;
+      color:rgba(148,163,184,.95);
+      font-weight:900;
+      padding-top:2px;
+    }
+    .v{
+      color:rgba(248,250,252,.90);
+      font-weight:700;
     }
 
+    .track-embed{margin-top:14px;}
     .track-embed iframe{
       width:100%;
       border-radius:8px;
     }
 
+    /* Gear gallery */
     .gear-grid{
       display:grid;
       gap:24px;
@@ -364,6 +520,7 @@
       border-radius:var(--radius);
       overflow:hidden;
       transition:all .3s;
+      cursor:pointer;
     }
 
     .gear-card:hover{
@@ -392,26 +549,112 @@
       display:block;
     }
 
-    .gear-placeholder{
-      text-align:center;
-      padding:20px;
-    }
+    .gear-placeholder{text-align:center; padding:20px;}
 
-    .gear-info{
-      padding:18px 20px;
-    }
-
+    .gear-info{padding:18px 20px;}
     .gear-name{
       font-size:16px;
-      font-weight:700;
+      font-weight:900;
       color:var(--text);
       margin-bottom:6px;
     }
-
     .gear-note{
       font-size:13px;
       color:var(--muted);
       line-height:1.5;
+    }
+
+    /* NEW: modal */
+    .modal{
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+      z-index:999;
+      background:rgba(2,6,23,.72);
+      backdrop-filter:blur(10px);
+    }
+    .modal.open{display:flex;}
+    .modal-card{
+      width:min(980px, 100%);
+      border-radius:18px;
+      overflow:hidden;
+      border:1px solid rgba(59,130,246,.22);
+      background:linear-gradient(145deg, rgba(15,23,42,.92), rgba(10,17,32,.92));
+      box-shadow:0 18px 60px rgba(0,0,0,.55);
+    }
+    .modal-top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:14px 16px;
+      border-bottom:1px solid rgba(59,130,246,.18);
+    }
+    .modal-title{
+      font-weight:900;
+      color:var(--text);
+      letter-spacing:.2px;
+    }
+    .modal-close{
+      border:1px solid rgba(59,130,246,.25);
+      background:rgba(15,23,42,.55);
+      color:var(--accent-bright);
+      padding:8px 10px;
+      border-radius:10px;
+      font-weight:900;
+      cursor:pointer;
+    }
+    .modal-close:hover{
+      border-color:rgba(59,130,246,.45);
+      background:rgba(59,130,246,.15);
+    }
+    .modal-media{
+      width:100%;
+      height:420px;
+      background:rgba(59,130,246,.05);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border-bottom:1px solid rgba(59,130,246,.18);
+    }
+    .modal-media img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+    .modal-body{
+      padding:14px 16px 18px;
+      display:grid;
+      gap:10px;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.6;
+    }
+    .modal-body strong{color:rgba(248,250,252,.92); font-weight:900;}
+    .modal-tracks{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+    }
+    .modal-trackchip{
+      font-size:11px;
+      font-weight:900;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      padding:6px 10px;
+      border-radius:999px;
+      color:rgba(248,250,252,.92);
+      background:rgba(59,130,246,.10);
+      border:1px solid rgba(59,130,246,.18);
+      cursor:pointer;
+    }
+    .modal-trackchip:hover{
+      border-color:rgba(59,130,246,.35);
+      background:rgba(59,130,246,.14);
     }
 
     @media (max-width:1024px){
@@ -430,6 +673,11 @@
       }
       .main{margin-left:0; padding:20px 16px}
       .header h2{font-size:28px}
+      .control input{min-width:0; width:100%}
+      .control select{min-width:0; width:100%}
+      .controls{align-items:stretch}
+      .modal-media{height:300px}
+      .kv{grid-template-columns:1fr}
     }
   </style>
 </head>
@@ -456,19 +704,73 @@
       <p class="header-note">
         Most tracks start as hardware jams; I keep software minimal and focus on routing, texture, and arrangement.
       </p>
+
+      <!-- NEW: obvious CTA -->
+      <div class="controls" style="margin-top:14px;">
+        <div class="control" style="flex:1; min-width:260px;">
+          <label>Profile</label>
+          <a href="https://soundcloud.com/" target="_blank" rel="noopener noreferrer"
+             style="display:inline-flex; align-items:center; gap:8px; text-decoration:none; padding:10px 12px; border-radius:10px; border:1px solid rgba(59,130,246,.25); background:rgba(15,23,42,.55); color:var(--accent-bright); font-weight:900;">
+            SoundCloud Profile (set link)
+          </a>
+        </div>
+        <div class="control" style="flex:1; min-width:260px;">
+          <label>What this is</label>
+          <div style="color:var(--muted); font-size:13px; line-height:1.55;">
+            Short writeups, embedded players, and the gear/routing behind each track.
+          </div>
+        </div>
+      </div>
     </div>
 
     <section class="section">
       <h3 class="section-title">Tracks</h3>
-      
+
       <div class="production-note">
-        Hardware-first workflow (when possible). Modular synthesis, Elektron-style sequencing, and intentional constraints.
+        Hardware-first workflow (when possible). Intentional constraints. Repeatable routing. Minimal “plugin wandering.”
       </div>
 
-      <div class="production-grid">
+      <!-- NEW: filter/search -->
+      <div class="controls" aria-label="Track filters">
+        <div class="control">
+          <label for="searchInput">Search</label>
+          <input id="searchInput" type="text" placeholder="Title, genre, gear, notes…" />
+        </div>
+        <div class="control">
+          <label for="genreSelect">Genre</label>
+          <select id="genreSelect">
+            <option value="all" selected>All</option>
+            <option>Industrial / EBM</option>
+            <option>Dark Synth</option>
+            <option>Synthwave / Industrial</option>
+            <option>Ambient / Drone</option>
+            <option>Synth / Electronic</option>
+            <option>Industrial</option>
+          </select>
+        </div>
+        <div class="control">
+          <label for="featuredSelect">Featured</label>
+          <select id="featuredSelect">
+            <option value="all" selected>All</option>
+            <option value="yes">Featured only</option>
+          </select>
+        </div>
+        <div class="control">
+          <button id="resetBtn" type="button">Reset</button>
+        </div>
+      </div>
 
-        <!-- NEW: Like A Lost Star -->
-        <article class="track-card">
+      <div class="production-grid" id="trackGrid">
+
+        <!-- Like A Lost Star -->
+        <article class="track-card"
+          data-title="Like A Lost Star"
+          data-genre="Synth / Electronic"
+          data-featured="yes"
+          data-gear="Cubase 11,UVI Cameo"
+          data-year="2024"
+          data-bpm="—"
+          data-key="—">
           <div class="track-header">
             <div class="track-title-row">
               <div>
@@ -483,24 +785,42 @@
               </div>
             </div>
 
+            <div class="track-meta">
+              <span class="meta-chip">Year: 2024</span>
+              <span class="meta-chip">BPM: —</span>
+              <span class="meta-chip">Key: —</span>
+              <span class="meta-chip gear-chip" data-gear-ref="uvi-cameo">Gear: UVI Cameo</span>
+              <span class="meta-chip gear-chip" data-gear-ref="cubase">DAW: Cubase 11</span>
+            </div>
+
             <div class="track-process">
-              <strong>About:</strong> A focused “single-plugin” production built around phase distortion textures.
+              <strong>What I was chasing:</strong> phase distortion textures with a controlled low end and minimal layers.
             </div>
             <div class="track-process">
-              <strong>Gear / process:</strong> Cubase 11 + UVI Cameo only (no other instruments).
+              <strong>Constraint:</strong> one instrument only (UVI Cameo). No additional synths.
             </div>
 
             <div class="track-links">
               <span>Listen on:</span>
               <a href="https://soundcloud.com/user-886953764/like-a-lost-star" target="_blank" rel="noopener noreferrer">SoundCloud</a>
-              <!-- Optional: add more platforms later -->
-              <!-- <a href="https://bandcamp.com/..." target="_blank" rel="noopener noreferrer">Bandcamp</a> -->
-              <!-- <a href="https://open.spotify.com/track/..." target="_blank" rel="noopener noreferrer">Spotify</a> -->
+            </div>
+          </div>
+
+          <div class="details" data-details>
+            <button class="details-btn" type="button" aria-expanded="false">
+              Track details (signal chain / mix notes)
+              <span class="details-caret" aria-hidden="true">▼</span>
+            </button>
+            <div class="details-body" role="region" aria-label="Track details">
+              <div class="details-content">
+                <div class="kv"><div class="k">Signal chain</div><div class="v">UVI Cameo → DAW FX (minimal) → mix bus</div></div>
+                <div class="kv"><div class="k">Notes</div><div class="v">Add what you learned / what broke / what you fixed.</div></div>
+                <div class="kv"><div class="k">Tracking</div><div class="v">Gain staging, transient discipline, low-end translation.</div></div>
+              </div>
             </div>
           </div>
 
           <div class="track-embed">
-            <!-- If you want the embed to be dynamic, you can replace this with the track ID-based embed later. -->
             <iframe
               width="100%"
               height="166"
@@ -512,8 +832,15 @@
           </div>
         </article>
 
-        <!-- Existing tracks (kept, but enhanced with About/Gear/Links) -->
-        <article class="track-card">
+        <!-- Polis Syndicate -->
+        <article class="track-card"
+          data-title="Polis Syndicate"
+          data-genre="Industrial / EBM"
+          data-featured="no"
+          data-gear="Hardware sequencing,Distortion bus"
+          data-year="—"
+          data-bpm="—"
+          data-key="—">
           <div class="track-header">
             <div class="track-title-row">
               <div>
@@ -521,17 +848,42 @@
                 <div class="track-genre">Industrial / EBM</div>
               </div>
             </div>
+
+            <div class="track-meta">
+              <span class="meta-chip">Year: —</span>
+              <span class="meta-chip">BPM: —</span>
+              <span class="meta-chip">Key: —</span>
+              <span class="meta-chip gear-chip" data-gear-ref="hardware">Gear: Hardware sequencing</span>
+              <span class="meta-chip gear-chip" data-gear-ref="distortion">FX: Distortion staging</span>
+            </div>
+
             <div class="track-process">
-              <strong>About:</strong> Punchy industrial rhythm with a militant pulse and tight transitions.
+              <strong>What I was chasing:</strong> militant pulse + tight transitions with “machine” timing.
             </div>
             <div class="track-process">
-              <strong>Gear / process:</strong> Hardware-first sequencing and sound design, then arrangement cleanup in the DAW.
+              <strong>Constraint:</strong> arrangement built from a small number of patterns; variation via routing and subtraction.
             </div>
+
             <div class="track-links">
               <span>Listen on:</span>
               <a href="#" onclick="return false;">SoundCloud (add link)</a>
             </div>
           </div>
+
+          <div class="details" data-details>
+            <button class="details-btn" type="button" aria-expanded="false">
+              Track details (signal chain / mix notes)
+              <span class="details-caret" aria-hidden="true">▼</span>
+            </button>
+            <div class="details-body" role="region" aria-label="Track details">
+              <div class="details-content">
+                <div class="kv"><div class="k">Signal chain</div><div class="v">Hardware → saturation/distortion bus → DAW arrangement</div></div>
+                <div class="kv"><div class="k">Notes</div><div class="v">What you tuned: kick/bass pocket, transient shape, noise control.</div></div>
+                <div class="kv"><div class="k">Tracking</div><div class="v">Consistency, repeatability, controlled aggression.</div></div>
+              </div>
+            </div>
+          </div>
+
           <div class="track-embed">
             <iframe width="100%" height="166" scrolling="no" frameborder="no" allow="autoplay"
               src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/1986798838&color=%233b82f6&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false">
@@ -539,7 +891,15 @@
           </div>
         </article>
 
-        <article class="track-card">
+        <!-- PortalFalling -->
+        <article class="track-card"
+          data-title="PortalFalling"
+          data-genre="Dark Synth"
+          data-featured="no"
+          data-gear="Layered synth voices,Delay/Reverb"
+          data-year="—"
+          data-bpm="—"
+          data-key="—">
           <div class="track-header">
             <div class="track-title-row">
               <div>
@@ -547,17 +907,42 @@
                 <div class="track-genre">Dark Synth</div>
               </div>
             </div>
+
+            <div class="track-meta">
+              <span class="meta-chip">Year: —</span>
+              <span class="meta-chip">BPM: —</span>
+              <span class="meta-chip">Key: —</span>
+              <span class="meta-chip gear-chip" data-gear-ref="delay">FX: Delay</span>
+              <span class="meta-chip gear-chip" data-gear-ref="reverb">FX: Reverb</span>
+            </div>
+
             <div class="track-process">
-              <strong>About:</strong> Dark, drifting synth lines with tension builds and wide atmosphere.
+              <strong>What I was chasing:</strong> wide tension builds without washing out transients.
             </div>
             <div class="track-process">
-              <strong>Gear / process:</strong> Layered synth voices, subtle distortion, and controlled space (delay/reverb).
+              <strong>Constraint:</strong> space is controlled; reverb is a design choice, not default.
             </div>
+
             <div class="track-links">
               <span>Listen on:</span>
               <a href="#" onclick="return false;">SoundCloud (add link)</a>
             </div>
           </div>
+
+          <div class="details" data-details>
+            <button class="details-btn" type="button" aria-expanded="false">
+              Track details (signal chain / mix notes)
+              <span class="details-caret" aria-hidden="true">▼</span>
+            </button>
+            <div class="details-body" role="region" aria-label="Track details">
+              <div class="details-content">
+                <div class="kv"><div class="k">Signal chain</div><div class="v">Synth layers → delay sends → controlled reverb bus → mix</div></div>
+                <div class="kv"><div class="k">Notes</div><div class="v">Where you placed width and why. What you muted to keep clarity.</div></div>
+                <div class="kv"><div class="k">Tracking</div><div class="v">Stereo stability, tension pacing, build/release timing.</div></div>
+              </div>
+            </div>
+          </div>
+
           <div class="track-embed">
             <iframe width="100%" height="166" scrolling="no" frameborder="no" allow="autoplay"
               src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/1986802002&color=%233b82f6&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false">
@@ -565,7 +950,15 @@
           </div>
         </article>
 
-        <article class="track-card">
+        <!-- Tannhauser -->
+        <article class="track-card"
+          data-title="Tannhauser"
+          data-genre="Synthwave / Industrial"
+          data-featured="no"
+          data-gear="Bright leads,Grit percussion"
+          data-year="—"
+          data-bpm="—"
+          data-key="—">
           <div class="track-header">
             <div class="track-title-row">
               <div>
@@ -573,17 +966,42 @@
                 <div class="track-genre">Synthwave / Industrial</div>
               </div>
             </div>
+
+            <div class="track-meta">
+              <span class="meta-chip">Year: —</span>
+              <span class="meta-chip">BPM: —</span>
+              <span class="meta-chip">Key: —</span>
+              <span class="meta-chip gear-chip" data-gear-ref="leads">Gear: Bright leads</span>
+              <span class="meta-chip gear-chip" data-gear-ref="grit">FX: Grit staging</span>
+            </div>
+
             <div class="track-process">
-              <strong>About:</strong> Synthwave color with industrial edges—clean hooks, dirty textures.
+              <strong>What I was chasing:</strong> clean hook + dirty edges without collapsing the mix.
             </div>
             <div class="track-process">
-              <strong>Gear / process:</strong> Contrast-driven production: bright leads against gritty percussion and bass.
+              <strong>Constraint:</strong> contrast-driven: one “clean” lane, one “dirty” lane.
             </div>
+
             <div class="track-links">
               <span>Listen on:</span>
               <a href="#" onclick="return false;">SoundCloud (add link)</a>
             </div>
           </div>
+
+          <div class="details" data-details>
+            <button class="details-btn" type="button" aria-expanded="false">
+              Track details (signal chain / mix notes)
+              <span class="details-caret" aria-hidden="true">▼</span>
+            </button>
+            <div class="details-body" role="region" aria-label="Track details">
+              <div class="details-content">
+                <div class="kv"><div class="k">Signal chain</div><div class="v">Lead bus (clean) + percussion bus (dirty) → glue bus</div></div>
+                <div class="kv"><div class="k">Notes</div><div class="v">What you did to keep brightness without fatigue.</div></div>
+                <div class="kv"><div class="k">Tracking</div><div class="v">Contrast, hook clarity, controlled saturation.</div></div>
+              </div>
+            </div>
+          </div>
+
           <div class="track-embed">
             <iframe width="100%" height="166" scrolling="no" frameborder="no" allow="autoplay"
               src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/1986803377&color=%233b82f6&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false">
@@ -591,7 +1009,15 @@
           </div>
         </article>
 
-        <article class="track-card">
+        <!-- Solarius -->
+        <article class="track-card"
+          data-title="Solarius"
+          data-genre="Ambient / Drone"
+          data-featured="no"
+          data-gear="Long envelopes,Modulation"
+          data-year="—"
+          data-bpm="—"
+          data-key="—">
           <div class="track-header">
             <div class="track-title-row">
               <div>
@@ -599,17 +1025,42 @@
                 <div class="track-genre">Ambient / Drone</div>
               </div>
             </div>
+
+            <div class="track-meta">
+              <span class="meta-chip">Year: —</span>
+              <span class="meta-chip">BPM: —</span>
+              <span class="meta-chip">Key: —</span>
+              <span class="meta-chip gear-chip" data-gear-ref="modulation">Gear: Modulation</span>
+              <span class="meta-chip gear-chip" data-gear-ref="envelopes">Gear: Long envelopes</span>
+            </div>
+
             <div class="track-process">
-              <strong>About:</strong> Slow-bloom ambient layers built for texture and space.
+              <strong>What I was chasing:</strong> slow-bloom layers that stay clear instead of turning to fog.
             </div>
             <div class="track-process">
-              <strong>Gear / process:</strong> Long envelopes, evolving modulation, and minimal percussion.
+              <strong>Constraint:</strong> minimal percussion; movement comes from modulation.
             </div>
+
             <div class="track-links">
               <span>Listen on:</span>
               <a href="#" onclick="return false;">SoundCloud (add link)</a>
             </div>
           </div>
+
+          <div class="details" data-details>
+            <button class="details-btn" type="button" aria-expanded="false">
+              Track details (signal chain / mix notes)
+              <span class="details-caret" aria-hidden="true">▼</span>
+            </button>
+            <div class="details-body" role="region" aria-label="Track details">
+              <div class="details-content">
+                <div class="kv"><div class="k">Signal chain</div><div class="v">Pads → modulation → subtle saturation → space bus</div></div>
+                <div class="kv"><div class="k">Notes</div><div class="v">How you prevented buildup in low-mids. Where you cut.</div></div>
+                <div class="kv"><div class="k">Tracking</div><div class="v">Texture evolution, headroom, long-form pacing.</div></div>
+              </div>
+            </div>
+          </div>
+
           <div class="track-embed">
             <iframe width="100%" height="166" scrolling="no" frameborder="no" allow="autoplay"
               src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/1986804866&color=%233b82f6&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false">
@@ -617,7 +1068,15 @@
           </div>
         </article>
 
-        <article class="track-card">
+        <!-- Shatterpoint -->
+        <article class="track-card"
+          data-title="Shatterpoint"
+          data-genre="Industrial"
+          data-featured="no"
+          data-gear="Transient shaping,Distortion stages"
+          data-year="—"
+          data-bpm="—"
+          data-key="—">
           <div class="track-header">
             <div class="track-title-row">
               <div>
@@ -625,17 +1084,42 @@
                 <div class="track-genre">Industrial</div>
               </div>
             </div>
+
+            <div class="track-meta">
+              <span class="meta-chip">Year: —</span>
+              <span class="meta-chip">BPM: —</span>
+              <span class="meta-chip">Key: —</span>
+              <span class="meta-chip gear-chip" data-gear-ref="transients">FX: Transient shaping</span>
+              <span class="meta-chip gear-chip" data-gear-ref="distortion">FX: Distortion staging</span>
+            </div>
+
             <div class="track-process">
-              <strong>About:</strong> Direct, heavy industrial track centered on impact and rhythm design.
+              <strong>What I was chasing:</strong> impact + control: heavy but not smeared.
             </div>
             <div class="track-process">
-              <strong>Gear / process:</strong> Aggressive transient shaping, distortion stages, and tight mix control.
+              <strong>Constraint:</strong> aggressive sound, strict headroom discipline.
             </div>
+
             <div class="track-links">
               <span>Listen on:</span>
               <a href="#" onclick="return false;">SoundCloud (add link)</a>
             </div>
           </div>
+
+          <div class="details" data-details>
+            <button class="details-btn" type="button" aria-expanded="false">
+              Track details (signal chain / mix notes)
+              <span class="details-caret" aria-hidden="true">▼</span>
+            </button>
+            <div class="details-body" role="region" aria-label="Track details">
+              <div class="details-content">
+                <div class="kv"><div class="k">Signal chain</div><div class="v">Drums → transient shaping → distortion bus → limiter discipline</div></div>
+                <div class="kv"><div class="k">Notes</div><div class="v">What you did to keep punch at low volume.</div></div>
+                <div class="kv"><div class="k">Tracking</div><div class="v">Transient clarity, loudness without mush, repeatability.</div></div>
+              </div>
+            </div>
+          </div>
+
           <div class="track-embed">
             <iframe width="100%" height="166" scrolling="no" frameborder="no" allow="autoplay"
               src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/1986805988&color=%233b82f6&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false">
@@ -648,23 +1132,32 @@
 
     <section class="section">
       <h3 class="section-title">Hardware & Workspace</h3>
-      
-      <div class="gear-grid">
-        <article class="gear-card">
+
+      <div class="production-note" style="margin-bottom:18px;">
+        Click any gear card for a larger view + notes. Gear chips inside tracks can jump here.
+      </div>
+
+      <div class="gear-grid" id="gearGrid">
+        <article class="gear-card" data-gear-id="modular"
+                 data-title="Modular Rig"
+                 data-img="../images/gear/modular-rig.jpg"
+                 data-desc="Used for bass, texture, motion. Architecture over presets."
+                 data-used="Polis Syndicate,Solarius">
           <div class="gear-image">
-            <!-- Replace with a real image when ready -->
-            <!-- <img src="../images/gear/modular-rig.jpg" alt="Modular synth rig" /> -->
             <div class="gear-placeholder">Modular Synth Workbox<br><small>(Add photo)</small></div>
           </div>
           <div class="gear-info">
             <div class="gear-name">Modular Rig</div>
-            <div class="gear-note">Architecture matters more to me than presets. Used for bass, texture, and motion.</div>
+            <div class="gear-note">Architecture matters more than presets. Used for bass, texture, and motion.</div>
           </div>
         </article>
 
-        <article class="gear-card">
+        <article class="gear-card" data-gear-id="studio"
+                 data-title="Studio Setup"
+                 data-img="../images/gear/studio.jpg"
+                 data-desc="Routing, gain staging, repeatable chains. Minimal distractions."
+                 data-used="All tracks">
           <div class="gear-image">
-            <!-- <img src="../images/gear/studio.jpg" alt="Studio setup" /> -->
             <div class="gear-placeholder">Production Workspace<br><small>(Add photo)</small></div>
           </div>
           <div class="gear-info">
@@ -673,9 +1166,12 @@
           </div>
         </article>
 
-        <article class="gear-card">
+        <article class="gear-card" data-gear-id="synths"
+                 data-title="Hardware Synths"
+                 data-img="../images/gear/synths.jpg"
+                 data-desc="Hardware-first: tactile control and intentional limitations."
+                 data-used="Tannhauser,PortalFalling">
           <div class="gear-image">
-            <!-- <img src="../images/gear/synths.jpg" alt="Hardware synths" /> -->
             <div class="gear-placeholder">Synthesizers<br><small>(Add photo)</small></div>
           </div>
           <div class="gear-info">
@@ -684,9 +1180,12 @@
           </div>
         </article>
 
-        <article class="gear-card">
+        <article class="gear-card" data-gear-id="guitars"
+                 data-title="Guitars"
+                 data-img="../images/gear/guitars.jpg"
+                 data-desc="Feel, tuning stability, and tone shaping."
+                 data-used="(if applicable)">
           <div class="gear-image">
-            <!-- <img src="../images/gear/guitars.jpg" alt="Guitars" /> -->
             <div class="gear-placeholder">Guitars<br><small>(Add photo)</small></div>
           </div>
           <div class="gear-info">
@@ -697,5 +1196,192 @@
       </div>
     </section>
   </main>
+
+  <!-- NEW: modal -->
+  <div class="modal" id="gearModal" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-label="Gear details">
+      <div class="modal-top">
+        <div class="modal-title" id="gearModalTitle">Gear</div>
+        <button class="modal-close" id="gearModalClose" type="button">Close</button>
+      </div>
+      <div class="modal-media" id="gearModalMedia">
+        <div style="color:var(--muted); font-weight:900;">(Add image)</div>
+      </div>
+      <div class="modal-body">
+        <div><strong>Description:</strong> <span id="gearModalDesc">—</span></div>
+        <div><strong>Used on:</strong></div>
+        <div class="modal-tracks" id="gearModalTracks"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      // Collapsible track details
+      const detailBlocks = Array.from(document.querySelectorAll('[data-details]'));
+      for (const block of detailBlocks){
+        const btn = block.querySelector('.details-btn');
+        if (!btn) continue;
+        btn.addEventListener('click', () => {
+          const open = block.classList.toggle('open');
+          btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        });
+      }
+
+      // Track filters
+      const grid = document.getElementById('trackGrid');
+      const cards = Array.from(document.querySelectorAll('.track-card'));
+      const searchInput = document.getElementById('searchInput');
+      const genreSelect = document.getElementById('genreSelect');
+      const featuredSelect = document.getElementById('featuredSelect');
+      const resetBtn = document.getElementById('resetBtn');
+
+      function norm(s){ return (s || '').toString().toLowerCase().trim(); }
+
+      function applyFilters(){
+        const q = norm(searchInput.value);
+        const g = genreSelect.value;
+        const f = featuredSelect.value;
+
+        for (const c of cards){
+          const title = norm(c.dataset.title);
+          const genre = c.dataset.genre || '';
+          const gear = norm(c.dataset.gear);
+          const year = norm(c.dataset.year);
+          const bpm = norm(c.dataset.bpm);
+          const key = norm(c.dataset.key);
+          const blob = [title, norm(genre), gear, year, bpm, key].join(' ');
+
+          const matchQ = !q || blob.includes(q);
+          const matchG = (g === 'all') || (genre === g);
+          const matchF = (f === 'all') || (c.dataset.featured === 'yes');
+
+          c.style.display = (matchQ && matchG && matchF) ? '' : 'none';
+        }
+      }
+
+      searchInput.addEventListener('input', applyFilters);
+      genreSelect.addEventListener('change', applyFilters);
+      featuredSelect.addEventListener('change', applyFilters);
+      resetBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        genreSelect.value = 'all';
+        featuredSelect.value = 'all';
+        applyFilters();
+      });
+
+      // Gear modal
+      const modal = document.getElementById('gearModal');
+      const modalTitle = document.getElementById('gearModalTitle');
+      const modalDesc = document.getElementById('gearModalDesc');
+      const modalMedia = document.getElementById('gearModalMedia');
+      const modalTracks = document.getElementById('gearModalTracks');
+      const closeBtn = document.getElementById('gearModalClose');
+
+      function openModal(payload){
+        modalTitle.textContent = payload.title || 'Gear';
+        modalDesc.textContent = payload.desc || '—';
+
+        // media
+        modalMedia.innerHTML = '';
+        if (payload.img && payload.img.indexOf('(Add') === -1){
+          const img = document.createElement('img');
+          img.src = payload.img;
+          img.alt = payload.title || 'Gear image';
+          modalMedia.appendChild(img);
+        } else {
+          const d = document.createElement('div');
+          d.style.color = 'var(--muted)';
+          d.style.fontWeight = '900';
+          d.textContent = '(Add image)';
+          modalMedia.appendChild(d);
+        }
+
+        // used on
+        modalTracks.innerHTML = '';
+        const used = (payload.used || '').split(',').map(s => s.trim()).filter(Boolean);
+        if (!used.length){
+          const chip = document.createElement('div');
+          chip.className = 'modal-trackchip';
+          chip.textContent = '—';
+          chip.style.cursor = 'default';
+          modalTracks.appendChild(chip);
+        } else {
+          for (const name of used){
+            const chip = document.createElement('div');
+            chip.className = 'modal-trackchip';
+            chip.textContent = name;
+            chip.addEventListener('click', () => {
+              // scroll to track
+              const target = cards.find(c => (c.dataset.title || '') === name);
+              if (target){
+                modal.classList.remove('open');
+                modal.setAttribute('aria-hidden', 'true');
+                target.scrollIntoView({behavior:'smooth', block:'start'});
+              }
+            });
+            modalTracks.appendChild(chip);
+          }
+        }
+
+        modal.classList.add('open');
+        modal.setAttribute('aria-hidden', 'false');
+      }
+
+      function closeModal(){
+        modal.classList.remove('open');
+        modal.setAttribute('aria-hidden', 'true');
+      }
+
+      closeBtn.addEventListener('click', closeModal);
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('open')) closeModal();
+      });
+
+      // Click gear cards
+      const gearCards = Array.from(document.querySelectorAll('.gear-card'));
+      for (const gc of gearCards){
+        gc.addEventListener('click', () => {
+          openModal({
+            title: gc.dataset.title,
+            img: gc.dataset.img,
+            desc: gc.dataset.desc,
+            used: gc.dataset.used
+          });
+        });
+      }
+
+      // Gear chips in track meta -> scroll/open matching gear
+      const gearChips = Array.from(document.querySelectorAll('.gear-chip'));
+      gearChips.forEach(chip => {
+        chip.addEventListener('click', (e) => {
+          e.preventDefault();
+          const ref = chip.dataset.gearRef || '';
+          // naive mapping: look for gear card with id == ref, else scroll to gear section
+          const exact = document.querySelector(`.gear-card[data-gear-id="${ref}"]`);
+          if (exact){
+            exact.scrollIntoView({behavior:'smooth', block:'start'});
+            exact.classList.add('pulse');
+            setTimeout(()=> exact.classList.remove('pulse'), 900);
+            openModal({
+              title: exact.dataset.title,
+              img: exact.dataset.img,
+              desc: exact.dataset.desc,
+              used: exact.dataset.used
+            });
+          } else {
+            const gearSection = document.getElementById('gearGrid');
+            if (gearSection) gearSection.scrollIntoView({behavior:'smooth', block:'start'});
+          }
+        });
+      });
+
+      // initial filter pass
+      applyFilters();
+    })();
+  </script>
 </body>
 </html>
