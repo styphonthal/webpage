@@ -22,11 +22,24 @@
       --radius:16px;
       --shadow:0 20px 60px rgba(0,0,0,.4);
       --glow-shadow:0 0 40px rgba(59,130,246,.15);
+
+      /* status colors */
+      --status-active-bg: rgba(34,197,94,.14);
+      --status-active-bd: rgba(34,197,94,.28);
+      --status-active-tx: rgba(134,239,172,.95);
+
+      --status-paused-bg: rgba(148,163,184,.12);
+      --status-paused-bd: rgba(148,163,184,.22);
+      --status-paused-tx: rgba(203,213,225,.92);
+
+      --status-new-bg: rgba(245,158,11,.14);
+      --status-new-bd: rgba(245,158,11,.28);
+      --status-new-tx: rgba(253,230,138,.95);
     }
-    
+
     *{box-sizing:border-box; margin:0; padding:0}
     html,body{height:100%; overflow-x:hidden}
-    
+
     body{
       background:
         radial-gradient(ellipse 1400px 800px at 20% -15%, rgba(59,130,246,.08), transparent 60%),
@@ -50,7 +63,7 @@
       z-index:100;
       box-shadow:4px 0 24px rgba(0,0,0,.3);
     }
-    
+
     .brand{
       display:flex;
       align-items:center;
@@ -70,12 +83,12 @@
       position:relative;
       animation:pulse-glow 4s ease-in-out infinite;
     }
-    
+
     @keyframes pulse-glow{
       0%, 100%{box-shadow:0 8px 24px rgba(59,130,246,.4), 0 0 60px rgba(59,130,246,.2)}
       50%{box-shadow:0 8px 32px rgba(59,130,246,.5), 0 0 80px rgba(59,130,246,.3)}
     }
-    
+
     .brand h1{
       font-size:20px;
       font-weight:700;
@@ -85,7 +98,7 @@
       -webkit-text-fill-color:transparent;
       background-clip:text;
     }
-    
+
     nav a{
       display:flex;
       align-items:center;
@@ -101,7 +114,7 @@
       position:relative;
       overflow:hidden;
     }
-    
+
     nav a::before{
       content:'';
       position:absolute;
@@ -110,22 +123,21 @@
       opacity:0;
       transition:opacity .25s;
     }
-    
+
     nav a:hover{
       color:var(--text);
       border-color:rgba(59,130,246,.3);
       transform:translateX(4px);
     }
-    
     nav a:hover::before{opacity:1}
-    
+
     nav a.active{
       color:var(--accent-bright);
       background:linear-gradient(135deg, rgba(59,130,246,.15), rgba(96,165,250,.12));
       border-color:rgba(59,130,246,.4);
       box-shadow:0 4px 12px rgba(59,130,246,.15);
     }
-    
+
     .nav-dot{
       width:6px;
       height:6px;
@@ -133,7 +145,7 @@
       background:currentColor;
       transition:all .25s;
     }
-    
+
     nav a.active .nav-dot{
       width:8px;
       height:8px;
@@ -147,7 +159,7 @@
       max-width:1600px;
     }
 
-    /* Hero - ENHANCED */
+    /* Hero - UNCHANGED */
     .hero{
       position:relative;
       margin:0 0 48px 0;
@@ -169,7 +181,6 @@
       50%{transform:translateY(-8px)}
     }
 
-    /* Animated grid background */
     .hero::after{
       content:'';
       position:absolute;
@@ -273,13 +284,36 @@
       font-weight:500;
     }
 
-    /* Section headers with accent line */
+    /* reuse cta style */
+    .cta{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:12px 20px;
+      border:1px solid rgba(59,130,246,.4);
+      border-radius:10px;
+      color:var(--accent-bright);
+      text-decoration:none;
+      font-weight:800;
+      transition:all .3s;
+      position:relative;
+      z-index:1;
+      width:fit-content;
+      font-size:14px;
+      background:rgba(10,17,32,.35);
+    }
+    .cta:hover{
+      border-color:var(--accent-bright);
+      box-shadow:0 6px 20px rgba(59,130,246,.3);
+      transform:translateX(4px);
+    }
+
+    /* Section headers */
     .section{
       margin-top:56px;
       animation:fade-in-up 1s ease-out;
       animation-fill-mode:both;
     }
-
     .section:nth-child(2){animation-delay:.1s}
     .section:nth-child(3){animation-delay:.2s}
     .section:nth-child(4){animation-delay:.3s}
@@ -320,7 +354,7 @@
       margin-bottom:12px;
     }
 
-    /* Cards - ENHANCED */
+    /* Cards */
     .grid{
       display:grid;
       gap:24px;
@@ -368,7 +402,6 @@
       border-color:rgba(59,130,246,.5);
       box-shadow:0 25px 70px rgba(0,0,0,.5), 0 0 60px rgba(59,130,246,.2);
     }
-
     .card:hover::before{opacity:1}
     .card:hover::after{opacity:1}
 
@@ -393,55 +426,22 @@
       font-size:15px;
     }
 
-    .card .cta{
-      margin-top:auto;
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:12px 20px;
-      border:1px solid rgba(59,130,246,.4);
-      border-radius:10px;
-      color:var(--accent-bright);
-      text-decoration:none;
-      font-weight:700;
-      transition:all .3s;
-      position:relative;
-      z-index:1;
-      width:fit-content;
-      font-size:14px;
-    }
-
-    .card .cta::before{
-      content:'';
-      position:absolute;
-      inset:0;
-      background:linear-gradient(135deg, rgba(59,130,246,.2), rgba(96,165,250,.15));
-      opacity:0;
-      border-radius:10px;
-      transition:opacity .3s;
-    }
-
-    .card .cta:hover{
-      border-color:var(--accent-bright);
-      box-shadow:0 6px 20px rgba(59,130,246,.3);
-      transform:translateX(4px);
-    }
-
-    .card .cta:hover::before{opacity:1}
-
-    /* Status badges */
+    /* Status badges (for cards only) */
     .status-badge{
       display:inline-block;
       padding:4px 12px;
       border-radius:999px;
       font-size:11px;
-      font-weight:700;
+      font-weight:900;
       text-transform:uppercase;
-      letter-spacing:.5px;
+      letter-spacing:.7px;
       background:rgba(34,197,94,.15);
       border:1px solid rgba(34,197,94,.3);
       color:#22c55e;
       margin-bottom:8px;
+      position:relative;
+      z-index:1;
+      width:fit-content;
     }
 
     .status-badge.featured{
@@ -450,53 +450,255 @@
       color:#fbbf24;
     }
 
-    /* Activity list - ENHANCED */
-    .activity-list{
+    /* NEW: Activity controls */
+    .activity-controls{
+      margin-top:10px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px;
+      align-items:center;
+      border:1px solid rgba(59,130,246,.18);
+      border-radius:14px;
+      background:linear-gradient(145deg, rgba(15,23,42,.45), rgba(10,17,32,.65));
+      padding:14px 14px;
+    }
+    .control{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .control label{
+      font-size:11px;
+      letter-spacing:1px;
+      text-transform:uppercase;
+      color:var(--muted);
+      font-weight:900;
+      padding-left:4px;
+    }
+    .control input{
+      appearance:none;
+      background:rgba(59,130,246,.08);
+      border:1px solid rgba(59,130,246,.22);
+      color:var(--text);
+      border-radius:10px;
+      padding:10px 12px;
+      font-weight:800;
+      outline:none;
+      min-width:260px;
+    }
+
+    .chipbar{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .chip{
+      font-size:11px;
+      font-weight:900;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      padding:8px 10px;
+      border-radius:999px;
+      color:rgba(248,250,252,.92);
+      background:rgba(59,130,246,.10);
+      border:1px solid rgba(59,130,246,.18);
+      cursor:pointer;
+      user-select:none;
+      transition:all .2s;
+      white-space:nowrap;
+    }
+    .chip:hover{
+      border-color:rgba(59,130,246,.35);
+      background:rgba(59,130,246,.14);
+      transform:translateY(-1px);
+    }
+    .chip.active{
+      color:var(--accent-bright);
+      background:linear-gradient(135deg, rgba(59,130,246,.18), rgba(96,165,250,.14));
+      border-color:rgba(59,130,246,.45);
+      box-shadow:0 4px 12px rgba(59,130,246,.12);
+    }
+
+    .btn{
+      border:1px solid rgba(59,130,246,.25);
+      background:rgba(15,23,42,.55);
+      color:var(--accent-bright);
+      padding:10px 12px;
+      border-radius:10px;
+      font-weight:900;
+      letter-spacing:.4px;
+      cursor:pointer;
+      transition:all .2s;
+    }
+    .btn:hover{
+      border-color:rgba(59,130,246,.45);
+      background:rgba(59,130,246,.15);
+      transform:translateY(-1px);
+    }
+
+    /* NEW: Activity feed */
+    .activity-meta{
+      margin-top:10px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .pill{
+      font-size:11px;
+      font-weight:900;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      padding:8px 10px;
+      border-radius:999px;
+      color:rgba(248,250,252,.92);
+      background:rgba(59,130,246,.10);
+      border:1px solid rgba(59,130,246,.18);
+      white-space:nowrap;
+    }
+
+    .feed{
       list-style:none;
       padding:0;
       margin:0;
       display:grid;
-      gap:16px;
+      gap:14px;
     }
 
-    .activity-list li{
-      padding:16px 20px;
+    .feed-item{
       background:rgba(15,23,42,.5);
       border:1px solid rgba(59,130,246,.15);
-      border-radius:12px;
-      color:var(--muted);
-      font-size:15px;
-      line-height:1.6;
-      transition:all .3s;
+      border-radius:14px;
+      padding:16px 18px 16px 18px;
+      transition:all .25s;
       position:relative;
-      padding-left:60px;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
     }
 
-    .activity-list li::before{
-      content:'';
-      position:absolute;
-      left:20px;
-      top:50%;
-      transform:translateY(-50%);
-      width:24px;
-      height:24px;
-      background:linear-gradient(135deg, var(--accent), var(--accent-glow));
-      border-radius:6px;
-      box-shadow:0 4px 12px rgba(59,130,246,.3);
-    }
-
-    .activity-list li:hover{
+    .feed-item:hover{
       border-color:rgba(59,130,246,.4);
       background:rgba(15,23,42,.7);
       transform:translateX(4px);
     }
 
-    .activity-list strong{
-      color:var(--accent-bright);
-      font-weight:700;
+    .feed-top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
     }
 
-    /* Footer */
+    .feed-left{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      min-width:0;
+    }
+
+    .feed-date{
+      color:var(--muted);
+      font-weight:900;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+      font-size:11px;
+    }
+
+    .feed-type{
+      font-size:10px;
+      font-weight:1000;
+      letter-spacing:.1em;
+      text-transform:uppercase;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(59,130,246,.18);
+      background:rgba(59,130,246,.10);
+      color:rgba(248,250,252,.92);
+      white-space:nowrap;
+    }
+
+    .status{
+      font-size:10px;
+      font-weight:1000;
+      letter-spacing:.1em;
+      text-transform:uppercase;
+      padding:6px 10px;
+      border-radius:999px;
+      white-space:nowrap;
+      border:1px solid transparent;
+    }
+    .status-active{background:var(--status-active-bg); border-color:var(--status-active-bd); color:var(--status-active-tx);}
+    .status-paused{background:var(--status-paused-bg); border-color:var(--status-paused-bd); color:var(--status-paused-tx);}
+    .status-new{background:var(--status-new-bg); border-color:var(--status-new-bd); color:var(--status-new-tx);}
+
+    .feed-title{
+      font-weight:900;
+      letter-spacing:-.2px;
+      font-size:16px;
+      color:rgba(248,250,252,.96);
+      line-height:1.35;
+    }
+
+    .feed-desc{
+      color:var(--muted);
+      font-weight:700;
+      font-size:14px;
+      line-height:1.6;
+    }
+
+    .feed-bottom{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .feed-tags{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    .tag{
+      font-size:11px;
+      font-weight:900;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      padding:6px 10px;
+      border-radius:999px;
+      color:rgba(248,250,252,.92);
+      background:rgba(59,130,246,.10);
+      border:1px solid rgba(59,130,246,.18);
+      white-space:nowrap;
+    }
+
+    .feed-link{
+      color:var(--accent-bright);
+      text-decoration:none;
+      border:1px solid rgba(59,130,246,.25);
+      background:rgba(15,23,42,.45);
+      padding:8px 10px;
+      border-radius:999px;
+      font-weight:1000;
+      letter-spacing:.02em;
+      font-size:12px;
+      transition:all .2s;
+      white-space:nowrap;
+    }
+    .feed-link:hover{
+      border-color:rgba(59,130,246,.45);
+      background:rgba(59,130,246,.15);
+      transform:translateY(-1px);
+    }
+
     footer{
       font-size:14px;
       color:var(--muted);
@@ -555,6 +757,7 @@
       }
       .card{padding:24px; min-height:auto}
       .card h3{font-size:20px}
+      .control input{min-width:0; width:100%}
     }
 
     @media (max-width:480px){
@@ -594,21 +797,21 @@
       <h1>CommandBridge</h1>
     </div>
     <nav>
-<a href="/index.html" class="active">
-  <span class="nav-dot" aria-hidden="true"></span> Home
-</a>
-<a href="/projects/index.html">
-  <span class="nav-dot" aria-hidden="true"></span> Projects
-</a>
-<a href="/music/musicProduced.html">
-  <span class="nav-dot" aria-hidden="true"></span> Produced Music
-</a>
-<a href="/music/musicLikes.html">
-  <span class="nav-dot" aria-hidden="true"></span> Preferred Genres
-</a>      
-<a href="/personal/personal.html">
-  <span class="nav-dot" aria-hidden="true"></span> Personal / Systems
-</a>      
+      <a href="/index.html" class="active">
+        <span class="nav-dot" aria-hidden="true"></span> Home
+      </a>
+      <a href="/projects/index.html">
+        <span class="nav-dot" aria-hidden="true"></span> Projects
+      </a>
+      <a href="/music/musicProduced.html">
+        <span class="nav-dot" aria-hidden="true"></span> Produced Music
+      </a>
+      <a href="/music/musicLikes.html">
+        <span class="nav-dot" aria-hidden="true"></span> Preferred Genres
+      </a>
+      <a href="/personal/personal.html">
+        <span class="nav-dot" aria-hidden="true"></span> Personal / Systems
+      </a>
     </nav>
   </aside>
 
@@ -632,7 +835,7 @@
         </defs>
 
         <rect x="0" y="0" width="1600" height="700" fill="url(#g1)"/>
-        
+
         <g fill="#7dd3fc" opacity=".9">
           <circle cx="220" cy="120" r="2.5"/>
           <circle cx="380" cy="80" r="2"/>
@@ -672,13 +875,13 @@
           <h1>CommandBridge.uk</h1>
           <p class="sub">Experiments in code, automation, interface design, and sci-fi engineering.</p>
           <p class="sub">
-            Personal builds spanning Qt→Android ports, Meta glasses integrations, Home Assistant + n8n workflows,
-            and occasional sci-fi micro-fiction. Notes on what I design, break, and push further.
+            Projects, widgets, music, and personal systems. I build small tools that I actually run, then log changes and outcomes.
           </p>
 
           <div style="margin-top:28px; display:flex; flex-wrap:wrap; gap:14px;">
-            <a href="./projects/index.html" class="cta">Browse all projects →</a>
-            <a href="./widgets/index.html" class="cta">Explore widgets →</a>
+            <a href="/projects/index.html" class="cta">Browse projects →</a>
+            <a href="/widgets/index.html" class="cta">Explore widgets →</a>
+            <a href="/personal/personal.html" class="cta">Systems page →</a>
           </div>
         </div>
       </div>
@@ -691,8 +894,7 @@
         Android, Home Assistant, and Meta smart glasses.
       </p>
       <p>
-        The projects and widgets here are real tools I use: message-driven control paths, dashboard experiments, and
-        small surface UIs that feel like a ship's bridge.
+        The core pattern: ship something small, measure whether it holds up, then iterate. The home page is now the cross-site log.
       </p>
     </section>
 
@@ -702,31 +904,22 @@
         <article class="card">
           <span class="status-badge featured">Featured</span>
           <h3>WhatsApp → n8n → Home Assistant</h3>
-          <p>
-            Bi-directional automation pipeline that parses messages and triggers Home Assistant services,
-            forming the basis for the Meta glasses setup.
-          </p>
-          <a href="./projects/index.html#proj-001" class="cta">Open project →</a>
+          <p>Bi-directional automation pipeline that parses messages and triggers Home Assistant services.</p>
+          <a href="/projects/index.html#proj-001" class="cta">Open project →</a>
         </article>
 
         <article class="card">
           <span class="status-badge featured">Featured</span>
           <h3>Meta Smart Glasses WhatsApp bot</h3>
-          <p>
-            Experimental overlays for Meta Display Glasses, using WhatsApp as a transport to push live status,
-            notifications, and controls.
-          </p>
-          <a href="./projects/index.html#proj-002" class="cta">Open project →</a>
+          <p>Experimental overlays for Meta Display Glasses, using WhatsApp as a transport for status and controls.</p>
+          <a href="/projects/index.html#proj-002" class="cta">Open project →</a>
         </article>
 
         <article class="card">
           <span class="status-badge">Active</span>
           <h3>Movie/Series Tracker</h3>
-          <p>
-            Android + Linux (Qt) movie database engine using TMDb, with caching and multi-page configuration
-            for tracking what you watch across devices.
-          </p>
-          <a href="./projects/index.html#proj-003" class="cta">Open project →</a>
+          <p>Android + Linux (Qt) tracker using TMDb with caching and multi-page configuration.</p>
+          <a href="/projects/index.html#proj-003" class="cta">Open project →</a>
         </article>
       </div>
     </section>
@@ -737,31 +930,60 @@
         <article class="card">
           <span class="status-badge">Live</span>
           <h3>Buffalo Sabres — Scores &amp; Goals</h3>
-          <p>
-            Dashboard widget showing the latest Sabres score and next game time, updated automatically from an external API.
-          </p>
-          <a href="./widgets/sabres" class="cta">Open widget →</a>
+          <p>Dashboard widget showing latest score + next game time, refreshed automatically.</p>
+          <a href="/widgets/sabres" class="cta">Open widget →</a>
         </article>
 
         <article class="card">
           <span class="status-badge">Active</span>
           <h3>System monitor</h3>
-          <p>
-            Compact readout for CPU, RAM, and temperature pulled from Home Assistant, designed to sit on a secondary display
-            like a ship console.
-          </p>
-          <a href="./widgets/index.html" class="cta">View all widgets →</a>
+          <p>Compact readout for CPU/RAM/temp pulled from Home Assistant, designed as a console panel.</p>
+          <a href="/widgets/index.html" class="cta">View all widgets →</a>
         </article>
       </div>
     </section>
 
-    <section class="section">
-      <h4>Latest activity</h4>
-      <ul class="activity-list">
-        <li><strong>2025‑01‑06:</strong> Updated Movie/Series Tracker and Linux widgets (clock, Penny Arcade, Conky Halloween clock).</li>
-        <li><strong>2025‑01‑05:</strong> Expanded WhatsApp → n8n → Home Assistant automation pipeline.</li>
-        <li><strong>2025‑01‑03:</strong> Iterated on Meta Smart Glasses WhatsApp bot overlays.</li>
-      </ul>
+    <!-- REPLACED: Latest activity -> Unified Activity Feed -->
+    <section class="section" id="activity">
+      <h4>Activity feed</h4>
+      <p>
+        Cross-site log: projects, widgets, produced music, listening notes, systems work, and sprint artifacts.
+      </p>
+
+      <div class="activity-controls" aria-label="Activity filters">
+        <div class="control">
+          <label for="activitySearch">Search</label>
+          <input id="activitySearch" type="text" placeholder="Search: sabres, HA, finance, mix template, policy, sprint…" />
+        </div>
+
+        <div class="chipbar" aria-label="Type filters" id="typeChips">
+          <div class="chip active" data-type="all">All</div>
+          <div class="chip" data-type="project">Projects</div>
+          <div class="chip" data-type="widget">Widgets</div>
+          <div class="chip" data-type="music_produced">Produced</div>
+          <div class="chip" data-type="music_listening">Listening</div>
+          <div class="chip" data-type="systems">Systems</div>
+          <div class="chip" data-type="sprint">Sprints</div>
+          <div class="chip" data-type="finance">Finance</div>
+          <div class="chip" data-type="security">Security</div>
+          <div class="chip" data-type="medops">Med Ops</div>
+        </div>
+
+        <div class="chipbar" aria-label="Status filters" id="statusChips">
+          <div class="chip active" data-status="all">All status</div>
+          <div class="chip" data-status="active">Active</div>
+          <div class="chip" data-status="paused">Paused</div>
+          <div class="chip" data-status="new">New</div>
+        </div>
+
+        <button class="btn" id="activityReset" type="button">Reset</button>
+      </div>
+
+      <div class="activity-meta" aria-label="Activity summary">
+        <div class="pill" id="activitySummary">Showing recent items</div>
+      </div>
+
+      <ul class="feed" id="activityFeed" aria-label="Activity feed list"></ul>
     </section>
 
     <footer class="section">
@@ -770,5 +992,219 @@
       </p>
     </footer>
   </main>
+
+  <script>
+    (function(){
+      // ---- Activity data (single source of truth) ----
+      // date: YYYY-MM-DD (sortable), type: enum, status: active|paused|new
+      // source: label shown; link: relative URL
+      const activity = [
+        {
+          date: "2026-01-26",
+          type: "medops",
+          status: "active",
+          title: "Clinic systems: metrics glossary + workflow map draft",
+          desc: "Defined metric names/cadence + rough workflow handoffs. No PHI.",
+          source: "Personal / Systems",
+          tags: ["metrics","workflows","ops"],
+          link: "/personal/personal.html"
+        },
+        {
+          date: "2026-01-22",
+          type: "systems",
+          status: "new",
+          title: "Personal / Systems page: tri-state cards + expanded domains",
+          desc: "Added Med Ops, Home Lab, Sprints, Finance Modeling, Security/Safety.",
+          source: "Personal / Systems",
+          tags: ["systems","status","structure"],
+          link: "/personal/personal.html"
+        },
+        {
+          date: "2026-01-10",
+          type: "project",
+          status: "active",
+          title: "Movie/Series Tracker: settings + performance iteration",
+          desc: "Room-backed settings pages + responsiveness improvements.",
+          source: "Projects",
+          tags: ["android","room","tmdb"],
+          link: "/projects/index.html#proj-003"
+        },
+        {
+          date: "2026-01-06",
+          type: "widget",
+          status: "active",
+          title: "Widgets: refresh cadence + UI cleanup",
+          desc: "Minor UI polish + reliable refresh behavior.",
+          source: "Widgets",
+          tags: ["ui","refresh","dashboard"],
+          link: "/widgets/index.html"
+        },
+        {
+          date: "2026-01-05",
+          type: "project",
+          status: "paused",
+          title: "WhatsApp → n8n → Home Assistant pipeline expansion",
+          desc: "Message parsing + service execution improvements.",
+          source: "Projects",
+          tags: ["n8n","home-assistant","whatsapp"],
+          link: "/projects/index.html#proj-001"
+        },
+        {
+          date: "2026-01-03",
+          type: "project",
+          status: "paused",
+          title: "Meta Display Glasses overlays iteration",
+          desc: "Transport/UI experiments for quick status surfaces.",
+          source: "Projects",
+          tags: ["meta","overlay","ui"],
+          link: "/projects/index.html#proj-002"
+        },
+        {
+          date: "2025-12-28",
+          type: "finance",
+          status: "paused",
+          title: "Retirement modeling sprint: scenario + sensitivity notes",
+          desc: "Assumptions table + what moves outcomes most (non-performative).",
+          source: "Personal / Systems",
+          tags: ["assumptions","scenarios","sensitivity"],
+          link: "/personal/personal.html"
+        },
+        {
+          date: "2025-12-20",
+          type: "music_produced",
+          status: "paused",
+          title: "Mix template revision: routing + bus philosophy",
+          desc: "Documented a repeatable chain for heavy guitar mixes.",
+          source: "Produced Music",
+          tags: ["routing","template","mix"],
+          link: "/music/musicProduced.html"
+        },
+        {
+          date: "2025-12-12",
+          type: "music_listening",
+          status: "paused",
+          title: "Listening notes: production traits worth tracking",
+          desc: "What I’m extracting from drill/industrial/EBM mixes.",
+          source: "Preferred Genres",
+          tags: ["analysis","sound","traits"],
+          link: "/music/musicLikes.html"
+        }
+      ];
+
+      // ---- UI elements ----
+      const feedEl = document.getElementById("activityFeed");
+      const searchEl = document.getElementById("activitySearch");
+      const typeChips = Array.from(document.querySelectorAll("#typeChips .chip"));
+      const statusChips = Array.from(document.querySelectorAll("#statusChips .chip"));
+      const resetBtn = document.getElementById("activityReset");
+      const summaryEl = document.getElementById("activitySummary");
+
+      let activeType = "all";
+      let activeStatus = "all";
+
+      function norm(s){ return (s || "").toString().toLowerCase().trim(); }
+
+      function statusClass(s){
+        if (s === "active") return "status status-active";
+        if (s === "paused") return "status status-paused";
+        return "status status-new";
+      }
+
+      function typeLabel(t){
+        const map = {
+          project: "Project",
+          widget: "Widget",
+          music_produced: "Produced",
+          music_listening: "Listening",
+          systems: "Systems",
+          sprint: "Sprint",
+          finance: "Finance",
+          security: "Security",
+          medops: "Med Ops"
+        };
+        return map[t] || t;
+      }
+
+      function setActiveChip(group, value){
+        if (group === "type"){
+          activeType = value;
+          typeChips.forEach(c => c.classList.toggle("active", c.dataset.type === value));
+        } else {
+          activeStatus = value;
+          statusChips.forEach(c => c.classList.toggle("active", c.dataset.status === value));
+        }
+        render();
+      }
+
+      function matchesFilters(item){
+        const q = norm(searchEl.value);
+        const blob = norm([
+          item.date, item.type, item.status, item.title, item.desc,
+          item.source, (item.tags || []).join(" ")
+        ].join(" "));
+
+        const matchType = (activeType === "all") || (item.type === activeType);
+        const matchStatus = (activeStatus === "all") || (item.status === activeStatus);
+        const matchQ = !q || blob.includes(q);
+
+        return matchType && matchStatus && matchQ;
+      }
+
+      function render(){
+        // sort newest first
+        const sorted = [...activity].sort((a,b) => (a.date < b.date ? 1 : (a.date > b.date ? -1 : 0)));
+        const filtered = sorted.filter(matchesFilters);
+
+        // cap to recent items (adjust if you want)
+        const visible = filtered.slice(0, 12);
+
+        feedEl.innerHTML = "";
+
+        for (const it of visible){
+          const li = document.createElement("li");
+          li.className = "feed-item";
+
+          li.innerHTML = `
+            <div class="feed-top">
+              <div class="feed-left">
+                <div class="feed-date">${it.date}</div>
+                <div class="feed-type">${typeLabel(it.type)}</div>
+                <div class="${statusClass(it.status)}">${it.status}</div>
+              </div>
+              <a class="feed-link" href="${it.link}">Open →</a>
+            </div>
+
+            <div class="feed-title">${it.title}</div>
+            <div class="feed-desc">${it.desc}</div>
+
+            <div class="feed-bottom">
+              <div class="feed-tags">
+                <div class="tag">${it.source}</div>
+                ${(it.tags || []).slice(0,4).map(t => `<div class="tag">${t}</div>`).join("")}
+              </div>
+            </div>
+          `;
+          feedEl.appendChild(li);
+        }
+
+        const total = filtered.length;
+        const shown = visible.length;
+        summaryEl.textContent = `Showing ${shown} of ${total} matching items`;
+      }
+
+      // ---- Bind events ----
+      typeChips.forEach(ch => ch.addEventListener("click", () => setActiveChip("type", ch.dataset.type)));
+      statusChips.forEach(ch => ch.addEventListener("click", () => setActiveChip("status", ch.dataset.status)));
+      searchEl.addEventListener("input", render);
+
+      resetBtn.addEventListener("click", () => {
+        searchEl.value = "";
+        setActiveChip("type", "all");
+        setActiveChip("status", "all");
+      });
+
+      render();
+    })();
+  </script>
 </body>
 </html>
