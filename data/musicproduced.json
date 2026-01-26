@@ -1,0 +1,48 @@
+{
+  "id": "trk-like-a-lost-star",
+  "type": "track",
+  "title": "Like A Lost Star",
+  "description": "Phase distortion textures with controlled low end and minimal layers.",
+  "tags": ["synth", "electronic", "uvi-cameo", "cubase"],
+
+  "status": "paused",
+  "state": "Complete",
+  "updated": "2024-01-01",
+
+  "genre": "Synth / Electronic",
+  "year": 2024,
+  "bpm": null,
+  "key": null,
+  "featured": true,
+
+  "gear": {
+    "daw": { "name": "Cubase 11", "ref": "cubase" },
+    "instruments": [{ "name": "UVI Cameo", "ref": "uvi-cameo" }],
+    "notes": "One instrument only (UVI Cameo). No additional synths."
+  },
+
+  "process": [
+    { "label": "What I was chasing", "text": "Phase distortion textures with a controlled low end and minimal layers." },
+    { "label": "Constraint", "text": "One instrument only (UVI Cameo). No additional synths." }
+  ],
+
+  "links": [
+    {
+      "label": "SoundCloud",
+      "url": "https://soundcloud.com/user-886953764/like-a-lost-star"
+    }
+  ],
+
+  "details": {
+    "signalChain": "UVI Cameo → DAW FX (minimal) → mix bus",
+    "notes": "Add what you learned / what broke / what you fixed.",
+    "tracking": "Gain staging, transient discipline, low-end translation.",
+    "Last update": "Update here"
+  },
+
+  "embed": {
+    "type": "soundcloud",
+    "src": "https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/user-886953764/like-a-lost-star&color=%233b82f6&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false",
+    "height": 166
+  }
+}
