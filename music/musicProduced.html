@@ -15,6 +15,19 @@
       --accent-bright:#60a5fa;
       --border:#1e293b;
       --radius:16px;
+
+      /* status colors */
+      --status-active:#22c55e;
+      --status-paused:#f97316;
+      --status-new:#60a5fa;
+      --status-default:#64748b;
+
+      /* stage colors (keep same semantics as your projects page) */
+      --stage-active:#22c55e;
+      --stage-near:#eab308;
+      --stage-stalled:#f97316;
+      --stage-complete:#22c55e;
+      --stage-default:#64748b;
     }
 
     *{box-sizing:border-box; margin:0; padding:0}
@@ -198,7 +211,7 @@
       max-width:980px;
     }
 
-    /* NEW: controls */
+    /* controls */
     .controls{
       margin-top:18px;
       display:flex;
@@ -295,9 +308,18 @@
     .track-title{
       font-size:20px;
       font-weight:900;
-      color:var(--text);
-      margin-bottom:4px;
       line-height:1.2;
+
+      /* whiter + readable + blue halo (from your project title tuning) */
+      background:linear-gradient(135deg, #ffffff 0%, #f8fafc 70%, #eaf2ff 100%);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      background-clip:text;
+      text-shadow:
+        0 1px 0 rgba(2,6,23,.75),
+        0 2px 6px rgba(2,6,23,.55),
+        0 10px 26px rgba(59,130,246,.16),
+        0 0 28px rgba(96,165,250,.10);
     }
 
     .track-genre{
@@ -335,6 +357,7 @@
       background:rgba(59,130,246,.14);
     }
 
+    /* Featured pill */
     .track-pill{
       display:inline-flex;
       align-items:center;
@@ -390,6 +413,35 @@
       100%{transform:rotate(360deg);}
     }
 
+    /* NEW: status + stage pills (like projects) */
+    .pill-row{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      justify-content:flex-end;
+      flex-wrap:wrap;
+    }
+    .status-pill, .stage-pill{
+      padding:4px 10px;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:900;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      white-space:nowrap;
+      background:rgba(15,23,42,.65);
+    }
+    .pill-dot{
+      width:7px;
+      height:7px;
+      border-radius:999px;
+      background:currentColor;
+      box-shadow:0 0 8px currentColor;
+    }
+
     .track-process{
       color:var(--muted);
       font-size:14px;
@@ -430,7 +482,7 @@
       transform:translateY(-1px);
     }
 
-    /* NEW: collapsible details */
+    /* collapsible details */
     .details{
       margin-top:14px;
       border:1px solid rgba(59,130,246,.18);
@@ -507,7 +559,7 @@
       border-radius:8px;
     }
 
-    /* Gear gallery */
+    /* Gear gallery (unchanged) */
     .gear-grid{
       display:grid;
       gap:24px;
@@ -564,7 +616,7 @@
       line-height:1.5;
     }
 
-    /* NEW: modal */
+    /* modal (unchanged) */
     .modal{
       position:fixed;
       inset:0;
@@ -657,6 +709,17 @@
       background:rgba(59,130,246,.14);
     }
 
+    /* empty state */
+    .empty{
+      border:1px dashed rgba(59,130,246,.25);
+      background:rgba(15,23,42,.45);
+      border-radius:var(--radius);
+      padding:26px 22px;
+      color:var(--muted);
+      font-size:14px;
+      margin-top:16px;
+    }
+
     @media (max-width:1024px){
       .sidebar{width:240px}
       .main{margin-left:240px; padding:32px}
@@ -689,17 +752,17 @@
     </div>
     <nav>
       <a href="/index.html">
-      <span class="nav-dot" aria-hidden="true"></span> Home
+        <span class="nav-dot" aria-hidden="true"></span> Home
       </a>
       <a href="/projects/index.html">
-      <span class="nav-dot" aria-hidden="true"></span> Projects
+        <span class="nav-dot" aria-hidden="true"></span> Projects
       </a>
       <a href="/music/musicProduced.html" class="active">
-      <span class="nav-dot" aria-hidden="true"></span> Produced Music
+        <span class="nav-dot" aria-hidden="true"></span> Produced Music
       </a>
       <a href="/music/musicLikes.html">
-      <span class="nav-dot" aria-hidden="true"></span> Preferred Genres
-      </a>  
+        <span class="nav-dot" aria-hidden="true"></span> Preferred Genres
+      </a>
     </nav>
   </aside>
 
@@ -713,7 +776,6 @@
         Most tracks start as hardware jams; I keep software minimal and focus on routing, texture, and arrangement.
       </p>
 
-      <!-- NEW: obvious CTA -->
       <div class="controls" style="margin-top:14px;">
         <div class="control" style="flex:1; min-width:260px;">
           <label>Profile</label>
@@ -738,7 +800,6 @@
         Hardware-first workflow (when possible). Intentional constraints. Repeatable routing. Minimal “plugin wandering.”
       </div>
 
-      <!-- NEW: filter/search -->
       <div class="controls" aria-label="Track filters">
         <div class="control">
           <label for="searchInput">Search</label>
@@ -748,12 +809,6 @@
           <label for="genreSelect">Genre</label>
           <select id="genreSelect">
             <option value="all" selected>All</option>
-            <option>Industrial / EBM</option>
-            <option>Dark Synth</option>
-            <option>Synthwave / Industrial</option>
-            <option>Ambient / Drone</option>
-            <option>Synth / Electronic</option>
-            <option>Industrial</option>
           </select>
         </div>
         <div class="control">
@@ -764,380 +819,24 @@
           </select>
         </div>
         <div class="control">
+          <label for="statusSelect">Status</label>
+          <select id="statusSelect">
+            <option value="all" selected>All</option>
+            <option value="active">Active</option>
+            <option value="paused">Paused</option>
+            <option value="new">New</option>
+          </select>
+        </div>
+        <div class="control">
           <button id="resetBtn" type="button">Reset</button>
         </div>
       </div>
 
-      <div class="production-grid" id="trackGrid">
-
-        <!-- Like A Lost Star -->
-        <article class="track-card"
-          data-title="Like A Lost Star"
-          data-genre="Synth / Electronic"
-          data-featured="yes"
-          data-gear="Cubase 11,UVI Cameo"
-          data-year="2024"
-          data-bpm="—"
-          data-key="—">
-          <div class="track-header">
-            <div class="track-title-row">
-              <div>
-                <div class="track-title">Like A Lost Star</div>
-                <div class="track-genre">Synth / Electronic</div>
-              </div>
-              <div class="track-pill" title="Good starting point">
-                <div class="track-pill-inner">
-                  <span class="track-pill-dot"></span>
-                  <span>Featured</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="track-meta">
-              <span class="meta-chip">Year: 2024</span>
-              <span class="meta-chip">BPM: —</span>
-              <span class="meta-chip">Key: —</span>
-              <span class="meta-chip gear-chip" data-gear-ref="uvi-cameo">Gear: UVI Cameo</span>
-              <span class="meta-chip gear-chip" data-gear-ref="cubase">DAW: Cubase 11</span>
-            </div>
-
-            <div class="track-process">
-              <strong>What I was chasing:</strong> phase distortion textures with a controlled low end and minimal layers.
-            </div>
-            <div class="track-process">
-              <strong>Constraint:</strong> one instrument only (UVI Cameo). No additional synths.
-            </div>
-
-            <div class="track-links">
-              <span>Listen on:</span>
-              <a href="https://soundcloud.com/user-886953764/like-a-lost-star" target="_blank" rel="noopener noreferrer">SoundCloud</a>
-            </div>
-          </div>
-
-          <div class="details" data-details>
-            <button class="details-btn" type="button" aria-expanded="false">
-              Track details (signal chain / mix notes)
-              <span class="details-caret" aria-hidden="true">▼</span>
-            </button>
-            <div class="details-body" role="region" aria-label="Track details">
-              <div class="details-content">
-                <div class="kv"><div class="k">Signal chain</div><div class="v">UVI Cameo → DAW FX (minimal) → mix bus</div></div>
-                <div class="kv"><div class="k">Notes</div><div class="v">Add what you learned / what broke / what you fixed.</div></div>
-                <div class="kv"><div class="k">Tracking</div><div class="v">Gain staging, transient discipline, low-end translation.</div></div>
-              </div>
-            </div>
-          </div>
-
-          <div class="track-embed">
-            <iframe
-              width="100%"
-              height="166"
-              scrolling="no"
-              frameborder="no"
-              allow="autoplay"
-              src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/user-886953764/like-a-lost-star&color=%233b82f6&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false">
-            </iframe>
-          </div>
-        </article>
-
-        <!-- Polis Syndicate -->
-        <article class="track-card"
-          data-title="Polis Syndicate"
-          data-genre="Industrial / EBM"
-          data-featured="no"
-          data-gear="Hardware sequencing,Distortion bus"
-          data-year="—"
-          data-bpm="—"
-          data-key="—">
-          <div class="track-header">
-            <div class="track-title-row">
-              <div>
-                <div class="track-title">Polis Syndicate</div>
-                <div class="track-genre">Industrial / EBM</div>
-              </div>
-            </div>
-
-            <div class="track-meta">
-              <span class="meta-chip">Year: —</span>
-              <span class="meta-chip">BPM: —</span>
-              <span class="meta-chip">Key: —</span>
-              <span class="meta-chip gear-chip" data-gear-ref="hardware">Gear: Hardware sequencing</span>
-              <span class="meta-chip gear-chip" data-gear-ref="distortion">FX: Distortion staging</span>
-            </div>
-
-            <div class="track-process">
-              <strong>What I was chasing:</strong> militant pulse + tight transitions with “machine” timing.
-            </div>
-            <div class="track-process">
-              <strong>Constraint:</strong> arrangement built from a small number of patterns; variation via routing and subtraction.
-            </div>
-
-            <div class="track-links">
-              <span>Listen on:</span>
-              <a href="#" onclick="return false;">SoundCloud (add link)</a>
-            </div>
-          </div>
-
-          <div class="details" data-details>
-            <button class="details-btn" type="button" aria-expanded="false">
-              Track details (signal chain / mix notes)
-              <span class="details-caret" aria-hidden="true">▼</span>
-            </button>
-            <div class="details-body" role="region" aria-label="Track details">
-              <div class="details-content">
-                <div class="kv"><div class="k">Signal chain</div><div class="v">Hardware → saturation/distortion bus → DAW arrangement</div></div>
-                <div class="kv"><div class="k">Notes</div><div class="v">What you tuned: kick/bass pocket, transient shape, noise control.</div></div>
-                <div class="kv"><div class="k">Tracking</div><div class="v">Consistency, repeatability, controlled aggression.</div></div>
-              </div>
-            </div>
-          </div>
-
-          <div class="track-embed">
-            <iframe width="100%" height="166" scrolling="no" frameborder="no" allow="autoplay"
-              src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/1986798838&color=%233b82f6&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false">
-            </iframe>
-          </div>
-        </article>
-
-        <!-- PortalFalling -->
-        <article class="track-card"
-          data-title="PortalFalling"
-          data-genre="Dark Synth"
-          data-featured="no"
-          data-gear="Layered synth voices,Delay/Reverb"
-          data-year="—"
-          data-bpm="—"
-          data-key="—">
-          <div class="track-header">
-            <div class="track-title-row">
-              <div>
-                <div class="track-title">PortalFalling</div>
-                <div class="track-genre">Dark Synth</div>
-              </div>
-            </div>
-
-            <div class="track-meta">
-              <span class="meta-chip">Year: —</span>
-              <span class="meta-chip">BPM: —</span>
-              <span class="meta-chip">Key: —</span>
-              <span class="meta-chip gear-chip" data-gear-ref="delay">FX: Delay</span>
-              <span class="meta-chip gear-chip" data-gear-ref="reverb">FX: Reverb</span>
-            </div>
-
-            <div class="track-process">
-              <strong>What I was chasing:</strong> wide tension builds without washing out transients.
-            </div>
-            <div class="track-process">
-              <strong>Constraint:</strong> space is controlled; reverb is a design choice, not default.
-            </div>
-
-            <div class="track-links">
-              <span>Listen on:</span>
-              <a href="#" onclick="return false;">SoundCloud (add link)</a>
-            </div>
-          </div>
-
-          <div class="details" data-details>
-            <button class="details-btn" type="button" aria-expanded="false">
-              Track details (signal chain / mix notes)
-              <span class="details-caret" aria-hidden="true">▼</span>
-            </button>
-            <div class="details-body" role="region" aria-label="Track details">
-              <div class="details-content">
-                <div class="kv"><div class="k">Signal chain</div><div class="v">Synth layers → delay sends → controlled reverb bus → mix</div></div>
-                <div class="kv"><div class="k">Notes</div><div class="v">Where you placed width and why. What you muted to keep clarity.</div></div>
-                <div class="kv"><div class="k">Tracking</div><div class="v">Stereo stability, tension pacing, build/release timing.</div></div>
-              </div>
-            </div>
-          </div>
-
-          <div class="track-embed">
-            <iframe width="100%" height="166" scrolling="no" frameborder="no" allow="autoplay"
-              src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/1986802002&color=%233b82f6&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false">
-            </iframe>
-          </div>
-        </article>
-
-        <!-- Tannhauser -->
-        <article class="track-card"
-          data-title="Tannhauser"
-          data-genre="Synthwave / Industrial"
-          data-featured="no"
-          data-gear="Bright leads,Grit percussion"
-          data-year="—"
-          data-bpm="—"
-          data-key="—">
-          <div class="track-header">
-            <div class="track-title-row">
-              <div>
-                <div class="track-title">Tannhauser</div>
-                <div class="track-genre">Synthwave / Industrial</div>
-              </div>
-            </div>
-
-            <div class="track-meta">
-              <span class="meta-chip">Year: —</span>
-              <span class="meta-chip">BPM: —</span>
-              <span class="meta-chip">Key: —</span>
-              <span class="meta-chip gear-chip" data-gear-ref="leads">Gear: Bright leads</span>
-              <span class="meta-chip gear-chip" data-gear-ref="grit">FX: Grit staging</span>
-            </div>
-
-            <div class="track-process">
-              <strong>What I was chasing:</strong> clean hook + dirty edges without collapsing the mix.
-            </div>
-            <div class="track-process">
-              <strong>Constraint:</strong> contrast-driven: one “clean” lane, one “dirty” lane.
-            </div>
-
-            <div class="track-links">
-              <span>Listen on:</span>
-              <a href="#" onclick="return false;">SoundCloud (add link)</a>
-            </div>
-          </div>
-
-          <div class="details" data-details>
-            <button class="details-btn" type="button" aria-expanded="false">
-              Track details (signal chain / mix notes)
-              <span class="details-caret" aria-hidden="true">▼</span>
-            </button>
-            <div class="details-body" role="region" aria-label="Track details">
-              <div class="details-content">
-                <div class="kv"><div class="k">Signal chain</div><div class="v">Lead bus (clean) + percussion bus (dirty) → glue bus</div></div>
-                <div class="kv"><div class="k">Notes</div><div class="v">What you did to keep brightness without fatigue.</div></div>
-                <div class="kv"><div class="k">Tracking</div><div class="v">Contrast, hook clarity, controlled saturation.</div></div>
-              </div>
-            </div>
-          </div>
-
-          <div class="track-embed">
-            <iframe width="100%" height="166" scrolling="no" frameborder="no" allow="autoplay"
-              src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/1986803377&color=%233b82f6&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false">
-            </iframe>
-          </div>
-        </article>
-
-        <!-- Solarius -->
-        <article class="track-card"
-          data-title="Solarius"
-          data-genre="Ambient / Drone"
-          data-featured="no"
-          data-gear="Long envelopes,Modulation"
-          data-year="—"
-          data-bpm="—"
-          data-key="—">
-          <div class="track-header">
-            <div class="track-title-row">
-              <div>
-                <div class="track-title">Solarius</div>
-                <div class="track-genre">Ambient / Drone</div>
-              </div>
-            </div>
-
-            <div class="track-meta">
-              <span class="meta-chip">Year: —</span>
-              <span class="meta-chip">BPM: —</span>
-              <span class="meta-chip">Key: —</span>
-              <span class="meta-chip gear-chip" data-gear-ref="modulation">Gear: Modulation</span>
-              <span class="meta-chip gear-chip" data-gear-ref="envelopes">Gear: Long envelopes</span>
-            </div>
-
-            <div class="track-process">
-              <strong>What I was chasing:</strong> slow-bloom layers that stay clear instead of turning to fog.
-            </div>
-            <div class="track-process">
-              <strong>Constraint:</strong> minimal percussion; movement comes from modulation.
-            </div>
-
-            <div class="track-links">
-              <span>Listen on:</span>
-              <a href="#" onclick="return false;">SoundCloud (add link)</a>
-            </div>
-          </div>
-
-          <div class="details" data-details>
-            <button class="details-btn" type="button" aria-expanded="false">
-              Track details (signal chain / mix notes)
-              <span class="details-caret" aria-hidden="true">▼</span>
-            </button>
-            <div class="details-body" role="region" aria-label="Track details">
-              <div class="details-content">
-                <div class="kv"><div class="k">Signal chain</div><div class="v">Pads → modulation → subtle saturation → space bus</div></div>
-                <div class="kv"><div class="k">Notes</div><div class="v">How you prevented buildup in low-mids. Where you cut.</div></div>
-                <div class="kv"><div class="k">Tracking</div><div class="v">Texture evolution, headroom, long-form pacing.</div></div>
-              </div>
-            </div>
-          </div>
-
-          <div class="track-embed">
-            <iframe width="100%" height="166" scrolling="no" frameborder="no" allow="autoplay"
-              src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/1986804866&color=%233b82f6&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false">
-            </iframe>
-          </div>
-        </article>
-
-        <!-- Shatterpoint -->
-        <article class="track-card"
-          data-title="Shatterpoint"
-          data-genre="Industrial"
-          data-featured="no"
-          data-gear="Transient shaping,Distortion stages"
-          data-year="—"
-          data-bpm="—"
-          data-key="—">
-          <div class="track-header">
-            <div class="track-title-row">
-              <div>
-                <div class="track-title">Shatterpoint</div>
-                <div class="track-genre">Industrial</div>
-              </div>
-            </div>
-
-            <div class="track-meta">
-              <span class="meta-chip">Year: —</span>
-              <span class="meta-chip">BPM: —</span>
-              <span class="meta-chip">Key: —</span>
-              <span class="meta-chip gear-chip" data-gear-ref="transients">FX: Transient shaping</span>
-              <span class="meta-chip gear-chip" data-gear-ref="distortion">FX: Distortion staging</span>
-            </div>
-
-            <div class="track-process">
-              <strong>What I was chasing:</strong> impact + control: heavy but not smeared.
-            </div>
-            <div class="track-process">
-              <strong>Constraint:</strong> aggressive sound, strict headroom discipline.
-            </div>
-
-            <div class="track-links">
-              <span>Listen on:</span>
-              <a href="#" onclick="return false;">SoundCloud (add link)</a>
-            </div>
-          </div>
-
-          <div class="details" data-details>
-            <button class="details-btn" type="button" aria-expanded="false">
-              Track details (signal chain / mix notes)
-              <span class="details-caret" aria-hidden="true">▼</span>
-            </button>
-            <div class="details-body" role="region" aria-label="Track details">
-              <div class="details-content">
-                <div class="kv"><div class="k">Signal chain</div><div class="v">Drums → transient shaping → distortion bus → limiter discipline</div></div>
-                <div class="kv"><div class="k">Notes</div><div class="v">What you did to keep punch at low volume.</div></div>
-                <div class="kv"><div class="k">Tracking</div><div class="v">Transient clarity, loudness without mush, repeatability.</div></div>
-              </div>
-            </div>
-          </div>
-
-          <div class="track-embed">
-            <iframe width="100%" height="166" scrolling="no" frameborder="no" allow="autoplay"
-              src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/1986805988&color=%233b82f6&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false">
-            </iframe>
-          </div>
-        </article>
-
-      </div>
+      <div class="production-grid" id="trackGrid"></div>
+      <div id="emptyTracks" class="empty" style="display:none;">No matching tracks found.</div>
     </section>
 
+    <!-- KEEP: Hardware & Workspace unchanged -->
     <section class="section">
       <h3 class="section-title">Hardware & Workspace</h3>
 
@@ -1205,7 +904,6 @@
     </section>
   </main>
 
-  <!-- NEW: modal -->
   <div class="modal" id="gearModal" aria-hidden="true">
     <div class="modal-card" role="dialog" aria-modal="true" aria-label="Gear details">
       <div class="modal-top">
@@ -1225,60 +923,295 @@
 
   <script>
     (function(){
-      // Collapsible track details
-      const detailBlocks = Array.from(document.querySelectorAll('[data-details]'));
-      for (const block of detailBlocks){
-        const btn = block.querySelector('.details-btn');
-        if (!btn) continue;
-        btn.addEventListener('click', () => {
-          const open = block.classList.toggle('open');
-          btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-        });
+      const el = {
+        grid: document.getElementById('trackGrid'),
+        empty: document.getElementById('emptyTracks'),
+        search: document.getElementById('searchInput'),
+        genre: document.getElementById('genreSelect'),
+        featured: document.getElementById('featuredSelect'),
+        status: document.getElementById('statusSelect'),
+        reset: document.getElementById('resetBtn')
+      };
+
+      let tracks = [];
+
+      function esc(s){
+        return String(s).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[m]));
       }
 
-      // Track filters
-      const grid = document.getElementById('trackGrid');
-      const cards = Array.from(document.querySelectorAll('.track-card'));
-      const searchInput = document.getElementById('searchInput');
-      const genreSelect = document.getElementById('genreSelect');
-      const featuredSelect = document.getElementById('featuredSelect');
-      const resetBtn = document.getElementById('resetBtn');
+      function fmtYear(y){ return (y === null || y === undefined || y === '') ? '—' : String(y); }
+      function fmtBpm(b){ return (b === null || b === undefined || b === '') ? '—' : String(b); }
+      function fmtKey(k){ return (k === null || k === undefined || k === '') ? '—' : String(k); }
 
-      function norm(s){ return (s || '').toString().toLowerCase().trim(); }
+      function normalizeTrack(t){
+        const status = (t.status || 'active').toString().toLowerCase().trim();
+        const stage = (t.stage || t.state || '').toString().trim(); // allow legacy "state"
+        const genre = (t.genre || '').toString().trim();
+
+        const gearNames = [];
+        if (t.gear && t.gear.daw && t.gear.daw.name) gearNames.push(t.gear.daw.name);
+        if (t.gear && Array.isArray(t.gear.instruments)) gearNames.push(...t.gear.instruments.map(i=>i && i.name).filter(Boolean));
+        const gearBlob = gearNames.join(',');
+
+        const searchBlob = [
+          t.title, t.description, genre, gearBlob,
+          (t.details && t.details.signalChain) || '',
+          (t.details && t.details.notes) || '',
+          (t.details && t.details.tracking) || ''
+        ].join(' ').toLowerCase();
+
+        return {
+          id: String(t.id || Math.random().toString(36).slice(2,10)),
+          title: String(t.title || 'Untitled'),
+          description: String(t.description || ''),
+          tags: Array.isArray(t.tags) ? t.tags.map(String) : [],
+          status,
+          stage,
+          updated: String(t.updated || ''),
+          genre,
+          year: t.year ?? null,
+          bpm: t.bpm ?? null,
+          key: t.key ?? null,
+          featured: Boolean(t.featured),
+          gear: t.gear || {},
+          process: Array.isArray(t.process) ? t.process : [],
+          links: Array.isArray(t.links) ? t.links : [],
+          details: t.details || null,
+          embed: t.embed || null,
+          _gearNames: gearNames,
+          _search: searchBlob
+        };
+      }
+
+      function statusStyles(status){
+        const s = (status || '').toLowerCase();
+        if (s === 'active') return { label:'Active', color:'var(--status-active)' };
+        if (s === 'paused') return { label:'Paused', color:'var(--status-paused)' };
+        if (s === 'new') return { label:'New', color:'var(--status-new)' };
+        return { label: status || '—', color:'var(--status-default)' };
+      }
+
+      function stageStyles(stage){
+        const s = (stage || '').toLowerCase();
+        if (!s) return { label:'—', color:'var(--stage-default)' };
+        if (s.includes('near')) return { label:'Near Complete', color:'var(--stage-near)' };
+        if (s.includes('stall')) return { label:'Stalled', color:'var(--stage-stalled)' };
+        if (s.includes('complete')) return { label:'Complete', color:'var(--stage-complete)' };
+        if (s.includes('active')) return { label:'Active', color:'var(--stage-active)' };
+        return { label: stage, color:'var(--stage-default)' };
+      }
+
+      function buildGenreOptions(items){
+        const genres = new Set();
+        for (const t of items){
+          if (t.genre) genres.add(t.genre);
+        }
+        const sorted = Array.from(genres).sort((a,b)=>a.localeCompare(b));
+        el.genre.innerHTML = '<option value="all" selected>All</option>' + sorted.map(g=>`<option>${esc(g)}</option>`).join('');
+      }
+
+      function renderTracks(items){
+        el.grid.innerHTML = '';
+
+        if (!items.length){
+          el.empty.style.display = 'block';
+          return;
+        }
+        el.empty.style.display = 'none';
+
+        for (const t of items){
+          const status = statusStyles(t.status);
+          const stage = stageStyles(t.stage);
+
+          const chips = [
+            `<span class="meta-chip">Year: ${esc(fmtYear(t.year))}</span>`,
+            `<span class="meta-chip">BPM: ${esc(fmtBpm(t.bpm))}</span>`,
+            `<span class="meta-chip">Key: ${esc(fmtKey(t.key))}</span>`
+          ];
+
+          // instruments as chips
+          const inst = (t.gear && Array.isArray(t.gear.instruments)) ? t.gear.instruments : [];
+          for (const i of inst){
+            if (!i || !i.name) continue;
+            chips.push(`<span class="meta-chip gear-chip" data-gear-ref="${esc(i.ref || '')}">Gear: ${esc(i.name)}</span>`);
+          }
+          // daw as chip
+          if (t.gear && t.gear.daw && t.gear.daw.name){
+            chips.push(`<span class="meta-chip gear-chip" data-gear-ref="${esc(t.gear.daw.ref || '')}">DAW: ${esc(t.gear.daw.name)}</span>`);
+          }
+
+          const processHtml = (t.process || []).map(p=>{
+            const label = (p && p.label) ? String(p.label) : '';
+            const text = (p && p.text) ? String(p.text) : '';
+            if (!label && !text) return '';
+            return `<div class="track-process"><strong>${esc(label)}:</strong> ${esc(text)}</div>`;
+          }).join('');
+
+          const linksHtml = (t.links || []).length
+            ? `
+              <div class="track-links">
+                <span>Listen on:</span>
+                ${(t.links || []).map(l=>{
+                  const url = l && l.url ? String(l.url) : '';
+                  const label = l && l.label ? String(l.label) : 'Link';
+                  if (!url) return '';
+                  return `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(label)}</a>`;
+                }).join('')}
+              </div>
+            `
+            : '';
+
+          const detailsHtml = t.details ? `
+            <div class="details" data-details>
+              <button class="details-btn" type="button" aria-expanded="false">
+                Track details (signal chain / mix notes)
+                <span class="details-caret" aria-hidden="true">▼</span>
+              </button>
+              <div class="details-body" role="region" aria-label="Track details">
+                <div class="details-content">
+                  ${t.details.signalChain ? `<div class="kv"><div class="k">Signal chain</div><div class="v">${esc(t.details.signalChain)}</div></div>` : ''}
+                  ${t.details.notes ? `<div class="kv"><div class="k">Notes</div><div class="v">${esc(t.details.notes)}</div></div>` : ''}
+                  ${t.details.tracking ? `<div class="kv"><div class="k">Tracking</div><div class="v">${esc(t.details.tracking)}</div></div>` : ''}
+                </div>
+              </div>
+            </div>
+          ` : '';
+
+          const embedHtml = (t.embed && t.embed.type === 'soundcloud' && t.embed.src) ? `
+            <div class="track-embed">
+              <iframe
+                width="100%"
+                height="${Number.isFinite(t.embed.height) ? t.embed.height : 166}"
+                scrolling="no"
+                frameborder="no"
+                allow="autoplay"
+                src="${esc(t.embed.src)}">
+              </iframe>
+            </div>
+          ` : '';
+
+          const card = document.createElement('article');
+          card.className = 'track-card';
+          card.dataset.title = t.title;
+          card.dataset.genre = t.genre;
+          card.dataset.featured = t.featured ? 'yes' : 'no';
+          card.dataset.status = t.status;
+          card.dataset.gear = (t._gearNames || []).join(',');
+          card.dataset.year = fmtYear(t.year);
+          card.dataset.bpm = fmtBpm(t.bpm);
+          card.dataset.key = fmtKey(t.key);
+
+          card.innerHTML = `
+            <div class="track-header">
+              <div class="track-title-row">
+                <div>
+                  <div class="track-title">${esc(t.title)}</div>
+                  <div class="track-genre">${esc(t.genre || '—')}</div>
+                </div>
+
+                <div class="pill-row">
+                  ${t.featured ? `
+                    <div class="track-pill" title="Good starting point">
+                      <div class="track-pill-inner">
+                        <span class="track-pill-dot"></span>
+                        <span>Featured</span>
+                      </div>
+                    </div>
+                  ` : ''}
+
+                  <div class="status-pill" style="color:${status.color}; border:1px solid ${status.color}33;">
+                    <span class="pill-dot"></span>
+                    <span>${esc(status.label)}</span>
+                  </div>
+
+                  ${t.stage ? `
+                    <div class="stage-pill" style="color:${stage.color}; border:1px solid ${stage.color}33;">
+                      <span class="pill-dot"></span>
+                      <span>${esc(stage.label)}</span>
+                    </div>
+                  ` : ''}
+                </div>
+              </div>
+
+              <div class="track-meta">
+                ${chips.join('')}
+              </div>
+
+              ${processHtml}
+              ${linksHtml}
+            </div>
+
+            ${detailsHtml}
+            ${embedHtml}
+          `;
+
+          el.grid.appendChild(card);
+        }
+
+        // hook up collapsibles after render
+        const detailBlocks = Array.from(document.querySelectorAll('[data-details]'));
+        for (const block of detailBlocks){
+          const btn = block.querySelector('.details-btn');
+          if (!btn) continue;
+          btn.addEventListener('click', () => {
+            const open = block.classList.toggle('open');
+            btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+          });
+        }
+
+        // re-bind gear chips to your existing behavior (scroll/open)
+        bindGearChips();
+      }
 
       function applyFilters(){
-        const q = norm(searchInput.value);
-        const g = genreSelect.value;
-        const f = featuredSelect.value;
+        const q = (el.search.value || '').toLowerCase().trim();
+        const g = el.genre.value;
+        const f = el.featured.value;
+        const s = el.status.value;
 
-        for (const c of cards){
-          const title = norm(c.dataset.title);
-          const genre = c.dataset.genre || '';
-          const gear = norm(c.dataset.gear);
-          const year = norm(c.dataset.year);
-          const bpm = norm(c.dataset.bpm);
-          const key = norm(c.dataset.key);
-          const blob = [title, norm(genre), gear, year, bpm, key].join(' ');
+        const out = tracks.filter(t=>{
+          const matchQ = !q || t._search.includes(q);
+          const matchG = (g === 'all') || (t.genre === g);
+          const matchF = (f === 'all') || (t.featured === true);
+          const matchS = (s === 'all') || (t.status === s);
+          return matchQ && matchG && matchF && matchS;
+        });
 
-          const matchQ = !q || blob.includes(q);
-          const matchG = (g === 'all') || (genre === g);
-          const matchF = (f === 'all') || (c.dataset.featured === 'yes');
-
-          c.style.display = (matchQ && matchG && matchF) ? '' : 'none';
-        }
+        renderTracks(out);
       }
 
-      searchInput.addEventListener('input', applyFilters);
-      genreSelect.addEventListener('change', applyFilters);
-      featuredSelect.addEventListener('change', applyFilters);
-      resetBtn.addEventListener('click', () => {
-        searchInput.value = '';
-        genreSelect.value = 'all';
-        featuredSelect.value = 'all';
+      async function loadTracks(){
+        let data = [];
+        try{
+          const res = await fetch('../data/musicproduced.json', { cache:'no-store' });
+          if (!res.ok) throw new Error('Failed to load musicproduced.json: ' + res.status);
+          data = await res.json();
+        }catch(e){
+          console.error(e);
+          el.grid.innerHTML = '';
+          el.empty.style.display = 'block';
+          el.empty.textContent = 'Failed to load tracks. Check console + JSON format.';
+          return;
+        }
+
+        tracks = (Array.isArray(data) ? data : []).map(normalizeTrack);
+        buildGenreOptions(tracks);
+        applyFilters();
+      }
+
+      el.search.addEventListener('input', applyFilters);
+      el.genre.addEventListener('change', applyFilters);
+      el.featured.addEventListener('change', applyFilters);
+      el.status.addEventListener('change', applyFilters);
+      el.reset.addEventListener('click', ()=>{
+        el.search.value = '';
+        el.genre.value = 'all';
+        el.featured.value = 'all';
+        el.status.value = 'all';
         applyFilters();
       });
 
-      // Gear modal
+      // Gear modal (unchanged from your existing)
       const modal = document.getElementById('gearModal');
       const modalTitle = document.getElementById('gearModalTitle');
       const modalDesc = document.getElementById('gearModalDesc');
@@ -1290,7 +1223,6 @@
         modalTitle.textContent = payload.title || 'Gear';
         modalDesc.textContent = payload.desc || '—';
 
-        // media
         modalMedia.innerHTML = '';
         if (payload.img && payload.img.indexOf('(Add') === -1){
           const img = document.createElement('img');
@@ -1305,7 +1237,6 @@
           modalMedia.appendChild(d);
         }
 
-        // used on
         modalTracks.innerHTML = '';
         const used = (payload.used || '').split(',').map(s => s.trim()).filter(Boolean);
         if (!used.length){
@@ -1320,13 +1251,12 @@
             chip.className = 'modal-trackchip';
             chip.textContent = name;
             chip.addEventListener('click', () => {
-              // scroll to track
-              const target = cards.find(c => (c.dataset.title || '') === name);
-              if (target){
-                modal.classList.remove('open');
-                modal.setAttribute('aria-hidden', 'true');
-                target.scrollIntoView({behavior:'smooth', block:'start'});
-              }
+              modal.classList.remove('open');
+              modal.setAttribute('aria-hidden', 'true');
+              // scroll to the first matching card (by data-title)
+              const target = Array.from(document.querySelectorAll('.track-card'))
+                .find(c => (c.dataset.title || '') === name);
+              if (target) target.scrollIntoView({behavior:'smooth', block:'start'});
             });
             modalTracks.appendChild(chip);
           }
@@ -1342,12 +1272,8 @@
       }
 
       closeBtn.addEventListener('click', closeModal);
-      modal.addEventListener('click', (e) => {
-        if (e.target === modal) closeModal();
-      });
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && modal.classList.contains('open')) closeModal();
-      });
+      modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal.classList.contains('open')) closeModal(); });
 
       // Click gear cards
       const gearCards = Array.from(document.querySelectorAll('.gear-card'));
@@ -1362,33 +1288,30 @@
         });
       }
 
-      // Gear chips in track meta -> scroll/open matching gear
-      const gearChips = Array.from(document.querySelectorAll('.gear-chip'));
-      gearChips.forEach(chip => {
-        chip.addEventListener('click', (e) => {
-          e.preventDefault();
-          const ref = chip.dataset.gearRef || '';
-          // naive mapping: look for gear card with id == ref, else scroll to gear section
-          const exact = document.querySelector(`.gear-card[data-gear-id="${ref}"]`);
-          if (exact){
-            exact.scrollIntoView({behavior:'smooth', block:'start'});
-            exact.classList.add('pulse');
-            setTimeout(()=> exact.classList.remove('pulse'), 900);
-            openModal({
-              title: exact.dataset.title,
-              img: exact.dataset.img,
-              desc: exact.dataset.desc,
-              used: exact.dataset.used
-            });
-          } else {
-            const gearSection = document.getElementById('gearGrid');
-            if (gearSection) gearSection.scrollIntoView({behavior:'smooth', block:'start'});
-          }
+      function bindGearChips(){
+        const gearChips = Array.from(document.querySelectorAll('.gear-chip'));
+        gearChips.forEach(chip => {
+          chip.addEventListener('click', (e) => {
+            e.preventDefault();
+            const ref = chip.dataset.gearRef || '';
+            const exact = ref ? document.querySelector(`.gear-card[data-gear-id="${CSS.escape(ref)}"]`) : null;
+            if (exact){
+              exact.scrollIntoView({behavior:'smooth', block:'start'});
+              openModal({
+                title: exact.dataset.title,
+                img: exact.dataset.img,
+                desc: exact.dataset.desc,
+                used: exact.dataset.used
+              });
+            } else {
+              const gearSection = document.getElementById('gearGrid');
+              if (gearSection) gearSection.scrollIntoView({behavior:'smooth', block:'start'});
+            }
+          });
         });
-      });
+      }
 
-      // initial filter pass
-      applyFilters();
+      loadTracks();
     })();
   </script>
 </body>
