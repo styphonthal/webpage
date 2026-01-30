@@ -507,7 +507,7 @@
 
         <!-- Roster Button -->
         <div style="text-align:center;">
-          <button class="roster-btn" onclick="openRoster()">View Full Roster</button>
+          <button class="roster-btn" id="rosterBtn">View Full Roster</button>
         </div>
       </div>
     </div>
@@ -1736,6 +1736,12 @@
       }
     } else {
       setHTML('lastGameGoals', '');
+    }
+
+    // Setup roster button event listener
+    const rosterBtn = document.getElementById('rosterBtn');
+    if (rosterBtn) {
+      rosterBtn.addEventListener('click', openRoster);
     }
 
     // If live: auto-refresh
