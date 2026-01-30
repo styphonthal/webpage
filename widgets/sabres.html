@@ -509,9 +509,10 @@
   
   // Multiple CORS proxies with automatic fallback
   const CORS_PROXIES = [
-    'https://api.allorigins.win/raw?url=',
-    'https://corsproxy.io/?',
-    'https://api.codetabs.com/v1/proxy?quest='
+    'https://api.codetabs.com/v1/proxy?quest=',  // Currently working
+    'https://cors-anywhere.herokuapp.com/',       // Popular option
+    'https://corsproxy.io/?',                     // Backup
+    'https://api.allorigins.win/raw?url='         // Last resort
   ];
   
   let currentProxyIndex = 0;
@@ -568,6 +569,7 @@
 
   async function fetchJSON(url) {
     let lastError;
+    let failedProxies = [];
     
     // Try each proxy in sequence
     for (let i = 0; i < CORS_PROXIES.length; i++) {
@@ -578,22 +580,29 @@
       try {
         const response = await fetch(proxiedUrl, { cache: 'no-store' });
         if (!response.ok) {
-          lastError = new Error(`HTTP ${response.status} from ${proxy}`);
-          console.warn(`Proxy ${proxy} returned ${response.status}`);
+          lastError = new Error(`HTTP ${response.status}`);
+          failedProxies.push(`${proxy} (${response.status})`);
           continue;
         }
         
         // Success! Remember this proxy worked
         currentProxyIndex = proxyIndex;
+        
+        // Only log if we had to try multiple proxies
+        if (i > 0) {
+          console.log(`✓ Using proxy: ${proxy}`);
+        }
+        
         return await response.json();
       } catch (err) {
         lastError = err;
-        console.warn(`Proxy ${proxy} failed:`, err.message);
+        failedProxies.push(`${proxy} (${err.message})`);
         continue;
       }
     }
     
-    // All proxies failed
+    // All proxies failed - now we log the issue
+    console.error('All CORS proxies failed:', failedProxies.join(', '));
     throw lastError || new Error('All CORS proxies failed');
   }
 
