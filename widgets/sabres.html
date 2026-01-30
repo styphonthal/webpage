@@ -250,6 +250,77 @@
     padding-bottom:8px;
   }
 
+  /* Roster Button */
+  .roster-btn{
+    display:inline-block;
+    margin-top:16px;
+    padding:10px 24px;
+    background: linear-gradient(135deg, var(--sabres-gold), #e5a200);
+    color: var(--sabres-navy);
+    font-weight:900;
+    font-size:1rem;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    transition:all .2s;
+    box-shadow: 0 4px 12px rgba(252,181,20,.3);
+  }
+
+  .roster-btn:hover{
+    background: linear-gradient(135deg, #ffc526, var(--sabres-gold));
+    box-shadow: 0 6px 16px rgba(252,181,20,.5);
+    transform:translateY(-2px);
+  }
+
+  .roster-btn:active{
+    transform:translateY(0);
+  }
+
+  /* Roster table styles */
+  .roster-table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:12px;
+  }
+
+  .roster-table th{
+    background: rgba(252,181,20,.15);
+    color:#ffe9b3;
+    font-weight:900;
+    padding:10px 8px;
+    text-align:left;
+    border-bottom:2px solid rgba(252,181,20,.3);
+    font-size:.9rem;
+  }
+
+  .roster-table td{
+    padding:8px;
+    border-bottom:1px solid rgba(252,181,20,.1);
+    color:#cfe1ff;
+  }
+
+  .roster-table tr:hover{
+    background:rgba(252,181,20,.05);
+  }
+
+  .roster-table .player-name{
+    font-weight:700;
+    color:var(--sabres-white);
+  }
+
+  .roster-divider{
+    margin:24px 0;
+    border:none;
+    border-top:2px solid rgba(252,181,20,.3);
+  }
+
+  .roster-section-title{
+    font-size:1.3rem;
+    color:var(--sabres-gold);
+    font-weight:900;
+    margin:20px 0 12px 0;
+  }
+
   .game-summary{
     display:flex;
     flex-direction:column;
@@ -432,6 +503,11 @@
         </div>
         <div class="top-scorer" id="topPoints" style="margin-top:8px; border-top:none; padding-top:0;">
           Loading leading points...
+        </div>
+
+        <!-- Roster Button -->
+        <div style="text-align:center;">
+          <button class="roster-btn" onclick="openRoster()">View Full Roster</button>
         </div>
       </div>
     </div>
@@ -700,6 +776,203 @@
     } catch {
       return null;
     }
+  }
+
+  async function getRosterData() {
+    try {
+      const url = `https://api-web.nhle.com/v1/club-stats/${SABRES_ABBR}/now`;
+      const data = await fetchJSON(url);
+      return {
+        skaters: data.skaters || [],
+        goalies: data.goalies || []
+      };
+    } catch (e) {
+      console.error('Error fetching roster:', e);
+      return { skaters: [], goalies: [] };
+    }
+  }
+
+  function openRoster() {
+    const rosterWindow = window.open('', 'Sabres Roster', 'width=1000,height=800,scrollbars=yes');
+    
+    rosterWindow.document.write(`
+      <!doctype html>
+      <html lang="en">
+      <head>
+        <meta charset="utf-8">
+        <title>Buffalo Sabres - Full Roster</title>
+        <style>
+          :root{
+            --sabres-navy: #002654;
+            --sabres-gold: #FCB514;
+            --sabres-white: #f7f9fc;
+            --bg-deep: #001631;
+          }
+          *{box-sizing:border-box; margin:0; padding:0}
+          body{
+            color:var(--sabres-white);
+            background:
+              radial-gradient(1200px 700px at 80% 10%, rgba(252,181,20,.12), transparent 60%),
+              radial-gradient(900px 500px at 20% 80%, rgba(0,38,84,.35), transparent 70%),
+              var(--bg-deep);
+            font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial;
+            padding:20px;
+          }
+          .container{
+            max-width:1100px;
+            margin:0 auto;
+            background: linear-gradient(180deg, rgba(0,38,84,.65), rgba(0,28,62,.65));
+            border: 2px solid rgba(252,181,20,.25);
+            border-radius:18px;
+            padding:24px;
+            box-shadow: 0 8px 24px rgba(0,0,0,.3);
+          }
+          h1{
+            color:var(--sabres-gold);
+            text-align:center;
+            margin-bottom:24px;
+            font-size:2rem;
+          }
+          h2{
+            color:var(--sabres-gold);
+            font-size:1.5rem;
+            margin:24px 0 12px 0;
+            border-bottom:2px solid rgba(252,181,20,.3);
+            padding-bottom:8px;
+          }
+          table{
+            width:100%;
+            border-collapse:collapse;
+            margin-bottom:16px;
+          }
+          th{
+            background: rgba(252,181,20,.15);
+            color:#ffe9b3;
+            font-weight:900;
+            padding:10px 8px;
+            text-align:left;
+            border-bottom:2px solid rgba(252,181,20,.3);
+            font-size:.9rem;
+          }
+          td{
+            padding:8px;
+            border-bottom:1px solid rgba(252,181,20,.1);
+            color:#cfe1ff;
+          }
+          tr:hover{
+            background:rgba(252,181,20,.05);
+          }
+          .player-name{
+            font-weight:700;
+            color:var(--sabres-white);
+          }
+          .loading{
+            text-align:center;
+            padding:40px;
+            color:#cfe1ff;
+            font-size:1.2rem;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <h1>🏒 Buffalo Sabres - Full Roster</h1>
+          <div id="rosterContent" class="loading">Loading roster data...</div>
+        </div>
+      </body>
+      </html>
+    `);
+
+    getRosterData().then(roster => {
+      const { skaters, goalies } = roster;
+      
+      // Sort skaters by points (descending)
+      const sortedSkaters = [...skaters].sort((a, b) => (b.points || 0) - (a.points || 0));
+      
+      // Sort goalies by wins (descending)
+      const sortedGoalies = [...goalies].sort((a, b) => (b.wins || 0) - (a.wins || 0));
+
+      const formatName = (p) => `${p.firstName?.default || ''} ${p.lastName?.default || ''}`.trim();
+      
+      let html = '<h2>Skaters</h2>';
+      html += `
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Pos</th>
+              <th>GP</th>
+              <th>G</th>
+              <th>A</th>
+              <th>Pts</th>
+              <th>+/-</th>
+              <th>PIM</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      for (const player of sortedSkaters) {
+        html += `
+          <tr>
+            <td class="player-name">${formatName(player)}</td>
+            <td>${player.positionCode || '—'}</td>
+            <td>${player.gamesPlayed || 0}</td>
+            <td>${player.goals || 0}</td>
+            <td>${player.assists || 0}</td>
+            <td>${player.points || 0}</td>
+            <td>${player.plusMinus != null ? (player.plusMinus > 0 ? '+' : '') + player.plusMinus : '—'}</td>
+            <td>${player.penaltyMinutes || 0}</td>
+          </tr>
+        `;
+      }
+
+      html += '</tbody></table>';
+
+      html += '<h2>Goalies</h2>';
+      html += `
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>GP</th>
+              <th>W</th>
+              <th>L</th>
+              <th>OTL</th>
+              <th>GAA</th>
+              <th>SV%</th>
+              <th>SO</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      for (const goalie of sortedGoalies) {
+        const gaa = goalie.goalsAgainstAvg != null ? goalie.goalsAgainstAvg.toFixed(2) : '—';
+        const svPct = goalie.savePctg != null ? goalie.savePctg.toFixed(3) : '—';
+        
+        html += `
+          <tr>
+            <td class="player-name">${formatName(goalie)}</td>
+            <td>${goalie.gamesPlayed || 0}</td>
+            <td>${goalie.wins || 0}</td>
+            <td>${goalie.losses || 0}</td>
+            <td>${goalie.otLosses || 0}</td>
+            <td>${gaa}</td>
+            <td>${svPct}</td>
+            <td>${goalie.shutouts || 0}</td>
+          </tr>
+        `;
+      }
+
+      html += '</tbody></table>';
+
+      rosterWindow.document.getElementById('rosterContent').innerHTML = html;
+    }).catch(err => {
+      rosterWindow.document.getElementById('rosterContent').innerHTML = 
+        '<div class="loading" style="color:#ff6b6b;">Error loading roster data. Please try again.</div>';
+      console.error('Roster error:', err);
+    });
   }
 
   async function getSchedule() {
