@@ -686,8 +686,16 @@
       const name = (p) => `${p.firstName?.default || ''} ${p.lastName?.default || ''}`.trim();
 
       return {
-        goals: { name: name(bestGoals), val: bestGoals.goals || 0 },
-        points: { name: name(bestPoints), val: bestPoints.points || 0 }
+        goals: { 
+          name: name(bestGoals), 
+          val: bestGoals.goals || 0,
+          gamesPlayed: bestGoals.gamesPlayed || 0
+        },
+        points: { 
+          name: name(bestPoints), 
+          val: bestPoints.points || 0,
+          gamesPlayed: bestPoints.gamesPlayed || 0
+        }
       };
     } catch {
       return null;
@@ -1388,8 +1396,22 @@
     // leaders
     const leaders = await getLeaders().catch(()=>null);
     if (leaders) {
-      setHTML('topGoals', `Leading goals: <strong>${leaders.goals.name}</strong>, ${leaders.goals.val}`);
-      setHTML('topPoints', `Leading points: <strong>${leaders.points.name}</strong>, ${leaders.points.val}`);
+      // Calculate pace for goals
+      const goalsPace = leaders.goals.gamesPlayed > 0 
+        ? Math.round((leaders.goals.val / leaders.goals.gamesPlayed) * 82)
+        : 0;
+      
+      // Calculate pace for points
+      const pointsPace = leaders.points.gamesPlayed > 0
+        ? Math.round((leaders.points.val / leaders.points.gamesPlayed) * 82)
+        : 0;
+      
+      setHTML('topGoals', 
+        `Leading goals: <strong>${leaders.goals.name}</strong>, ${leaders.goals.val}${goalsPace > 0 ? ` <span style="opacity:.75">(on pace for ${goalsPace})</span>` : ''}`
+      );
+      setHTML('topPoints', 
+        `Leading points: <strong>${leaders.points.name}</strong>, ${leaders.points.val}${pointsPace > 0 ? ` <span style="opacity:.75">(on pace for ${pointsPace})</span>` : ''}`
+      );
     } else {
       setHTML('topGoals', 'Leading goals unavailable');
       setHTML('topPoints', 'Leading points unavailable');
