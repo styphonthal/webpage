@@ -497,6 +497,11 @@
           Loading standings…
         </div>
 
+        <!-- Standings Button -->
+        <div style="text-align:center; margin-top:12px;">
+          <button class="roster-btn" id="standingsBtn" style="padding:8px 20px; font-size:0.95rem;">View Full Standings</button>
+        </div>
+
         <!-- leaders -->
         <div class="top-scorer" id="topGoals">
           Loading leading goals...
@@ -792,6 +797,107 @@
     }
   }
 
+  async function getFullStandings() {
+    try {
+      const url = 'https://api-web.nhle.com/v1/standings/now';
+      const data = await fetchJSON(url);
+      return data.standings || [];
+    } catch (e) {
+      console.error('Error fetching standings:', e);
+      return [];
+    }
+  }
+
+  function openStandings() {
+    const win = window.open('', 'NHL Standings', 'width=1100,height=800,scrollbars=yes');
+    
+    const htmlStart = '<!doctype html><html><head><meta charset="utf-8"><title>NHL Standings</title><style>' +
+      'body{margin:0;padding:20px;font-family:system-ui;background:#001631;color:#f7f9fc}' +
+      '.container{max-width:1100px;margin:0 auto;background:linear-gradient(180deg,rgba(0,38,84,.65),rgba(0,28,62,.65));border:2px solid rgba(252,181,20,.25);border-radius:18px;padding:24px}' +
+      'h1{color:#FCB514;text-align:center;margin-bottom:20px}' +
+      '.tabs{display:flex;gap:12px;margin-bottom:20px;border-bottom:2px solid rgba(252,181,20,.3)}' +
+      '.tab{padding:12px 24px;background:rgba(252,181,20,.1);border:none;border-radius:8px 8px 0 0;color:#cfe1ff;font-weight:700;cursor:pointer}' +
+      '.tab:hover{background:rgba(252,181,20,.2)}' +
+      '.tab.active{background:#FCB514;color:#002654}' +
+      '.content{display:none}.content.active{display:block}' +
+      'h2{color:#FCB514;font-size:1.5rem;margin:24px 0 12px;border-bottom:2px solid rgba(252,181,20,.3);padding-bottom:8px}' +
+      'table{width:100%;border-collapse:collapse;margin-bottom:24px}' +
+      'th{background:rgba(252,181,20,.15);color:#ffe9b3;font-weight:900;padding:10px 8px;text-align:left;border-bottom:2px solid rgba(252,181,20,.3);font-size:.9rem}' +
+      'th.c,td.c{text-align:center}' +
+      'td{padding:8px;border-bottom:1px solid rgba(252,181,20,.1);color:#cfe1ff}' +
+      'tr:hover{background:rgba(252,181,20,.05)}' +
+      'tr.sabres{background:rgba(252,181,20,.15);font-weight:700}' +
+      '.team-name{font-weight:700;color:#f7f9fc}' +
+      '.loading{text-align:center;padding:40px;color:#cfe1ff;font-size:1.2rem}' +
+      '</style></head><body><div class="container"><h1>🏒 NHL Standings</h1>' +
+      '<div class="tabs">' +
+      '<button class="tab active" onclick="switchTab(0)">Conference</button>' +
+      '<button class="tab" onclick="switchTab(1)">Division</button>' +
+      '</div><div id="content" class="loading">Loading standings...</div></div>' +
+      '<script>let tabs=document.querySelectorAll(".tab");let contents;function switchTab(i){tabs.forEach(t=>t.classList.remove("active"));tabs[i].classList.add("active");contents.forEach(c=>c.classList.remove("active"));contents[i].classList.add("active")}</script></body></html>';
+    
+    win.document.write(htmlStart);
+    win.document.close();
+
+    getFullStandings().then(standings => {
+      if (!standings.length) {
+        win.document.getElementById('content').innerHTML = '<div class="loading" style="color:#ff6b6b">No standings data</div>';
+        return;
+      }
+
+      const eastern = standings.filter(t => (t.conferenceName || '').includes('Eastern'));
+      const western = standings.filter(t => (t.conferenceName || '').includes('Western'));
+      
+      const divisions = {};
+      standings.forEach(team => {
+        const div = team.divisionName || 'Unknown';
+        if (!divisions[div]) divisions[div] = [];
+        divisions[div].push(team);
+      });
+
+      const getName = (t) => t.teamName?.default || t.teamCommonName?.default || t.teamAbbrev?.default || t.teamAbbrev || '?';
+      
+      const makeTable = (teams, title) => {
+        let html = '<h2>' + title + '</h2><table><thead><tr>' +
+          '<th class="c">#</th><th>Team</th><th class="c">GP</th><th class="c">W</th><th class="c">L</th>' +
+          '<th class="c">OTL</th><th class="c">PTS</th><th class="c">+/-</th></tr></thead><tbody>';
+        
+        teams.forEach((team, idx) => {
+          const isSabres = (team.teamAbbrev?.default || team.teamAbbrev) === SABRES_ABBR;
+          const diff = (team.goalFor || 0) - (team.goalAgainst || 0);
+          const diffStr = diff > 0 ? '+' + diff : diff;
+          
+          html += '<tr' + (isSabres ? ' class="sabres"' : '') + '>' +
+            '<td class="c">' + (idx + 1) + '</td>' +
+            '<td class="team-name">' + getName(team) + '</td>' +
+            '<td class="c">' + (team.gamesPlayed || 0) + '</td>' +
+            '<td class="c">' + (team.wins || 0) + '</td>' +
+            '<td class="c">' + (team.losses || 0) + '</td>' +
+            '<td class="c">' + (team.otLosses || 0) + '</td>' +
+            '<td class="c">' + (team.points || 0) + '</td>' +
+            '<td class="c">' + diffStr + '</td></tr>';
+        });
+        
+        html += '</tbody></table>';
+        return html;
+      };
+
+      let confHtml = '<div class="content active">' + makeTable(eastern, 'Eastern Conference') + makeTable(western, 'Western Conference') + '</div>';
+      
+      let divHtml = '<div class="content">';
+      Object.keys(divisions).sort().forEach(divName => {
+        divHtml += makeTable(divisions[divName], divName);
+      });
+      divHtml += '</div>';
+
+      win.document.getElementById('content').innerHTML = confHtml + divHtml;
+      contents = win.document.querySelectorAll('.content');
+    }).catch(err => {
+      console.error('Standings error:', err);
+      win.document.getElementById('content').innerHTML = '<div class="loading" style="color:#ff6b6b">Error loading standings</div>';
+    });
+  }
+
   function openRoster() {
     const rosterWindow = window.open('', 'Sabres Roster', 'width=1000,height=800,scrollbars=yes');
     
@@ -991,15 +1097,21 @@
     const now = new Date();
     const formatAPIDate = (d) => d.toISOString().split('T')[0];
 
+    // Fetch 3 weeks to ensure we have at least 5 completed games
     const url = `https://api-web.nhle.com/v1/club-schedule/${SABRES_ABBR}/week/${formatAPIDate(now)}`;
     const data = await fetchJSON(url);
 
-    const prevWeek = new Date(now);
-    prevWeek.setDate(prevWeek.getDate() - 7);
-    const prevUrl = `https://api-web.nhle.com/v1/club-schedule/${SABRES_ABBR}/week/${formatAPIDate(prevWeek)}`;
-    const prevData = await fetchJSON(prevUrl);
+    const prevWeek1 = new Date(now);
+    prevWeek1.setDate(prevWeek1.getDate() - 7);
+    const prevUrl1 = `https://api-web.nhle.com/v1/club-schedule/${SABRES_ABBR}/week/${formatAPIDate(prevWeek1)}`;
+    const prevData1 = await fetchJSON(prevUrl1);
 
-    const allGames = [...(prevData.games || []), ...(data.games || [])];
+    const prevWeek2 = new Date(now);
+    prevWeek2.setDate(prevWeek2.getDate() - 14);
+    const prevUrl2 = `https://api-web.nhle.com/v1/club-schedule/${SABRES_ABBR}/week/${formatAPIDate(prevWeek2)}`;
+    const prevData2 = await fetchJSON(prevUrl2);
+
+    const allGames = [...(prevData2.games || []), ...(prevData1.games || []), ...(data.games || [])];
 
     const liveGame = allGames.find(g =>
       g.gameState === 'LIVE' ||
@@ -1754,6 +1866,12 @@
     const rosterBtn = document.getElementById('rosterBtn');
     if (rosterBtn) {
       rosterBtn.addEventListener('click', openRoster);
+    }
+
+    // Setup standings button event listener
+    const standingsBtn = document.getElementById('standingsBtn');
+    if (standingsBtn) {
+      standingsBtn.addEventListener('click', openStandings);
     }
 
     // If live: auto-refresh
