@@ -892,6 +892,11 @@
       // Sort goalies by wins (descending)
       const sortedGoalies = [...goalies].sort((a, b) => (b.wins || 0) - (a.wins || 0));
 
+      // Debug: log goalie data structure
+      if (sortedGoalies.length > 0) {
+        console.log('Sample goalie data:', sortedGoalies[0]);
+      }
+
       const formatName = (p) => `${p.firstName?.default || ''} ${p.lastName?.default || ''}`.trim();
       
       let html = '<h2>Skaters</h2>';
@@ -948,8 +953,15 @@
       `;
 
       for (const goalie of sortedGoalies) {
-        const gaa = goalie.goalsAgainstAvg != null ? goalie.goalsAgainstAvg.toFixed(2) : '—';
-        const svPct = goalie.savePctg != null ? goalie.savePctg.toFixed(3) : '—';
+        // Try multiple possible field names for GAA
+        const gaa = goalie.goalsAgainstAvg ?? goalie.goalsAgainstAverage ?? 
+                    goalie.gaa ?? goalie.GAA ?? goalie.goalsAgainst;
+        const gaaDisplay = gaa != null ? Number(gaa).toFixed(2) : '—';
+        
+        // Try multiple possible field names for Save %
+        const svPct = goalie.savePctg ?? goalie.savePercentage ?? 
+                      goalie.savePct ?? goalie.svPct ?? goalie.saves;
+        const svPctDisplay = svPct != null ? Number(svPct).toFixed(3) : '—';
         
         html += `
           <tr>
@@ -958,8 +970,8 @@
             <td>${goalie.wins || 0}</td>
             <td>${goalie.losses || 0}</td>
             <td>${goalie.otLosses || 0}</td>
-            <td>${gaa}</td>
-            <td>${svPct}</td>
+            <td>${gaaDisplay}</td>
+            <td>${svPctDisplay}</td>
             <td>${goalie.shutouts || 0}</td>
           </tr>
         `;
