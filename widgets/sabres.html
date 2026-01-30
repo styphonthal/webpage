@@ -506,7 +506,15 @@
 <script>
 (async function(){
   const SABRES_ABBR = 'BUF';
-  const CORS_PROXY = 'https://corsproxy.io/?';
+  
+  // Multiple CORS proxies with automatic fallback
+  const CORS_PROXIES = [
+    'https://api.allorigins.win/raw?url=',
+    'https://corsproxy.io/?',
+    'https://api.codetabs.com/v1/proxy?quest='
+  ];
+  
+  let currentProxyIndex = 0;
 
   // Helper functions
   const setTxt = (id, t) => {
@@ -559,10 +567,34 @@
   }
 
   async function fetchJSON(url) {
-    const proxiedUrl = CORS_PROXY + encodeURIComponent(url);
-    const response = await fetch(proxiedUrl, { cache: 'no-store' });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    return await response.json();
+    let lastError;
+    
+    // Try each proxy in sequence
+    for (let i = 0; i < CORS_PROXIES.length; i++) {
+      const proxyIndex = (currentProxyIndex + i) % CORS_PROXIES.length;
+      const proxy = CORS_PROXIES[proxyIndex];
+      const proxiedUrl = proxy + encodeURIComponent(url);
+      
+      try {
+        const response = await fetch(proxiedUrl, { cache: 'no-store' });
+        if (!response.ok) {
+          lastError = new Error(`HTTP ${response.status} from ${proxy}`);
+          console.warn(`Proxy ${proxy} returned ${response.status}`);
+          continue;
+        }
+        
+        // Success! Remember this proxy worked
+        currentProxyIndex = proxyIndex;
+        return await response.json();
+      } catch (err) {
+        lastError = err;
+        console.warn(`Proxy ${proxy} failed:`, err.message);
+        continue;
+      }
+    }
+    
+    // All proxies failed
+    throw lastError || new Error('All CORS proxies failed');
   }
 
   // Get team standings and stats (record + points)
