@@ -1,0 +1,23 @@
+Privacy Policy for SubVault
+Effective Date: November 25, 2026
+Overview
+SubVault ("the App") is a private, offline-first subscription and promotional deal tracker. Your privacy is fundamental to how SubVault is built: all data you enter stays exclusively on your device.
+Data Collection and Sharing
+SubVault does not collect, transmit, sell, or share any personal or financial data.
+No Internet Access: The App does not request Android internet or network permissions and never communicates with external servers.
+No Accounts or Tracking: There is no sign-in, no cloud sync, no analytics, and no advertising SDKs.
+On-Device Storage Only: Your subscriptions, renewal dates, promo deals, alert history, and settings are stored strictly in your device's local storage (Room SQLite database and Android DataStore).
+Security Features: If you set an App PIN, it is stored locally as a salted PBKDF2-HMAC-SHA256 hash. If you enable biometric or device-credential unlock, authentication is handled directly by Android; SubVault never receives or stores biometric data.
+Backups: If you choose to export a JSON backup, the file is created only when you initiate it and saved to the location you pick via Android's system file picker.
+Permissions Used
+SubVault requests only two minimal permissions:
+Notifications (POST_NOTIFICATIONS, optional): Used solely to show local on-device reminders for upcoming promotional deal expirations and price-hike alerts.
+Run at Startup (RECEIVE_BOOT_COMPLETED): Used solely to restore your scheduled local reminders after a device restart or app update.
+Data Deletion
+You have complete control over your data at all times. You can delete individual subscriptions, erase all stored records immediately using Settings → Reset All Data, or remove all app data by uninstalling SubVault.
+Children's Privacy
+SubVault does not knowingly collect any personal information from anyone, including children under 13.
+Changes to This Policy
+Any future updates to this Privacy Policy will be posted on this page with an updated effective date.
+Contact
+If you have questions about this Privacy Policy, contact: styphonthal@gmail.com (replace with your preferred developer support email if different).
